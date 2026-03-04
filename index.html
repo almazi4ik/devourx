@@ -635,7 +635,7 @@ let W,H;
 function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
 resize();window.addEventListener('resize',resize);
 
-const WORLD=12000,CELL=22,FCNT=1200,BCNT=55;
+const WORLD=12000,CELL=22,FCNT=1200,BCNT=0;
 const MAX_NATURAL_FOOD=1200,MAX_BODY=1000;
 let foods=[],bots=[],player=null,guestSnake=null,running=false;
 let camX=0,camY=0,boosting=false,pname='Player',guestName='Guest';
@@ -868,7 +868,7 @@ function initGame(keepBots=false,spawnX=null,spawnY=null,teamMode=false,teamSkin
   if(spawnY===null) spawnY=800+Math.random()*(WORLD-1600);
   initFoods();
   if(!keepBots||!botsInitialized){
-    bots=[];for(let i=0;i<BCNT;i++)bots.push(mkBot(i));
+    bots=[];
     botsInitialized=true;
   } else {
     for(let i=0;i<bots.length;i++){if(!bots[i]||!bots[i].alive)bots[i]=mkBot(i);}
