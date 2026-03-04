@@ -1214,6 +1214,104 @@ showMenu = function(){
   showJoystick(false);
 };
 
+
+// ══════════════════════════════════════
+// ПОДКЛЮЧЕНИЕ К СЕРВЕРУ RAILWAY
+// ══════════════════════════════════════
+const SERVER = 'wss://devourx-server-production.up.railway.app';
+let ws = null;
+
+function connectWS() {
+  if(ws) { try{ws.close();}catch(e){} ws=null; }
+  ws = new WebSocket(SERVER);
+
+  ws.onopen = () => {
+    const name = document.getElementById('nameInput').value.trim() || 'Player';
+    ws.send(JSON.stringify({ type: 'join', name: name, skinId: selSkin }));
+  };
+
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+
+    if (msg.type === 'world') {
+      bots = msg.bots.map(b => {
+        const sn = new Snake(b.segs[0].x, b.segs[0].y, b.skinId || 0, b.name, false, false);
+        sn.segs = b.segs;
+        sn.score = b.score;
+        sn.boosting = b.boosting;
+        return sn;
+      });
+
+      foods = msg.foods.map(f => ({
+        x: f.x, y: f.y, r: f.r || 6, color: f.color || '#2ecc71',
+        big: f.big, p: 0, glow: false
+      }));
+
+      msg.players.forEach(pd => {
+        if (pd.isMe && player) {
+          player.score = pd.score;
+          if(pd.segs && pd.segs.length) player.segs = pd.segs;
+        }
+      });
+
+      if (msg.leaderboard) {
+        let h = '';
+        msg.leaderboard.forEach((s, i) => {
+          h += `<div class="lb-row${s.isMe?' me':''}"><span class="lb-rank">${i+1}</span><span class="lb-name">${s.name}</span><span class="lb-score">${s.score}</span></div>`;
+        });
+        document.getElementById('lbList').innerHTML = h;
+      }
+
+      if(player) {
+        document.getElementById('hudLen').textContent = player.score;
+      }
+    }
+
+    if (msg.type === 'dead') {
+      document.getElementById('deathScore').textContent = 'Масса: ' + msg.score;
+      document.getElementById('hud').style.display = 'none';
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('deathScreen').classList.add('active');
+      running = false;
+    }
+  };
+
+  ws.onerror = () => { console.log('WS ошибка'); };
+  ws.onclose = () => { ws = null; };
+}
+
+// Отправляем управление серверу
+const _wsUpdHUD = updHUD;
+updHUD = function() {
+  _wsUpdHUD();
+  if (ws && ws.readyState === WebSocket.OPEN && player && player.alive) {
+    ws.send(JSON.stringify({
+      type: 'input',
+      angle: player.tAngle,
+      boost: player.boosting
+    }));
+  }
+};
+
+// Кнопка ИГРАТЬ
+const _wsPlayBtn = document.getElementById('playBtn').onclick;
+document.getElementById('playBtn').onclick = function() {
+  if(_wsPlayBtn) _wsPlayBtn();
+  connectWS();
+};
+
+// Кнопка Снова!
+const _wsRestartBtn = document.getElementById('restartBtn').onclick;
+document.getElementById('restartBtn').onclick = function() {
+  if(_wsRestartBtn) _wsRestartBtn();
+  if(ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'respawn' }));
+  } else {
+    connectWS();
+  }
+};
+
+
 syncEss();
 drawIcons();
 drawRobotIcon();
