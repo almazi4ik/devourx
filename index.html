@@ -635,12 +635,13 @@ let W,H;
 function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
 resize();window.addEventListener('resize',resize);
 
-const WORLD=12000,CELL=22,FCNT=1200,BCNT=0;
+const WORLD=12000,CELL=22,FCNT=1200,BCNT=55;
 const MAX_NATURAL_FOOD=1200,MAX_BODY=1000;
 let foods=[],bots=[],player=null,guestSnake=null,running=false;
 let camX=0,camY=0,boosting=false,pname='Player',guestName='Guest';
 let autopilotMode=false;
 let botsInitialized=false;
+let useServer=false,serverWorld=null,ws=null; // мультиплеер
 
 // BOT NAMES — shared, consistent
 const BOT_NAMES_LIST=['Toxix','BloodWorm','Kira','ZeroX','Ghost','Titan','Nova','Crux','Venom','Abyss','Rush','Nyx','Omen','Void','Fang','Drift','Blaze','Pulse','Echo','Raven','Cobra','Sphinx','Drex','Hornet','Vex'];
@@ -742,11 +743,24 @@ function updBot(bot){
 // ══════════════════════════════════════════
 function runAutopilot(snake){
   const h=snake.segs[0];
+  // Выбираем источник еды
+  const foodList = (useServer && serverWorld && serverWorld.foods) ? serverWorld.foods : foods;
   let best=Infinity,tgt=null;
-  for(let i=0;i<foods.length;i+=2){const f=foods[i],dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;if(d<best){best=d;tgt=f;}}
+  for(let i=0;i<foodList.length;i+=2){const f=foodList[i],dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;if(d<best){best=d;tgt=f;}}
   if(tgt)snake.tAngle=Math.atan2(tgt.y-h.y,tgt.x-h.x);
-  const allSnakes=[...bots].filter(b=>b.alive);
-  for(const o of allSnakes){for(let i=0;i<Math.min(o.segs.length,30);i++){const s=o.segs[i],dx=s.x-h.x,dy=s.y-h.y;if(Math.sqrt(dx*dx+dy*dy)<110){snake.tAngle=Math.atan2(h.y-s.y,h.x-s.x)+(Math.random()-.5)*1.2;break;}}}
+  // Избегаем других игроков на сервере
+  if(useServer && serverWorld && serverWorld.players){
+    for(const p of serverWorld.players){
+      if(p.isMe||!p.segs) continue;
+      for(let i=0;i<Math.min(p.segs.length,20);i++){
+        const s=p.segs[i],dx=s.x-h.x,dy=s.y-h.y;
+        if(Math.sqrt(dx*dx+dy*dy)<120){snake.tAngle=Math.atan2(h.y-s.y,h.x-s.x)+(Math.random()-.5)*1.2;break;}
+      }
+    }
+  } else {
+    const allSnakes=[...bots].filter(b=>b.alive);
+    for(const o of allSnakes){for(let i=0;i<Math.min(o.segs.length,30);i++){const s=o.segs[i],dx=s.x-h.x,dy=s.y-h.y;if(Math.sqrt(dx*dx+dy*dy)<110){snake.tAngle=Math.atan2(h.y-s.y,h.x-s.x)+(Math.random()-.5)*1.2;break;}}}
+  }
   const mg=300;
   if(h.x<mg)snake.tAngle=0;if(h.x>WORLD-mg)snake.tAngle=Math.PI;
   if(h.y<mg)snake.tAngle=Math.PI/2;if(h.y>WORLD-mg)snake.tAngle=-Math.PI/2;
@@ -854,7 +868,7 @@ function initGame(keepBots=false,spawnX=null,spawnY=null,teamMode=false,teamSkin
   if(spawnY===null) spawnY=800+Math.random()*(WORLD-1600);
   initFoods();
   if(!keepBots||!botsInitialized){
-    bots=[];
+    bots=[];for(let i=0;i<BCNT;i++)bots.push(mkBot(i));
     botsInitialized=true;
   } else {
     for(let i=0;i<bots.length;i++){if(!bots[i]||!bots[i].alive)bots[i]=mkBot(i);}
@@ -953,6 +967,24 @@ canvas.addEventListener('touchend',()=>boosting=false,{passive:true});
 // HUD / MINIMAP
 // ══════════════════════════════════════════
 function updHUD(){
+  if(useServer && serverWorld) {
+    // Используем данные от сервера
+    if(serverWorld.leaderboard) {
+      let h='';
+      serverWorld.leaderboard.forEach((s,i)=>{
+        h+=`<div class="lb-row${s.isMe?' me':''}"><span class="lb-rank">${i+1}</span><span class="lb-name">${s.name}</span><span class="lb-score">${s.score}</span></div>`;
+      });
+      document.getElementById('lbList').innerHTML=h;
+    }
+    const me = serverWorld.players ? serverWorld.players.find(p=>p.isMe) : null;
+    const myScore = me ? me.score : 0;
+    const myRank = serverWorld.leaderboard ? (serverWorld.leaderboard.findIndex(s=>s.isMe)+1||'?') : '?';
+    document.getElementById('hudLen').textContent = myScore;
+    document.getElementById('hudRank').textContent = '#'+myRank;
+    if(player) player.score = myScore;
+    return;
+  }
+  // Локальный режим
   const all=[...bots.filter(b=>b.alive),...(player&&player.alive?[player]:[]),...(guestSnake&&guestSnake.alive?[guestSnake]:[])];
   all.sort((a,b)=>b.score-a.score);
   const rank=player&&player.alive?all.indexOf(player)+1:'?';
@@ -967,6 +999,21 @@ function updHUD(){
 }
 function drawMM(){
   mctx.clearRect(0,0,108,108);const sc=108/WORLD;
+  if(useServer && serverWorld) {
+    // Еда от сервера
+    for(const f of (serverWorld.foods||[]).filter((_,i)=>i%5===0)){
+      mctx.fillStyle='rgba(46,204,113,0.3)';mctx.fillRect(f.x*sc,f.y*sc,2,2);
+    }
+    // Все игроки от сервера
+    for(const p of (serverWorld.players||[])){
+      if(!p.segs||!p.segs.length) continue;
+      const h=p.segs[0];
+      mctx.beginPath();mctx.arc(h.x*sc,h.y*sc,p.isMe?4:3,0,Math.PI*2);
+      mctx.fillStyle=p.isMe?'#f9ca24':'#00e5cc';mctx.fill();
+    }
+    return;
+  }
+  // Локальный режим
   for(let i=0;i<foods.length;i+=10){const f=foods[i];mctx.fillStyle='rgba(46,204,113,0.3)';mctx.fillRect(f.x*sc,f.y*sc,2,2);}
   bots.forEach(b=>{if(!b.alive)return;const h=b.segs[0];mctx.beginPath();mctx.arc(h.x*sc,h.y*sc,2,0,Math.PI*2);mctx.fillStyle=SKINS_DATA[b.sid].h;mctx.fill();});
   if(guestSnake&&guestSnake.alive){const h=guestSnake.segs[0];mctx.beginPath();mctx.arc(h.x*sc,h.y*sc,3,0,Math.PI*2);mctx.fillStyle='#00e5cc';mctx.fill();}
@@ -1001,43 +1048,29 @@ function draw(cx,cy){
 let lastT=0;
 function loop(ts){
   const dt=Math.min((ts-lastT)/16,3);lastT=ts;
-
-  if(useServer) {
-    // Режим сервера — только читаем ввод, камера за змейкой от сервера
-    if(running && player) {
-      if(autopilotMode){ runAutopilot(player); }
-      else {
-        player.tAngle = Math.atan2(my-H/2, mx-W/2);
-        player.boosting = boosting && player.length > MIN_LEN;
-      }
-      if(serverWorld && serverWorld.players) {
-        const me = serverWorld.players.find(p=>p.isMe);
-        if(me && me.segs && me.segs.length) {
-          camX += (me.segs[0].x - W/2 - camX) * 0.12;
-          camY += (me.segs[0].y - H/2 - camY) * 0.12;
-        }
+  if(running&&player&&player.alive){
+    if(autopilotMode){runAutopilot(player);}
+    else{
+      player.tAngle=Math.atan2(my-H/2,mx-W/2);
+      const canBoost=player.length>MIN_LEN;
+      player.boosting=boosting&&canBoost;
+      if(player.boosting&&player.length>MIN_LEN&&Math.random()<.18){
+        player.length=Math.max(MIN_LEN,player.length-1);
+        player.score=Math.max(MIN_LEN,player.score-1);
+        if(Math.random()<.5){const ht=player.segs[player.segs.length-1];foods.push({x:ht.x+Math.random()*10-5,y:ht.y+Math.random()*10-5,r:5,color:`hsl(${Math.random()*360},90%,65%)`,p:0,glow:false,boost:true,big:false});}
       }
     }
-  } else {
-    // Локальный режим (без сервера)
-    if(running&&player&&player.alive){
-      if(autopilotMode){runAutopilot(player);}
-      else{
-        player.tAngle=Math.atan2(my-H/2,mx-W/2);
-        const canBoost=player.length>MIN_LEN;
-        player.boosting=boosting&&canBoost;
-        if(player.boosting&&player.length>MIN_LEN&&Math.random()<.18){
-          player.length=Math.max(MIN_LEN,player.length-1);
-          player.score=Math.max(MIN_LEN,player.score-1);
-        }
-      }
-      player.update();eatFood(player);
-      camX+=(player.segs[0].x-W/2-camX)*.1;
-      camY+=(player.segs[0].y-H/2-camY)*.1;
-    }
-    if(running){ checkCols(); }
+    player.update();eatFood(player);
+    camX+=(player.segs[0].x-W/2-camX)*.1;
+    camY+=(player.segs[0].y-H/2-camY)*.1;
   }
-
+  if(running){
+    bots.forEach(b=>{updBot(b);eatFood(b);});
+    // host also simulates guestSnake movement
+    if(isHost&&guestSnake&&guestSnake.alive){guestSnake.update();eatFood(guestSnake);}
+    checkCols();
+    if(p2pMode)syncWorld(dt);
+  }
   draw(camX,camY);
   if(running){updHUD();drawMM();}
   requestAnimationFrame(loop);
@@ -1233,7 +1266,6 @@ showMenu = function(){
 // МУЛЬТИПЛЕЕР
 // ══════════════════════════════════════
 const SERVER = 'wss://devourx-server-production.up.railway.app';
-let ws = null, serverWorld = null, useServer = false;
 
 function connectWS() {
   if(ws){ try{ws.close();}catch(e){} ws=null; }
@@ -1252,15 +1284,6 @@ function connectWS() {
       }
       if (msg.type === 'world') {
         serverWorld = msg;
-        if(player) player.score = msg.myScore || player.score;
-        document.getElementById('hudLen').textContent = msg.myScore || 0;
-        if(msg.leaderboard) {
-          let h='';
-          msg.leaderboard.forEach((s,i)=>{
-            h+=`<div class="lb-row${s.isMe?' me':''}"><span class="lb-rank">${i+1}</span><span class="lb-name">${s.name}</span><span class="lb-score">${s.score}</span></div>`;
-          });
-          document.getElementById('lbList').innerHTML=h;
-        }
       }
       if (msg.type === 'dead') {
         document.getElementById('deathScore').textContent='Масса: '+(msg.score||0);
@@ -1336,7 +1359,6 @@ draw = function(cx, cy) {
     ctx.fillStyle=isMe?'#f9ca24':'#fff';ctx.fillText(name,hx,hy-r-8);
   }
 
-  // Только игроки — без ботов!
   for(const p of (serverWorld.players||[])) drawSnek(p.segs,p.skinId,p.name,p.score,p.isMe,p.boosting);
 };
 
