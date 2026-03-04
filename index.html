@@ -675,6 +675,9 @@ class Snake{
     if(!this.alive||this.segs.length<2)return;
     const sk=SKINS_DATA[this.sid]||SKINS_DATA[0];
     const r=this.getR();
+    // Пропускаем змейку если она далеко за экраном
+    const hd0=this.segs[0],hsx=hd0.x-cx,hsy=hd0.y-cy;
+    if(hsx<-400||hsx>W+400||hsy<-400||hsy>H+400)return;
     // При ускорении — светлее (как в Slither.io)
     if(this.boosting) ctx.globalAlpha=0.72;
     for(let i=this.segs.length-1;i>=1;i--){
@@ -861,7 +864,7 @@ function initGame(keepBots=false,spawnX=null,spawnY=null,teamMode=false,teamSkin
   }
   player=new Snake(spawnX,spawnY,teamMode?teamSkinId:selSkin,pname,true,false);
   guestSnake=null;
-  camX=player.segs[0].x-W/2;camY=player.segs[0].y-H/2;
+  camX=spawnX-W/2;camY=spawnY-H/2;
   boosting=false;p2pMode=teamMode;
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('hud').style.display='block';
@@ -1216,122 +1219,81 @@ showMenu = function(){
 
 
 // ══════════════════════════════════════
-// СЕРВЕР — только для реальных игроков
+// МУЛЬТИПЛЕЕР — реальные игроки
 // ══════════════════════════════════════
 const SERVER = 'wss://devourx-server-production.up.railway.app';
 let ws = null;
-let otherPlayers = {}; // реальные игроки от сервера
+let otherPlayers = {};
 
 function connectWS() {
   if(ws){ try{ws.close();}catch(e){} ws=null; }
   ws = new WebSocket(SERVER);
-
   ws.onopen = () => {
     const name = document.getElementById('nameInput').value.trim() || 'Player';
     ws.send(JSON.stringify({ type: 'join', name: name, skinId: selSkin }));
-    console.log('Подключились к серверу!');
   };
-
   ws.onmessage = (e) => {
     try {
       const msg = JSON.parse(e.data);
       if (msg.type === 'world') {
-        // Обновляем только ДРУГИХ реальных игроков
         otherPlayers = {};
-        msg.players.forEach(pd => {
-          if (!pd.isMe) {
-            otherPlayers[pd.id] = pd;
-          }
-        });
-        // Лидерборд от сервера
-        if (msg.leaderboard) {
-          let h = '';
-          msg.leaderboard.forEach((s, i) => {
-            h += '<div class="lb-row' + (s.isMe?' me':'') + '"><span class="lb-rank">' + (i+1) + '</span><span class="lb-name">' + s.name + '</span><span class="lb-score">' + s.score + '</span></div>';
-          });
-          const lb = document.getElementById('lbList');
-          if(lb) lb.innerHTML = h;
-        }
-      }
-      if (msg.type === 'dead') {
-        // сервер подтвердил смерть — ничего не делаем, локальная логика уже убила
+        msg.players.forEach(pd => { if (!pd.isMe) otherPlayers[pd.id] = pd; });
       }
     } catch(err) {}
   };
-
-  ws.onerror = (e) => { console.log('WS error'); };
   ws.onclose = () => { ws = null; otherPlayers = {}; };
 }
 
 function sendInput() {
   if(ws && ws.readyState === WebSocket.OPEN && player && player.alive) {
-    ws.send(JSON.stringify({
-      type: 'input',
-      angle: player.tAngle,
-      boost: player.boosting
-    }));
+    ws.send(JSON.stringify({ type: 'input', angle: player.tAngle, boost: player.boosting }));
   }
 }
 
-// Рисуем других реальных игроков
 function drawOtherPlayers(cx, cy) {
   for(const id in otherPlayers) {
     const pd = otherPlayers[id];
     if(!pd.segs || pd.segs.length < 2) continue;
     const sk = SKINS_DATA[pd.skinId] || SKINS_DATA[0];
-    const r = 6 + (Math.min(pd.score,1000)/1000)*22;
-    // тело
+    const r = 6 + (Math.min(pd.score||10, 1000)/1000)*22;
+    const hd0 = pd.segs[0];
+    if(hd0.x-cx < -400 || hd0.x-cx > W+400) continue;
     for(let i = pd.segs.length-1; i >= 1; i--) {
-      const s = pd.segs[i];
-      const sx = s.x - cx, sy = s.y - cy;
+      const s = pd.segs[i], sx = s.x-cx, sy = s.y-cy;
       if(sx<-150||sx>W+150||sy<-150||sy>H+150) continue;
       const t = i/pd.segs.length;
       ctx.beginPath(); ctx.arc(sx,sy,r*(.72+.28*(1-t)),0,Math.PI*2);
       ctx.fillStyle = i%2===0 ? sk.b[0] : sk.b[1]; ctx.fill();
     }
-    // голова
-    const hd = pd.segs[0];
-    const hx = hd.x - cx, hy = hd.y - cy;
-    ctx.beginPath(); ctx.arc(hx,hy,r,0,Math.PI*2);
-    ctx.fillStyle = sk.h; ctx.fill();
-    // имя
-    ctx.font = 'bold ' + (9+r) + 'px Nunito';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillText(pd.name, hx+1, hy-r-8+1);
-    ctx.fillStyle = '#fff'; ctx.fillText(pd.name, hx, hy-r-8);
+    const hx = hd0.x-cx, hy = hd0.y-cy;
+    ctx.beginPath(); ctx.arc(hx,hy,r,0,Math.PI*2); ctx.fillStyle=sk.h; ctx.fill();
+    // глаза
+    const ang = pd.segs.length>1 ? Math.atan2(pd.segs[0].y-pd.segs[1].y, pd.segs[0].x-pd.segs[1].x) : 0;
+    [ang-.48,ang+.48].forEach(a=>{
+      const ex=hx+Math.cos(a)*r*.5,ey=hy+Math.sin(a)*r*.5,er=r*.33;
+      ctx.beginPath();ctx.arc(ex,ey,er,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
+      ctx.beginPath();ctx.arc(ex+Math.cos(ang)*er*.5,ey+Math.sin(ang)*er*.5,er*.5,0,Math.PI*2);ctx.fillStyle='#111';ctx.fill();
+    });
+    ctx.font='bold '+(9+r)+'px Nunito';ctx.textAlign='center';
+    ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillText(pd.name,hx+1,hy-r-8+1);
+    ctx.fillStyle='#00e5cc';ctx.fillText(pd.name,hx,hy-r-8);
   }
 }
 
-// Патчим draw чтобы рисовал других игроков
 const _origDrawWS = draw;
-draw = function(cx, cy) {
-  _origDrawWS(cx, cy);
-  drawOtherPlayers(cx, cy);
-};
+draw = function(cx, cy) { _origDrawWS(cx, cy); drawOtherPlayers(cx, cy); };
 
-// Патчим updHUD чтобы отправлял управление серверу
 const _wsUpdHUD2 = updHUD;
-updHUD = function() {
-  _wsUpdHUD2();
-  sendInput();
-};
+updHUD = function() { _wsUpdHUD2(); sendInput(); };
 
-// Подключаемся при нажатии ИГРАТЬ
 const _wsPlayOrig = document.getElementById('playBtn').onclick;
-document.getElementById('playBtn').onclick = function() {
-  if(_wsPlayOrig) _wsPlayOrig();
-  connectWS();
-};
+document.getElementById('playBtn').onclick = function() { if(_wsPlayOrig) _wsPlayOrig(); connectWS(); };
 
-// Переродиться
 const _wsRestartOrig = document.getElementById('restartBtn').onclick;
 document.getElementById('restartBtn').onclick = function() {
   if(_wsRestartOrig) _wsRestartOrig();
-  if(ws && ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify({ type: 'respawn' }));
-  } else {
-    connectWS();
-  }
+  if(ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'respawn' }));
+  else connectWS();
 };
 
 syncEss();
