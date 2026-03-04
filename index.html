@@ -989,9 +989,9 @@ function draw(cx,cy){
     ctx.beginPath();ctx.arc(fx,fy,pr,0,Math.PI*2);ctx.fillStyle=f.color;ctx.fill();
     ctx.beginPath();ctx.arc(fx-pr*.3,fy-pr*.3,pr*.27,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.28)';ctx.fill();
   }
-  bots.forEach(b=>b.draw(cx,cy));
-  if(guestSnake)guestSnake.draw(cx,cy);
-  if(player)player.draw(cx,cy);
+  if(!useServer) bots.forEach(b=>b.draw(cx,cy));
+  if(!useServer && guestSnake)guestSnake.draw(cx,cy);
+  if(!useServer && player)player.draw(cx,cy);
   // boost particles removed
 }
 
@@ -1041,10 +1041,12 @@ function loop(ts){
       camY+=(player.segs[0].y-H/2-camY)*.1;
     }
     if(running){
-      bots.forEach(b=>{updBot(b);eatFood(b);});
-      if(isHost&&guestSnake&&guestSnake.alive){guestSnake.update();eatFood(guestSnake);}
-      checkCols();
-      if(p2pMode)syncWorld(dt);
+      if(!useServer) {
+        bots.forEach(b=>{updBot(b);eatFood(b);});
+        if(isHost&&guestSnake&&guestSnake.alive){guestSnake.update();eatFood(guestSnake);}
+        checkCols();
+        if(p2pMode)syncWorld(dt);
+      }
     }
   }
 
