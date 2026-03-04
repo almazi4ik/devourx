@@ -1013,17 +1013,15 @@ function loop(ts){
         if(Math.random()<.5){const ht=player.segs[player.segs.length-1];foods.push({x:ht.x+Math.random()*10-5,y:ht.y+Math.random()*10-5,r:5,color:`hsl(${Math.random()*360},90%,65%)`,p:0,glow:false,boost:true,big:false});}
       }
     }
-    player.update();eatFood(player); // всегда двигаемся локально
-    if(player.segs.length) {
-      camX+=(player.segs[0].x-W/2-camX)*.1;
-      camY+=(player.segs[0].y-H/2-camY)*.1;
-    }
+    player.update();eatFood(player);
+    camX+=(player.segs[0].x-W/2-camX)*.1;
+    camY+=(player.segs[0].y-H/2-camY)*.1;
   }
   if(running){
-    // боты обновляются всегда для плавности
     bots.forEach(b=>{updBot(b);eatFood(b);});
+    // host also simulates guestSnake movement
     if(isHost&&guestSnake&&guestSnake.alive){guestSnake.update();eatFood(guestSnake);}
-    if(!ws) checkCols(); // столкновения только локально (сервер пришлёт dead)
+    checkCols();
     if(p2pMode)syncWorld(dt);
   }
   draw(camX,camY);
@@ -1218,112 +1216,123 @@ showMenu = function(){
 
 
 // ══════════════════════════════════════
-// ПОДКЛЮЧЕНИЕ К СЕРВЕРУ RAILWAY
+// СЕРВЕР — только для реальных игроков
 // ══════════════════════════════════════
 const SERVER = 'wss://devourx-server-production.up.railway.app';
 let ws = null;
+let otherPlayers = {}; // реальные игроки от сервера
 
 function connectWS() {
-  if(ws) { try{ws.close();}catch(e){} ws=null; }
+  if(ws){ try{ws.close();}catch(e){} ws=null; }
   ws = new WebSocket(SERVER);
 
   ws.onopen = () => {
     const name = document.getElementById('nameInput').value.trim() || 'Player';
     ws.send(JSON.stringify({ type: 'join', name: name, skinId: selSkin }));
+    console.log('Подключились к серверу!');
   };
 
   ws.onmessage = (e) => {
-    const msg = JSON.parse(e.data);
-
-    if (msg.type === 'world') {
-      // Обновляем ботов плавно — не пересоздаём каждый раз
-      if(msg.bots.length !== bots.length) {
-        bots = msg.bots.map(b => {
-          const sn = new Snake(b.segs[0].x, b.segs[0].y, b.skinId||0, b.name, false, false);
-          sn.segs = b.segs; sn.score = b.score; sn.boosting = b.boosting;
-          return sn;
-        });
-      } else {
-        msg.bots.forEach((b, i) => {
-          if(bots[i]) {
-            bots[i].segs = b.segs;
-            bots[i].score = b.score;
-            bots[i].name = b.name;
-            bots[i].boosting = b.boosting;
+    try {
+      const msg = JSON.parse(e.data);
+      if (msg.type === 'world') {
+        // Обновляем только ДРУГИХ реальных игроков
+        otherPlayers = {};
+        msg.players.forEach(pd => {
+          if (!pd.isMe) {
+            otherPlayers[pd.id] = pd;
           }
         });
-      }
-
-      foods = msg.foods.map(f => ({
-        x: f.x, y: f.y, r: f.r || 6, color: f.color || '#2ecc71',
-        big: f.big, p: 0, glow: false
-      }));
-
-      msg.players.forEach(pd => {
-        if (pd.isMe && player) {
-          player.score = pd.score;
-          // НЕ перезаписываем segs от сервера — двигаемся локально!
-          // Сервер только авторитет для счёта
+        // Лидерборд от сервера
+        if (msg.leaderboard) {
+          let h = '';
+          msg.leaderboard.forEach((s, i) => {
+            h += '<div class="lb-row' + (s.isMe?' me':'') + '"><span class="lb-rank">' + (i+1) + '</span><span class="lb-name">' + s.name + '</span><span class="lb-score">' + s.score + '</span></div>';
+          });
+          const lb = document.getElementById('lbList');
+          if(lb) lb.innerHTML = h;
         }
-      });
-
-      if (msg.leaderboard) {
-        let h = '';
-        msg.leaderboard.forEach((s, i) => {
-          h += `<div class="lb-row${s.isMe?' me':''}"><span class="lb-rank">${i+1}</span><span class="lb-name">${s.name}</span><span class="lb-score">${s.score}</span></div>`;
-        });
-        document.getElementById('lbList').innerHTML = h;
       }
-
-      if(player) {
-        document.getElementById('hudLen').textContent = player.score;
+      if (msg.type === 'dead') {
+        // сервер подтвердил смерть — ничего не делаем, локальная логика уже убила
       }
-    }
-
-    if (msg.type === 'dead') {
-      document.getElementById('deathScore').textContent = 'Масса: ' + msg.score;
-      document.getElementById('hud').style.display = 'none';
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById('deathScreen').classList.add('active');
-      running = false;
-    }
+    } catch(err) {}
   };
 
-  ws.onerror = () => { console.log('WS ошибка'); };
-  ws.onclose = () => { ws = null; };
+  ws.onerror = (e) => { console.log('WS error'); };
+  ws.onclose = () => { ws = null; otherPlayers = {}; };
 }
 
-// Отправляем управление серверу
-const _wsUpdHUD = updHUD;
-updHUD = function() {
-  _wsUpdHUD();
-  if (ws && ws.readyState === WebSocket.OPEN && player && player.alive) {
+function sendInput() {
+  if(ws && ws.readyState === WebSocket.OPEN && player && player.alive) {
     ws.send(JSON.stringify({
       type: 'input',
       angle: player.tAngle,
       boost: player.boosting
     }));
   }
+}
+
+// Рисуем других реальных игроков
+function drawOtherPlayers(cx, cy) {
+  for(const id in otherPlayers) {
+    const pd = otherPlayers[id];
+    if(!pd.segs || pd.segs.length < 2) continue;
+    const sk = SKINS_DATA[pd.skinId] || SKINS_DATA[0];
+    const r = 6 + (Math.min(pd.score,1000)/1000)*22;
+    // тело
+    for(let i = pd.segs.length-1; i >= 1; i--) {
+      const s = pd.segs[i];
+      const sx = s.x - cx, sy = s.y - cy;
+      if(sx<-150||sx>W+150||sy<-150||sy>H+150) continue;
+      const t = i/pd.segs.length;
+      ctx.beginPath(); ctx.arc(sx,sy,r*(.72+.28*(1-t)),0,Math.PI*2);
+      ctx.fillStyle = i%2===0 ? sk.b[0] : sk.b[1]; ctx.fill();
+    }
+    // голова
+    const hd = pd.segs[0];
+    const hx = hd.x - cx, hy = hd.y - cy;
+    ctx.beginPath(); ctx.arc(hx,hy,r,0,Math.PI*2);
+    ctx.fillStyle = sk.h; ctx.fill();
+    // имя
+    ctx.font = 'bold ' + (9+r) + 'px Nunito';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillText(pd.name, hx+1, hy-r-8+1);
+    ctx.fillStyle = '#fff'; ctx.fillText(pd.name, hx, hy-r-8);
+  }
+}
+
+// Патчим draw чтобы рисовал других игроков
+const _origDrawWS = draw;
+draw = function(cx, cy) {
+  _origDrawWS(cx, cy);
+  drawOtherPlayers(cx, cy);
 };
 
-// Кнопка ИГРАТЬ
-const _wsPlayBtn = document.getElementById('playBtn').onclick;
+// Патчим updHUD чтобы отправлял управление серверу
+const _wsUpdHUD2 = updHUD;
+updHUD = function() {
+  _wsUpdHUD2();
+  sendInput();
+};
+
+// Подключаемся при нажатии ИГРАТЬ
+const _wsPlayOrig = document.getElementById('playBtn').onclick;
 document.getElementById('playBtn').onclick = function() {
-  if(_wsPlayBtn) _wsPlayBtn();
+  if(_wsPlayOrig) _wsPlayOrig();
   connectWS();
 };
 
-// Кнопка Снова!
-const _wsRestartBtn = document.getElementById('restartBtn').onclick;
+// Переродиться
+const _wsRestartOrig = document.getElementById('restartBtn').onclick;
 document.getElementById('restartBtn').onclick = function() {
-  if(_wsRestartBtn) _wsRestartBtn();
+  if(_wsRestartOrig) _wsRestartOrig();
   if(ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ type: 'respawn' }));
   } else {
     connectWS();
   }
 };
-
 
 syncEss();
 drawIcons();
