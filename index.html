@@ -1012,11 +1012,13 @@ function loop(ts){
         player.boosting = boosting && player.length > MIN_LEN;
       }
       // Двигаем камеру плавно за нашей змейкой (позиция от сервера)
-      if(serverWorld) {
-        const me = serverWorld.players ? serverWorld.players.find(p=>p.isMe) : null;
+      if(serverWorld && serverWorld.players) {
+        const me = serverWorld.players.find(p=>p.isMe);
         if(me && me.segs && me.segs.length) {
-          camX += (me.segs[0].x - W/2 - camX) * 0.15;
-          camY += (me.segs[0].y - H/2 - camY) * 0.15;
+          const tx = me.segs[0].x - W/2;
+          const ty = me.segs[0].y - H/2;
+          camX += (tx - camX) * 0.12;
+          camY += (ty - camY) * 0.12;
         }
       }
     }
