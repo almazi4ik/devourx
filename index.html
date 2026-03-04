@@ -1013,18 +1013,17 @@ function loop(ts){
         if(Math.random()<.5){const ht=player.segs[player.segs.length-1];foods.push({x:ht.x+Math.random()*10-5,y:ht.y+Math.random()*10-5,r:5,color:`hsl(${Math.random()*360},90%,65%)`,p:0,glow:false,boost:true,big:false});}
       }
     }
-    if(!ws) { player.update();eatFood(player); } // локально только без сервера
+    player.update();eatFood(player); // всегда двигаемся локально
     if(player.segs.length) {
       camX+=(player.segs[0].x-W/2-camX)*.1;
       camY+=(player.segs[0].y-H/2-camY)*.1;
     }
   }
   if(running){
-    if(!ws) { // без сервера — локальная симуляция
-      bots.forEach(b=>{updBot(b);eatFood(b);});
-      if(isHost&&guestSnake&&guestSnake.alive){guestSnake.update();eatFood(guestSnake);}
-      checkCols();
-    }
+    // боты обновляются всегда для плавности
+    bots.forEach(b=>{updBot(b);eatFood(b);});
+    if(isHost&&guestSnake&&guestSnake.alive){guestSnake.update();eatFood(guestSnake);}
+    if(!ws) checkCols(); // столкновения только локально (сервер пришлёт dead)
     if(p2pMode)syncWorld(dt);
   }
   draw(camX,camY);
@@ -1237,13 +1236,23 @@ function connectWS() {
     const msg = JSON.parse(e.data);
 
     if (msg.type === 'world') {
-      bots = msg.bots.map(b => {
-        const sn = new Snake(b.segs[0].x, b.segs[0].y, b.skinId || 0, b.name, false, false);
-        sn.segs = b.segs;
-        sn.score = b.score;
-        sn.boosting = b.boosting;
-        return sn;
-      });
+      // Обновляем ботов плавно — не пересоздаём каждый раз
+      if(msg.bots.length !== bots.length) {
+        bots = msg.bots.map(b => {
+          const sn = new Snake(b.segs[0].x, b.segs[0].y, b.skinId||0, b.name, false, false);
+          sn.segs = b.segs; sn.score = b.score; sn.boosting = b.boosting;
+          return sn;
+        });
+      } else {
+        msg.bots.forEach((b, i) => {
+          if(bots[i]) {
+            bots[i].segs = b.segs;
+            bots[i].score = b.score;
+            bots[i].name = b.name;
+            bots[i].boosting = b.boosting;
+          }
+        });
+      }
 
       foods = msg.foods.map(f => ({
         x: f.x, y: f.y, r: f.r || 6, color: f.color || '#2ecc71',
@@ -1253,10 +1262,8 @@ function connectWS() {
       msg.players.forEach(pd => {
         if (pd.isMe && player) {
           player.score = pd.score;
-          if(pd.segs && pd.segs.length) {
-            player.segs = pd.segs;
-            player.alive = true;
-          }
+          // НЕ перезаписываем segs от сервера — двигаемся локально!
+          // Сервер только авторитет для счёта
         }
       });
 
