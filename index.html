@@ -635,7 +635,7 @@ let W,H;
 function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
 resize();window.addEventListener('resize',resize);
 
-const WORLD=12000,CELL=22,FCNT=1200,BCNT=55;
+const WORLD=12000,CELL=22,FCNT=1200,BCNT=0;
 const MAX_NATURAL_FOOD=1200,MAX_BODY=1000;
 let foods=[],bots=[],player=null,guestSnake=null,running=false;
 let camX=0,camY=0,boosting=false,pname='Player',guestName='Guest';
@@ -854,7 +854,7 @@ function initGame(keepBots=false,spawnX=null,spawnY=null,teamMode=false,teamSkin
   if(spawnY===null) spawnY=800+Math.random()*(WORLD-1600);
   initFoods();
   if(!keepBots||!botsInitialized){
-    bots=[];for(let i=0;i<BCNT;i++)bots.push(mkBot(i));
+    bots=[];
     botsInitialized=true;
   } else {
     for(let i=0;i<bots.length;i++){if(!bots[i]||!bots[i].alive)bots[i]=mkBot(i);}
@@ -989,9 +989,9 @@ function draw(cx,cy){
     ctx.beginPath();ctx.arc(fx,fy,pr,0,Math.PI*2);ctx.fillStyle=f.color;ctx.fill();
     ctx.beginPath();ctx.arc(fx-pr*.3,fy-pr*.3,pr*.27,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.28)';ctx.fill();
   }
-  if(!useServer) bots.forEach(b=>b.draw(cx,cy));
-  if(!useServer && guestSnake)guestSnake.draw(cx,cy);
-  if(!useServer && player)player.draw(cx,cy);
+  bots.forEach(b=>b.draw(cx,cy));
+  if(guestSnake)guestSnake.draw(cx,cy);
+  if(player)player.draw(cx,cy);
   // boost particles removed
 }
 
@@ -1003,27 +1003,23 @@ function loop(ts){
   const dt=Math.min((ts-lastT)/16,3);lastT=ts;
 
   if(useServer) {
-    // ══ РЕЖИМ СЕРВЕРА ══
-    // Только читаем ввод и двигаем камеру — сервер считает всё остальное
+    // Режим сервера — только читаем ввод, камера за змейкой от сервера
     if(running && player) {
       if(autopilotMode){ runAutopilot(player); }
       else {
         player.tAngle = Math.atan2(my-H/2, mx-W/2);
         player.boosting = boosting && player.length > MIN_LEN;
       }
-      // Двигаем камеру плавно за нашей змейкой (позиция от сервера)
       if(serverWorld && serverWorld.players) {
         const me = serverWorld.players.find(p=>p.isMe);
         if(me && me.segs && me.segs.length) {
-          const tx = me.segs[0].x - W/2;
-          const ty = me.segs[0].y - H/2;
-          camX += (tx - camX) * 0.12;
-          camY += (ty - camY) * 0.12;
+          camX += (me.segs[0].x - W/2 - camX) * 0.12;
+          camY += (me.segs[0].y - H/2 - camY) * 0.12;
         }
       }
     }
   } else {
-    // ══ ЛОКАЛЬНЫЙ РЕЖИМ (без сервера) ══
+    // Локальный режим (без сервера)
     if(running&&player&&player.alive){
       if(autopilotMode){runAutopilot(player);}
       else{
@@ -1033,21 +1029,13 @@ function loop(ts){
         if(player.boosting&&player.length>MIN_LEN&&Math.random()<.18){
           player.length=Math.max(MIN_LEN,player.length-1);
           player.score=Math.max(MIN_LEN,player.score-1);
-          if(Math.random()<.5){const ht=player.segs[player.segs.length-1];foods.push({x:ht.x+Math.random()*10-5,y:ht.y+Math.random()*10-5,r:5,color:`hsl(${Math.random()*360},90%,65%)`,p:0,glow:false,boost:true,big:false});}
         }
       }
       player.update();eatFood(player);
       camX+=(player.segs[0].x-W/2-camX)*.1;
       camY+=(player.segs[0].y-H/2-camY)*.1;
     }
-    if(running){
-      if(!useServer) {
-        bots.forEach(b=>{updBot(b);eatFood(b);});
-        if(isHost&&guestSnake&&guestSnake.alive){guestSnake.update();eatFood(guestSnake);}
-        checkCols();
-        if(p2pMode)syncWorld(dt);
-      }
-    }
+    if(running){ checkCols(); }
   }
 
   draw(camX,camY);
@@ -1242,44 +1230,30 @@ showMenu = function(){
 
 
 // ══════════════════════════════════════
-// НАСТОЯЩИЙ МУЛЬТИПЛЕЕР
+// МУЛЬТИПЛЕЕР
 // ══════════════════════════════════════
 const SERVER = 'wss://devourx-server-production.up.railway.app';
-let ws = null;
-let serverWorld = null;
-let useServer = false;
+let ws = null, serverWorld = null, useServer = false;
 
 function connectWS() {
   if(ws){ try{ws.close();}catch(e){} ws=null; }
   ws = new WebSocket(SERVER);
-
   ws.onopen = () => {
     const name = document.getElementById('nameInput').value.trim() || 'Player';
     ws.send(JSON.stringify({ type: 'join', name: name, skinId: selSkin }));
     useServer = true;
   };
-
   ws.onmessage = (e) => {
     try {
       const msg = JSON.parse(e.data);
-
       if (msg.type === 'joined') {
-        // Ставим камеру на спавн
         camX = msg.spawnX - W/2;
         camY = msg.spawnY - H/2;
       }
-
       if (msg.type === 'world') {
         serverWorld = msg;
-        // Обновляем счёт и длину игрока
-        if(player) {
-          player.score = msg.myScore || player.score;
-          if(!msg.myAlive && player.alive) {
-            // сервер говорит мы мертвы
-            player.alive = false;
-          }
-        }
-        // Лидерборд
+        if(player) player.score = msg.myScore || player.score;
+        document.getElementById('hudLen').textContent = msg.myScore || 0;
         if(msg.leaderboard) {
           let h='';
           msg.leaderboard.forEach((s,i)=>{
@@ -1287,47 +1261,36 @@ function connectWS() {
           });
           document.getElementById('lbList').innerHTML=h;
         }
-        document.getElementById('hudLen').textContent = msg.myScore || 0;
       }
-
       if (msg.type === 'dead') {
-        document.getElementById('deathScore').textContent = 'Масса: ' + (msg.score||0);
-        document.getElementById('hud').style.display = 'none';
+        document.getElementById('deathScore').textContent='Масса: '+(msg.score||0);
+        document.getElementById('hud').style.display='none';
         document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
         document.getElementById('deathScreen').classList.add('active');
-        running = false;
+        running=false;
         renderRecords(msg.score||0);
       }
-
-    } catch(err) { console.log('WS err:', err); }
+    } catch(err) {}
   };
-
   ws.onerror = () => { useServer=false; };
   ws.onclose = () => { ws=null; useServer=false; serverWorld=null; };
 }
 
-// Отправляем управление серверу в updHUD
+// Отправка управления
 const _wsUpdHUD = updHUD;
 updHUD = function() {
   _wsUpdHUD();
   if(ws && ws.readyState===WebSocket.OPEN && player && running) {
-    ws.send(JSON.stringify({
-      type: 'input',
-      angle: player.tAngle,
-      boost: player.boosting
-    }));
+    ws.send(JSON.stringify({ type:'input', angle:player.tAngle, boost:player.boosting }));
   }
 };
 
 // Рисуем мир от сервера
 const _wsOrigDraw = draw;
 draw = function(cx, cy) {
-  if(!useServer || !serverWorld) {
-    _wsOrigDraw(cx, cy);
-    return;
-  }
+  if(!useServer || !serverWorld) { _wsOrigDraw(cx, cy); return; }
 
-  // Фон
+  // Фон и сетка
   ctx.fillStyle='#0d2b15'; ctx.fillRect(0,0,W,H);
   ctx.strokeStyle='rgba(46,204,113,0.055)'; ctx.lineWidth=1;
   for(let x=Math.floor(cx/CELL)*CELL;x<cx+W+CELL;x+=CELL){ctx.beginPath();ctx.moveTo(x-cx,0);ctx.lineTo(x-cx,H);ctx.stroke();}
@@ -1344,7 +1307,6 @@ draw = function(cx, cy) {
     ctx.beginPath();ctx.arc(fx-pr*.3,fy-pr*.3,pr*.27,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.28)';ctx.fill();
   }
 
-  // Рисуем змейку по данным
   function drawSnek(segs, skinId, name, score, isMe, boosting) {
     if(!segs||segs.length<2) return;
     const hd0=segs[0], hsx=hd0.x-cx, hsy=hd0.y-cy;
@@ -1374,17 +1336,13 @@ draw = function(cx, cy) {
     ctx.fillStyle=isMe?'#f9ca24':'#fff';ctx.fillText(name,hx,hy-r-8);
   }
 
-  // Боты
-  for(const b of (serverWorld.bots||[])) drawSnek(b.segs,b.skinId,b.name,b.score,false,b.boosting);
-  // Игроки
+  // Только игроки — без ботов!
   for(const p of (serverWorld.players||[])) drawSnek(p.segs,p.skinId,p.name,p.score,p.isMe,p.boosting);
 };
 
-// Кнопка ИГРАТЬ
+// Кнопки
 const _wsPlay = document.getElementById('playBtn').onclick;
 document.getElementById('playBtn').onclick = function() { if(_wsPlay)_wsPlay(); connectWS(); };
-
-// Кнопка Снова!
 const _wsRestart = document.getElementById('restartBtn').onclick;
 document.getElementById('restartBtn').onclick = function() {
   if(_wsRestart)_wsRestart();
