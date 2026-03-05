@@ -259,13 +259,31 @@ const SKINS_DATA=[
   {id:15,name:'Тёмный X',h:'#0a0a0a',b:['#2c2c2c','#0a0a0a'],rarity:'legendary',cost:2000,owned:false},
 ];
 const RARITY_C={standard:'#a8d8b8',rare:'#a29bfe',legendary:'#f9ca24'};
-let selSkin=0, essence=parseInt(localStorage.getItem('dvx_coins')||'18'), curCat='all';
+
+// Загружаем сохранённые скины
+(function loadSavedSkins(){
+  const saved = JSON.parse(localStorage.getItem('dvx_skins') || 'null');
+  if(saved){
+    saved.forEach(s => {
+      const skin = SKINS_DATA.find(x => x.id === s.id);
+      if(skin) skin.owned = s.owned;
+    });
+  }
+})();
+
+let selSkin = (()=>{ const s=localStorage.getItem('dvx_selSkin'); return s!==null?parseInt(s):0; })();
+let essence=parseInt(localStorage.getItem('dvx_coins')||'18'), curCat='all';
 const MIN_LEN=10;
 
 function syncEss(){
   localStorage.setItem('dvx_coins',essence);
   document.getElementById('essCnt').textContent=essence;
   document.getElementById('essCnt2').textContent=essence;
+}
+
+function saveSkins(){
+  localStorage.setItem('dvx_skins', JSON.stringify(SKINS_DATA.map(s=>({id:s.id,owned:s.owned}))));
+  localStorage.setItem('dvx_selSkin', selSkin);
 }
 syncEss();
 
@@ -279,8 +297,8 @@ function renderSkins(){
     const rc=RARITY_C[s.rarity];
     card.innerHTML=`${locked?'<span class="lock-ico">🔒</span>':''}<div class="skin-preview" style="background:linear-gradient(135deg,${s.b[0]},${s.b[1]})"></div><div class="sk-name" style="color:${rc}">${s.name}</div>${locked?`<div class="sk-cost">🪙 ${s.cost}</div>`:(s.id===selSkin?'<div class="sk-equip">Надет</div>':'<div class="sk-equip" style="color:#888">Надеть</div>')}<div class="rarity-bar" style="background:${rc}55"></div>`;
     card.onclick=()=>{
-      if(locked){if(essence>=s.cost){essence-=s.cost;s.owned=true;selSkin=s.id;syncEss();renderSkins();}else alert('Нужно '+s.cost+' монет');return;}
-      selSkin=s.id; renderSkins();
+      if(locked){if(essence>=s.cost){essence-=s.cost;s.owned=true;selSkin=s.id;syncEss();saveSkins();renderSkins();}else alert('Нужно '+s.cost+' монет');return;}
+      selSkin=s.id; saveSkins(); renderSkins();
     };
     grid.appendChild(card);
   });
