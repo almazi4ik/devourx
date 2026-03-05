@@ -78,10 +78,10 @@ canvas { display:block; position:fixed; inset:0; }
 #lvlUpBanner .lup-title { font-family:'Fredoka One',cursive; font-size:38px; color:#fff; }
 #activePowerup { position:fixed; top:16px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); border:2px solid #f9ca24; border-radius:50px; padding:6px 20px; font-family:'Fredoka One',cursive; font-size:16px; color:#f9ca24; display:none; z-index:20; gap:8px; align-items:center; }
 #activePowerup .pu-timer { font-size:14px; color:#fff; }
-#questsBtn { position:fixed; top:18px; left:22px; background:rgba(0,0,0,0.55); border:2px solid rgba(255,200,0,0.5); border-radius:50px; padding:7px 16px; display:flex; align-items:center; gap:8px; cursor:pointer; z-index:100; pointer-events:all !important; }
+#questsBtn { position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.55); border:2px solid rgba(255,200,0,0.5); border-radius:50px; padding:7px 16px; display:flex; align-items:center; gap:8px; cursor:pointer; z-index:100; pointer-events:all !important; }
 #questsBtn .q-lbl { font-family:'Fredoka One',cursive; font-size:14px; color:#f9ca24; }
 #questsBadge { background:#e74c3c; border-radius:50%; width:18px; height:18px; font-size:11px; font-weight:900; color:#fff; display:none; align-items:center; justify-content:center; }
-#questsPanel { position:fixed; top:60px; left:22px; background:rgba(10,20,14,0.96); border:2px solid rgba(255,200,0,0.35); border-radius:20px; padding:16px; width:280px; z-index:100; display:none; flex-direction:column; gap:10px; pointer-events:all !important; }
+#questsPanel { position:fixed; bottom:150px; left:50%; transform:translateX(-50%); background:rgba(10,20,14,0.96); border:2px solid rgba(255,200,0,0.35); border-radius:20px; padding:16px; width:280px; z-index:100; display:none; flex-direction:column; gap:10px; pointer-events:all !important; }
 #questsPanel .qp-title { font-family:'Fredoka One',cursive; font-size:20px; color:#f9ca24; text-align:center; margin-bottom:4px; }
 .quest-item { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:10px 12px; }
 .quest-name { font-size:13px; font-weight:800; color:#e8f5e9; margin-bottom:5px; }
@@ -114,6 +114,25 @@ canvas { display:block; position:fixed; inset:0; }
 .btn-back-menu:hover{background:rgba(255,255,255,0.09)}
 #onlineCounter { position:fixed; top:22px; left:50%; transform:translateX(-50%); color:rgba(255,255,255,0.7); font-family:'Nunito',sans-serif; font-weight:800; font-size:14px; z-index:200; pointer-events:none; letter-spacing:1px; }
 #onlineCounter span { color:#fff; font-weight:900; }
+.btn-top { position:fixed; bottom:18px; left:18px; background:rgba(0,0,0,0.65); border:2px solid rgba(249,150,0,0.5); border-radius:18px; padding:10px 16px 8px; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; z-index:100; pointer-events:all; transition:all .18s; }
+.btn-top:hover { background:rgba(249,150,0,0.15); border-color:#f9a000; transform:translateY(-2px); }
+.btn-top .bt-icon { font-size:24px; line-height:1; }
+.btn-top .bt-lbl { font-family:'Fredoka One',cursive; font-size:13px; background:linear-gradient(90deg,#f9ca24,#ff9f43); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:1px; }
+
+#topPanel { position:fixed; bottom:90px; left:18px; background:rgba(8,14,10,0.97); border:2px solid rgba(249,150,0,0.35); border-radius:22px; padding:18px 16px; width:260px; max-height:70vh; overflow-y:auto; z-index:101; display:none; flex-direction:column; gap:6px; pointer-events:all; }
+#topPanel::-webkit-scrollbar { width:4px; }
+#topPanel::-webkit-scrollbar-thumb { background:rgba(249,150,0,0.3); border-radius:4px; }
+.top-panel-title { font-family:'Fredoka One',cursive; font-size:20px; text-align:center; background:linear-gradient(90deg,#f9ca24,#ff9f43); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:6px; }
+.top-row { display:flex; align-items:center; gap:8px; padding:7px 10px; border-radius:12px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); }
+.top-row.gold { background:rgba(249,202,36,0.1); border-color:rgba(249,202,36,0.3); }
+.top-row.silver { background:rgba(192,192,192,0.1); border-color:rgba(192,192,192,0.25); }
+.top-row.bronze { background:rgba(205,127,50,0.1); border-color:rgba(205,127,50,0.25); }
+.top-medal { font-size:20px; width:28px; text-align:center; flex-shrink:0; }
+.top-medal-num { font-family:'Fredoka One',cursive; font-size:11px; display:block; line-height:1; margin-top:-3px; text-align:center; }
+.top-name { flex:1; font-size:13px; font-weight:800; color:#e8f5e9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.top-score { font-family:'Fredoka One',cursive; font-size:16px; color:#f9ca24; flex-shrink:0; }
+.top-empty { text-align:center; color:rgba(255,255,255,0.3); font-size:13px; font-weight:700; padding:20px 0; }
+
 #serverStatus { position:fixed; bottom:60px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); border:1px solid rgba(46,204,113,0.3); border-radius:50px; padding:6px 18px; font-family:'Fredoka One',cursive; font-size:13px; color:#2ecc71; z-index:200; display:none; pointer-events:none; }
 
 
@@ -172,6 +191,16 @@ canvas { display:block; position:fixed; inset:0; }
     <span>АВТОПИЛОТ</span>
   </button>
   <canvas class="minimap-c" id="minimap"></canvas>
+</div>
+
+<button class="btn-top" id="topBtn" style="display:none;">
+  <span class="bt-icon">🏆</span>
+  <span class="bt-lbl">ТОП</span>
+</button>
+
+<div id="topPanel">
+  <div class="top-panel-title">🏆 Рекорды</div>
+  <div id="topList"><div class="top-empty">Ещё нет рекордов</div></div>
 </div>
 
 <div id="joystickWrap"><div id="joystickBase"><div id="joystickKnob"></div></div></div>
@@ -273,6 +302,7 @@ function showMenu(){
   document.getElementById('hud').style.display='none';
   document.getElementById('xpBarWrap').style.display='block';
   document.getElementById('questsBtn').style.display='none';
+  document.getElementById('topBtn').style.display='flex';
   showJoystick(false);
   updateXPBar();
 }
@@ -365,7 +395,12 @@ function connectWS(){
         document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
         document.getElementById('hud').style.display='block';
         document.getElementById('xpBarWrap').style.display='none';
-        document.getElementById('questsBtn').style.display='flex';
+        document.getElementById('questsBtn').style.display='none';
+        document.getElementById('topBtn').style.display='none';
+        document.getElementById('topPanel').style.display='none';
+        document.getElementById('questsPanel').style.display='none';
+        questsOpen=false;
+        topPanelOpen=false;
         autopilotMode=false;
         document.getElementById('apBtn').classList.remove('active');
         running=true;
@@ -378,6 +413,7 @@ function connectWS(){
       // Обновление мира: синхронизируем камеру по серверной позиции игрока
       if(msg.type==='world'){
         serverWorld=msg;
+        if(msg.globalTop && msg.globalTop.length) renderTopPanel(msg.globalTop);
         if(serverWorld.players){
           const me=serverWorld.players.find(p=>p.isMe);
           if(me&&me.segs&&me.segs.length>0){
@@ -388,6 +424,10 @@ function connectWS(){
             if(player){player.segs=me.segs; player.score=me.score||player.score;}
           }
         }
+      }
+
+      if(msg.type==='globalTop'){
+        renderTopPanel(msg.data);
       }
 
       if(msg.type==='dead'){
@@ -552,7 +592,7 @@ function initGame(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('hud').style.display='block';
   document.getElementById('xpBarWrap').style.display='none';
-  document.getElementById('questsBtn').style.display='flex';
+  // questsBtn hidden in game
   document.getElementById('apBtn').classList.toggle('active',autopilotMode);
   running=true;
   surviveTimer=0;lastSurviveTick=performance.now();
@@ -762,7 +802,7 @@ function drawRobotIcon(){
   x.fillStyle='#00e5cc';x.fillRect(5,23,5,6);x.fillRect(26,23,5,6);x.fillRect(11,32,5,4);x.fillRect(20,32,5,4);
 }
 function toggleAutopilot(){autopilotMode=!autopilotMode;document.getElementById('apBtn').classList.toggle('active',autopilotMode);drawRobotIcon();}
-window.addEventListener('load',()=>{drawRobotIcon();});
+window.addEventListener('load',()=>{drawRobotIcon();document.getElementById('topBtn').style.display='flex';});
 
 // ══════ RECORDS ══════
 function loadRecords(){return JSON.parse(localStorage.getItem('dvx_records')||'[]');}
@@ -860,6 +900,54 @@ document.addEventListener('click',e=>{if(questsOpen&&!document.getElementById('q
 let surviveTimer=0,lastSurviveTick=0,_xpFoodCounter=0;
 
 // ══════ TOAST ══════
+// ══════ ГЛОБАЛЬНЫЙ ТОП ══════
+let globalTopData = [];
+let topPanelOpen = false;
+
+function renderTopPanel(data) {
+  if (data && data.length) globalTopData = data;
+  const list = document.getElementById('topList');
+  if (!list) return;
+  if (!globalTopData.length) {
+    list.innerHTML = '<div class="top-empty">Ещё нет рекордов</div>';
+    return;
+  }
+  const medals = [
+    { emoji:'🥇', color:'gold',   num:'1' },
+    { emoji:'🥈', color:'silver', num:'2' },
+    { emoji:'🥉', color:'bronze', num:'3' },
+  ];
+  list.innerHTML = globalTopData.map((r, i) => {
+    const m = medals[i];
+    const rowClass = m ? ' ' + m.color : '';
+    const medal = m
+      ? `<div class="top-medal">${m.emoji}<span class="top-medal-num" style="color:${m.color==='gold'?'#f9ca24':m.color==='silver'?'#c0c0c0':'#cd7f32'}">${m.num}</span></div>`
+      : `<div class="top-medal" style="font-family:'Fredoka One',cursive;font-size:13px;color:rgba(255,255,255,0.3);width:28px;text-align:center;">${i+1}</div>`;
+    return `<div class="top-row${rowClass}">${medal}<span class="top-name">${r.name}</span><span class="top-score">${r.score}</span></div>`;
+  }).join('');
+}
+
+function toggleTopPanel() {
+  topPanelOpen = !topPanelOpen;
+  const panel = document.getElementById('topPanel');
+  panel.style.display = topPanelOpen ? 'flex' : 'none';
+  if (topPanelOpen) {
+    // Запросить свежий топ с сервера
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'getTop' }));
+    }
+    renderTopPanel();
+  }
+}
+
+document.getElementById('topBtn').addEventListener('click', e => { e.stopPropagation(); toggleTopPanel(); });
+document.addEventListener('click', e => {
+  if (topPanelOpen && !document.getElementById('topPanel').contains(e.target) && e.target !== document.getElementById('topBtn')) {
+    topPanelOpen = false;
+    document.getElementById('topPanel').style.display = 'none';
+  }
+});
+
 function showToast(msg,color='#fff'){const w=document.getElementById('toastWrap'),t=document.createElement('div');t.className='toast';t.textContent=msg;t.style.borderColor=color;t.style.color=color;w.appendChild(t);setTimeout(()=>t.remove(),2300);}
 </script>
 </body>
