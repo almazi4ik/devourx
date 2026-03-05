@@ -112,33 +112,12 @@ canvas { display:block; position:fixed; inset:0; }
 .btn-restart:hover{transform:scale(1.05)}
 .btn-back-menu { background:transparent; border:2px solid rgba(255,255,255,0.28); border-radius:60px; color:#fff; font-family:'Fredoka One',cursive; font-size:20px; padding:11px 38px; cursor:pointer; margin-top:12px; }
 .btn-back-menu:hover{background:rgba(255,255,255,0.09)}
+#onlineCounter { position:fixed; top:22px; left:50%; transform:translateX(-50%); color:rgba(255,255,255,0.7); font-family:'Nunito',sans-serif; font-weight:800; font-size:14px; z-index:200; pointer-events:none; letter-spacing:1px; }
+#onlineCounter span { color:#fff; font-weight:900; }
 #serverStatus { position:fixed; bottom:60px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); border:1px solid rgba(46,204,113,0.3); border-radius:50px; padding:6px 18px; font-family:'Fredoka One',cursive; font-size:13px; color:#2ecc71; z-index:200; display:none; pointer-events:none; }
-/* ONLINE COUNTER */
-#onlineCounter { position:fixed; bottom:18px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.6); border:2px solid rgba(46,204,113,0.35); border-radius:50px; padding:7px 20px; display:flex; align-items:center; gap:8px; z-index:200; pointer-events:none; }
-#onlineCounter .oc-dot { width:8px; height:8px; border-radius:50%; background:#2ecc71; box-shadow:0 0 8px #2ecc71; animation:pulse 1.5s ease-in-out infinite; }
-#onlineCounter .oc-text { font-family:'Fredoka One',cursive; font-size:15px; color:#a8e6c0; }
-#onlineCounter .oc-num { font-family:'Fredoka One',cursive; font-size:18px; color:#2ecc71; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
-/* PROFILE BUTTON */
-.btn-profile { position:fixed; top:18px; left:18px; background:rgba(0,0,0,0.55); border:2px solid rgba(162,155,254,0.5); border-radius:50px; padding:8px 16px 8px 10px; display:flex; align-items:center; gap:10px; cursor:pointer; z-index:200; transition:all .15s; }
-.btn-profile:hover { background:rgba(162,155,254,0.15); border-color:#a29bfe; }
-.btn-profile .prof-avatar { width:36px; height:36px; border-radius:50%; font-size:20px; display:flex; align-items:center; justify-content:center; background:rgba(162,155,254,0.2); border:2px solid rgba(162,155,254,0.4); }
-.btn-profile .prof-name { font-family:'Fredoka One',cursive; font-size:15px; color:#a29bfe; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
-/* PROFILE SCREEN */
-#profileScreen { flex-direction:column; align-items:center; justify-content:center; background:radial-gradient(ellipse 100% 70% at 50% 0%,#1e1060 0%,#090615 60%,#030208 100%); gap:0; }
-.prof-title { font-family:'Fredoka One',cursive; font-size:44px; color:#a29bfe; filter:drop-shadow(0 0 20px #a29bfe55); margin-bottom:24px; }
-.prof-box { background:rgba(0,0,0,0.5); border:2px solid rgba(162,155,254,0.25); border-radius:24px; padding:28px 36px; display:flex; flex-direction:column; gap:20px; width:420px; }
-.prof-section-title { color:#a29bfe; font-size:12px; font-weight:900; text-transform:uppercase; letter-spacing:2px; margin-bottom:6px; }
-.avatars-row { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
-.avatar-opt { width:64px; height:64px; border-radius:50%; font-size:32px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.07); border:3px solid rgba(255,255,255,0.15); cursor:pointer; transition:all .15s; }
-.avatar-opt:hover { transform:scale(1.1); border-color:rgba(162,155,254,0.5); }
-.avatar-opt.selected { border-color:#a29bfe; background:rgba(162,155,254,0.2); box-shadow:0 0 18px rgba(162,155,254,0.4); }
-.prof-nick-row { display:flex; gap:10px; }
-.prof-nick-input { flex:1; background:rgba(255,255,255,0.93); border:none; border-radius:50px; padding:12px 20px; font-size:18px; font-family:'Nunito',sans-serif; font-weight:800; color:#1a1a3e; outline:none; text-align:center; }
-.btn-prof-save { background:linear-gradient(135deg,#a29bfe,#6c5ce7); border:none; border-radius:50px; color:#fff; font-family:'Fredoka One',cursive; font-size:18px; padding:12px 24px; cursor:pointer; box-shadow:0 4px 0 #3d349e; transition:transform .1s; }
-.btn-prof-save:hover{transform:translateY(-2px)}
+
 .prof-record { background:rgba(249,202,36,0.08); border:2px solid rgba(249,202,36,0.3); border-radius:16px; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; }
 .prof-record-lbl { font-size:13px; font-weight:900; color:#a8e6c0; text-transform:uppercase; letter-spacing:1px; }
 .prof-record-val { font-family:'Fredoka One',cursive; font-size:32px; color:#f9ca24; filter:drop-shadow(0 0 10px #f9ca2455); }
@@ -148,10 +127,7 @@ canvas { display:block; position:fixed; inset:0; }
 <body>
 
 <div id="menuScreen" class="screen active">
-  <button class="btn-profile" id="profileBtn">
-    <div class="prof-avatar" id="menuAvatar">🐍</div>
-    <span class="prof-name" id="menuNickDisplay">Player</span>
-  </button>
+
   <div class="top-bar">
     <div class="logo-wrap">
       <div class="logo"><span class="ld">D</span><span class="le">e</span><span class="lv">v</span><span class="lo">o</span><span class="lu">u</span><span class="lr">r</span><span class="lx">X</span><span class="lio">.io</span></div>
@@ -159,35 +135,13 @@ canvas { display:block; position:fixed; inset:0; }
     </div>
   </div>
   <div class="menu-center">
-    <div class="name-row" style="display:none">
+    <div class="name-row">
       <input class="name-input" id="nameInput" placeholder="Введи ник..." maxlength="16" value="Player">
     </div>
     <button class="btn-play" id="playBtn">ИГРАТЬ</button>
     <button class="btn-skins" id="skinsMenuBtn">СКИНЫ</button>
     <button class="btn-quests-menu" id="questsMenuBtn">ЗАДАНИЯ</button>
   </div>
-</div>
-
-<div id="profileScreen" class="screen">
-  <div class="prof-title">Профиль</div>
-  <div class="prof-box">
-    <div>
-      <div class="prof-section-title">Аватар</div>
-      <div class="avatars-row" id="avatarsList"></div>
-    </div>
-    <div>
-      <div class="prof-section-title">Ник</div>
-      <div class="prof-nick-row">
-        <input class="prof-nick-input" id="profNickInput" maxlength="16" placeholder="Твой ник...">
-        <button class="btn-prof-save" id="profSaveBtn">Сохранить</button>
-      </div>
-    </div>
-    <div class="prof-record">
-      <span class="prof-record-lbl">🏆 Рекорд</span>
-      <span class="prof-record-val" id="profRecordVal">0</span>
-    </div>
-  </div>
-  <button class="back-btn" style="margin-top:20px;padding:12px 32px;" id="profileBack">Назад</button>
 </div>
 
 <div id="skinsScreen" class="screen">
@@ -250,7 +204,7 @@ canvas { display:block; position:fixed; inset:0; }
 <div id="questsBtn" style="display:none;"><span class="q-lbl">ЗАДАНИЯ</span><span id="questsBadge"></span></div>
 <div id="questsPanel"><div class="qp-title">Ежедневные задания</div><div id="questsList"></div><div style="text-align:center;font-size:11px;color:#666;margin-top:4px">Обновляются каждый день</div></div>
 <div id="toastWrap"></div>
-<div id="onlineCounter" style="display:flex;"><div class="oc-dot"></div><span class="oc-text">Игроков:</span><span class="oc-num" id="onlineNum">0</span></div>
+<div id="onlineCounter">Онлайн: <span id="onlineNum">0</span></div>
 <div class="coins-fixed"><span style="font-size:18px;">🪙</span><span class="ess-cnt" id="essCnt" style="font-family:'Fredoka One',cursive;font-size:20px;color:#f9ca24;">0</span></div>
 <div id="serverStatus">🟢 Онлайн</div>
 <canvas id="gameCanvas"></canvas>
@@ -286,59 +240,6 @@ function syncEss(){
 }
 syncEss();
 
-// ══════ ПРОФИЛЬ ══════
-const AVATARS = ['🐍','🐲','👾','🔥','💀','⚡','🌀','🦊'];
-// Используем только 5 аватаров на выбор
-const AVATAR_OPTS = ['🐍','🐲','👾','🔥','💀'];
-
-let profile = JSON.parse(localStorage.getItem('dvx_profile') || 'null') || {nick:'Player', avatar:'🐍'};
-
-function saveProfile(){
-  localStorage.setItem('dvx_profile', JSON.stringify(profile));
-  // Sync nick input (used by connectWS)
-  document.getElementById('nameInput').value = profile.nick;
-  // Update menu button
-  document.getElementById('menuAvatar').textContent = profile.avatar;
-  document.getElementById('menuNickDisplay').textContent = profile.nick;
-}
-
-function showProfile(){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById('profileScreen').classList.add('active');
-  // Fill nick
-  document.getElementById('profNickInput').value = profile.nick;
-  // Render avatars
-  const list = document.getElementById('avatarsList');
-  list.innerHTML = '';
-  AVATAR_OPTS.forEach(av => {
-    const d = document.createElement('div');
-    d.className = 'avatar-opt' + (profile.avatar === av ? ' selected' : '');
-    d.textContent = av;
-    d.onclick = () => {
-      profile.avatar = av;
-      list.querySelectorAll('.avatar-opt').forEach(x=>x.classList.remove('selected'));
-      d.classList.add('selected');
-    };
-    list.appendChild(d);
-  });
-  // Best record
-  const recs = JSON.parse(localStorage.getItem('dvx_records') || '[]');
-  const best = recs.length ? recs[0] : 0;
-  document.getElementById('profRecordVal').textContent = best;
-}
-
-document.getElementById('profileBtn').onclick = showProfile;
-document.getElementById('profileBack').onclick = () => { saveProfile(); showMenu(); };
-document.getElementById('profSaveBtn').onclick = () => {
-  const nick = document.getElementById('profNickInput').value.trim();
-  if(nick) profile.nick = nick;
-  saveProfile();
-  showToast('Профиль сохранён!', '#a29bfe');
-};
-
-// Init on load
-saveProfile();
-
 
 function renderSkins(){
   const grid=document.getElementById('skinsGrid'); grid.innerHTML='';
@@ -368,9 +269,7 @@ let tipI=0; setInterval(()=>{tipI=(tipI+1)%TIPS.length;document.getElementById('
 function showMenu(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('menuScreen').classList.add('active');
-  // Refresh profile display
-  document.getElementById('menuAvatar').textContent = profile.avatar;
-  document.getElementById('menuNickDisplay').textContent = profile.nick;
+
   document.getElementById('hud').style.display='none';
   document.getElementById('xpBarWrap').style.display='block';
   document.getElementById('questsBtn').style.display='none';
@@ -431,7 +330,7 @@ function connectWS(){
   },5000);
 
   ws.onopen=()=>{
-    const name=profile.nick||document.getElementById('nameInput').value.trim()||'Player';
+    const name=document.getElementById('nameInput').value.trim()||'Player';
     ws.send(JSON.stringify({type:'join',name,skinId:selSkin}));
     setServerStatus('🟡','Авторизация...','#f9ca24');
   };
@@ -451,7 +350,7 @@ function connectWS(){
         setTimeout(()=>document.getElementById('serverStatus').style.display='none',2000);
 
         // Инициализируем игру с серверными координатами
-        pname=profile.nick||document.getElementById('nameInput').value.trim()||'Player';
+        pname=document.getElementById('nameInput').value.trim()||'Player';
 
         initFoods();      // локальная еда для фолбека отрисовки
 
@@ -527,7 +426,7 @@ function connectWS(){
 }
 
 function startLocalGame(){
-  pname=profile.nick||document.getElementById('nameInput').value.trim()||'Player';
+  pname=document.getElementById('nameInput').value.trim()||'Player';
   autopilotMode=false;
   initGame();
 }
@@ -826,7 +725,7 @@ requestAnimationFrame(loop);
 
 // ══════ BUTTONS ══════
 document.getElementById('playBtn').onclick=()=>{
-  pname=profile.nick||document.getElementById('nameInput').value.trim()||'Player';
+  pname=document.getElementById('nameInput').value.trim()||'Player';
   autopilotMode=false;
   // Всегда пробуем сначала сервер; фолбек — локальная игра
   connectWS();
@@ -849,7 +748,7 @@ document.getElementById('menuBackBtn').onclick=()=>{
 };
 
 document.getElementById('nameInput').addEventListener('keydown',e=>{
-  if(e.key==='Enter'){pname=profile.nick||document.getElementById('nameInput').value.trim()||'Player';connectWS();}
+  if(e.key==='Enter'){pname=document.getElementById('nameInput').value.trim()||'Player';connectWS();}
 });
 
 function drawRobotIcon(){
