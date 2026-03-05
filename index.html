@@ -725,7 +725,7 @@ function loop(ts){
       runAutopilot(player);
     } else {
       player.tAngle=Math.atan2(my-H/2,mx-W/2);
-      const canBoost=player.length>MIN_LEN;
+      const canBoost=player.score>MIN_LEN;
       player.boosting=boosting&&canBoost;
       if(!useServer&&player.boosting&&player.length>MIN_LEN&&Math.random()<.18){
         player.length=Math.max(MIN_LEN,player.length-1);player.score=Math.max(MIN_LEN,player.score-1);
