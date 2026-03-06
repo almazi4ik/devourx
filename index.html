@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <title>DevourX.io</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#2ecc71">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="DevourX">
+<link rel="apple-touch-icon" href="/devourx-icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -30,6 +36,17 @@ canvas { display:block; position:fixed; inset:0; }
 .btn-music { background:rgba(255,255,255,0.07); border:2px solid rgba(255,255,255,0.2); border-radius:60px; color:#a8d8b8; font-family:'Fredoka One',cursive; font-size:16px; letter-spacing:1px; padding:10px 0; width:100%; cursor:pointer; transition:all .15s; }
 .btn-music:hover{background:rgba(255,255,255,0.13); color:#fff;}
 .btn-music.off{color:rgba(255,255,255,0.3); border-color:rgba(255,255,255,0.1);}
+
+/* ═══ ШЕСТЕРЁНКА И ЯЗЫКИ ═══ */
+#gearBtn { position:fixed; bottom:20px; left:20px; width:48px; height:48px; background:rgba(0,0,0,0.55); border:2px solid rgba(255,255,255,0.2); border-radius:50%; cursor:pointer; z-index:200; display:none; align-items:center; justify-content:center; transition:transform .3s, border-color .2s; }
+#gearBtn:hover { border-color:#2ecc71; transform:rotate(45deg); }
+#gearBtn canvas { pointer-events:none; }
+#langPanel { position:fixed; bottom:78px; left:20px; background:rgba(8,18,12,0.97); border:2px solid rgba(46,204,113,0.3); border-radius:20px; padding:14px; z-index:200; display:none; flex-direction:column; gap:8px; min-width:220px; }
+#langPanel .lp-title { font-family:'Fredoka One',cursive; font-size:15px; color:#2ecc71; letter-spacing:2px; margin-bottom:4px; text-align:center; }
+.lang-row { display:flex; align-items:center; gap:10px; padding:6px 10px; border-radius:12px; cursor:pointer; transition:background .15s; }
+.lang-row:hover { background:rgba(46,204,113,0.12); }
+.lang-row.active { background:rgba(46,204,113,0.18); border:1px solid rgba(46,204,113,0.35); }
+.lang-name { font-family:'Nunito',sans-serif; font-weight:800; font-size:14px; color:#d4f5e9; }
 
 /* ═══ ЭКРАН ЗАГРУЗКИ ═══ */
 #loadingScreen { flex-direction:column; align-items:center; justify-content:center; background:radial-gradient(ellipse 100% 80% at 50% 0%, #1e5e30 0%, #0a1f10 60%, #050e08 100%); gap:28px; }
@@ -165,7 +182,7 @@ canvas { display:block; position:fixed; inset:0; }
 <!-- СКИНЫ -->
 <div id="skinsScreen" class="screen">
   <div class="sk-header">
-    <div class="sk-title">Скины</div>
+    <div class="sk-title" id="skTitle">Скины</div>
     <div style="display:flex;align-items:center;gap:14px">
       <div class="essence-badge"><span class="ess-cnt" id="essCnt2">0</span> 🪙</div>
       <button class="back-btn" id="skinsBack">Назад</button>
@@ -229,6 +246,13 @@ canvas { display:block; position:fixed; inset:0; }
 <div id="toastWrap"></div>
 <div id="onlineCounter">Онлайн: <span id="onlineNum">0</span></div>
 <div class="coins-fixed"><span style="font-size:18px;">🪙</span><span class="ess-cnt" id="essCnt" style="font-family:'Fredoka One',cursive;font-size:20px;color:#f9ca24;">0</span></div>
+
+<!-- ШЕСТЕРЁНКА -->
+<button id="gearBtn"><canvas id="gearCanvas" width="28" height="28"></canvas></button>
+<div id="langPanel">
+  <div class="lp-title">🌐 ЯЗЫК</div>
+  <div id="langList"></div>
+</div>
 <canvas id="gameCanvas"></canvas>
 
 <script>
@@ -287,7 +311,232 @@ document.getElementById('skCats').addEventListener('click',e=>{
   btn.classList.add('active');curCat=btn.dataset.cat;renderSkins();
 });
 
-const TIPS=['Зажми ЛКМ — ускорение!','Заставь врага врезаться в хвост!','Убивай игроков — монеты!','Минимум 10 массы для ускорения','A — автопилот'];
+// ══════ ЯЗЫКИ ══════
+const LANGS = {
+  ru: {
+    code:'ru', name:'Русский',
+    play:'ИГРАТЬ', skins:'СКИНЫ', quests:'ЗАДАНИЯ', music_on:'🔊 МУЗЫКА: ВКЛ', music_off:'🔇 МУЗЫКА: ВЫКЛ',
+    connecting:'Подключение', auth:'Авторизация', ready:'Готово!', no_server:'Нет связи с сервером. Попробуй позже.', conn_err:'Ошибка подключения', respawn:'Респавн',
+    mass:'Масса', place:'Место', autopilot:'АВТОПИЛОТ',
+    killed:'УБИТ!', your_score:'Твой результат', again:'Снова!', main_menu:'Главное меню',
+    top_records:'ТОП РЕКОРДОВ', top:'ТОП', online:'Онлайн',
+    daily:'Ежедневные задания', updates:'Обновляются каждый день',
+    all:'Все', standard:'Стандартные', rare:'Редкие', legendary:'Легендарные', back:'Назад',
+    task_done:'Задание выполнено!', kill_reward:'монеты за убийство!',
+    need_coins:'Нужно', coins:'монет',
+    tips:['Зажми ЛКМ — ускорение!','Заставь врага врезаться в хвост!','Убивай игроков — монеты!','Минимум 10 массы для ускорения','A — автопилот'],
+  },
+  en: {
+    code:'en', name:'English',
+    play:'PLAY', skins:'SKINS', quests:'QUESTS', music_on:'🔊 MUSIC: ON', music_off:'🔇 MUSIC: OFF',
+    connecting:'Connecting', auth:'Authorizing', ready:'Ready!', no_server:'No server connection. Try later.', conn_err:'Connection error', respawn:'Respawning',
+    mass:'Mass', place:'Rank', autopilot:'AUTOPILOT',
+    killed:'DEAD!', your_score:'Your score', again:'Again!', main_menu:'Main Menu',
+    top_records:'TOP RECORDS', top:'TOP', online:'Online',
+    daily:'Daily Quests', updates:'Reset every day',
+    all:'All', standard:'Standard', rare:'Rare', legendary:'Legendary', back:'Back',
+    task_done:'Quest complete!', kill_reward:'coins for kill!',
+    need_coins:'Need', coins:'coins',
+    tips:['Hold LMB — speed boost!','Make enemies hit your tail!','Kill players — earn coins!','Need 10+ mass to boost','A — autopilot'],
+  },
+  de: {
+    code:'de', name:'Deutsch',
+    play:'SPIELEN', skins:'SKINS', quests:'AUFGABEN', music_on:'🔊 MUSIK: AN', music_off:'🔇 MUSIK: AUS',
+    connecting:'Verbinden', auth:'Autorisierung', ready:'Fertig!', no_server:'Keine Verbindung. Später versuchen.', conn_err:'Verbindungsfehler', respawn:'Respawn',
+    mass:'Masse', place:'Rang', autopilot:'AUTOPILOT',
+    killed:'TOT!', your_score:'Dein Ergebnis', again:'Nochmal!', main_menu:'Hauptmenü',
+    top_records:'TOP REKORDE', top:'TOP', online:'Online',
+    daily:'Tägliche Aufgaben', updates:'Täglich zurückgesetzt',
+    all:'Alle', standard:'Standard', rare:'Selten', legendary:'Legendär', back:'Zurück',
+    task_done:'Aufgabe erledigt!', kill_reward:'Münzen für Kill!',
+    need_coins:'Brauche', coins:'Münzen',
+    tips:['LMB halten — Boost!','Feinde in deinen Schwanz lenken!','Spieler töten — Münzen!','Min. 10 Masse für Boost','A — Autopilot'],
+  },
+  fr: {
+    code:'fr', name:'Français',
+    play:'JOUER', skins:'SKINS', quests:'QUÊTES', music_on:'🔊 MUSIQUE: ON', music_off:'🔇 MUSIQUE: OFF',
+    connecting:'Connexion', auth:'Autorisation', ready:'Prêt!', no_server:'Pas de connexion. Réessayez.', conn_err:'Erreur de connexion', respawn:'Réapparition',
+    mass:'Masse', place:'Rang', autopilot:'PILOTE AUTO',
+    killed:'MORT!', your_score:'Ton score', again:'Encore!', main_menu:'Menu Principal',
+    top_records:'TOP RECORDS', top:'TOP', online:'En ligne',
+    daily:'Quêtes du jour', updates:'Réinitialisé chaque jour',
+    all:'Tous', standard:'Standard', rare:'Rare', legendary:'Légendaire', back:'Retour',
+    task_done:'Quête accomplie!', kill_reward:'pièces pour kill!',
+    need_coins:'Besoin de', coins:'pièces',
+    tips:['Maintenir clic — boost!','Faites heurter les ennemis!','Tuez pour des pièces!','10+ masse pour booster','A — pilote automatique'],
+  },
+  es: {
+    code:'es', name:'Español',
+    play:'JUGAR', skins:'SKINS', quests:'MISIONES', music_on:'🔊 MÚSICA: ON', music_off:'🔇 MÚSICA: OFF',
+    connecting:'Conectando', auth:'Autorizando', ready:'¡Listo!', no_server:'Sin conexión. Intenta más tarde.', conn_err:'Error de conexión', respawn:'Reapareciendo',
+    mass:'Masa', place:'Rango', autopilot:'AUTOPILOTO',
+    killed:'¡MUERTO!', your_score:'Tu puntuación', again:'¡Otra vez!', main_menu:'Menú Principal',
+    top_records:'TOP RECORDS', top:'TOP', online:'En línea',
+    daily:'Misiones diarias', updates:'Se reinician cada día',
+    all:'Todos', standard:'Estándar', rare:'Raro', legendary:'Legendario', back:'Volver',
+    task_done:'¡Misión completa!', kill_reward:'monedas por matar!',
+    need_coins:'Necesitas', coins:'monedas',
+    tips:['Mantén clic — boost!','¡Haz que enemigos choquen!','¡Mata — gana monedas!','10+ masa para boost','A — autopiloto'],
+  },
+  pt: {
+    code:'pt', name:'Português',
+    play:'JOGAR', skins:'SKINS', quests:'MISSÕES', music_on:'🔊 MÚSICA: ON', music_off:'🔇 MÚSICA: OFF',
+    connecting:'Conectando', auth:'Autorizando', ready:'Pronto!', no_server:'Sem conexão. Tente mais tarde.', conn_err:'Erro de conexão', respawn:'Renascendo',
+    mass:'Massa', place:'Rank', autopilot:'AUTOPILOTO',
+    killed:'MORTO!', your_score:'Sua pontuação', again:'De novo!', main_menu:'Menu Principal',
+    top_records:'TOP RECORDES', top:'TOP', online:'Online',
+    daily:'Missões diárias', updates:'Reinicia todo dia',
+    all:'Todos', standard:'Padrão', rare:'Raro', legendary:'Lendário', back:'Voltar',
+    task_done:'Missão completa!', kill_reward:'moedas por matar!',
+    need_coins:'Precisa de', coins:'moedas',
+    tips:['Segure clique — boost!','Faça inimigos baterem!','Mate — ganhe moedas!','10+ massa para boost','A — autopiloto'],
+  },
+  tr: {
+    code:'tr', name:'Türkçe',
+    play:'OYNA', skins:'SKİNLER', quests:'GÖREVLER', music_on:'🔊 MÜZİK: AÇIK', music_off:'🔇 MÜZİK: KAPALI',
+    connecting:'Bağlanıyor', auth:'Yetkilendirme', ready:'Hazır!', no_server:'Bağlantı yok. Sonra dene.', conn_err:'Bağlantı hatası', respawn:'Yeniden doğuyor',
+    mass:'Kütle', place:'Sıra', autopilot:'OTOPİLOT',
+    killed:'ÖLDÜN!', your_score:'Skorun', again:'Tekrar!', main_menu:'Ana Menü',
+    top_records:'TOP REKORLAR', top:'TOP', online:'Çevrimiçi',
+    daily:'Günlük Görevler', updates:'Her gün sıfırlanır',
+    all:'Hepsi', standard:'Standart', rare:'Nadir', legendary:'Efsanevi', back:'Geri',
+    task_done:'Görev tamamlandı!', kill_reward:'öldürme için para!',
+    need_coins:'Gerekli', coins:'para',
+    tips:['Sol tıkla tut — boost!','Düşmanları kuyruğuna çarp!','Öldür — para kazan!','Boost için 10+ kütle','A — otopilot'],
+  },
+  uk: {
+    code:'uk', name:'Українська',
+    play:'ГРАТИ', skins:'СКІНИ', quests:'ЗАВДАННЯ', music_on:'🔊 МУЗИКА: УВК', music_off:'🔇 МУЗИКА: ВИКЛ',
+    connecting:'Підключення', auth:'Авторизація', ready:'Готово!', no_server:'Немає зв\'язку. Спробуй пізніше.', conn_err:'Помилка підключення', respawn:'Відродження',
+    mass:'Маса', place:'Місце', autopilot:'АВТОПІЛОТ',
+    killed:'ВБИТИЙ!', your_score:'Твій результат', again:'Знову!', main_menu:'Головне меню',
+    top_records:'ТОП РЕКОРДІВ', top:'ТОП', online:'Онлайн',
+    daily:'Щоденні завдання', updates:'Оновлюються щодня',
+    all:'Всі', standard:'Стандартні', rare:'Рідкісні', legendary:'Легендарні', back:'Назад',
+    task_done:'Завдання виконано!', kill_reward:'монети за вбивство!',
+    need_coins:'Потрібно', coins:'монет',
+    tips:['Затисни ЛКМ — прискорення!','Змусь ворога врізатись!','Вбивай гравців — монети!','Мін. 10 маси для буста','A — автопілот'],
+  },
+};
+
+// Флаги через canvas
+const FLAG_DRAW = {
+  ru: (c,x,y,w,h,r)=>{ rr(c,x,y,w,h,r); stripe(c,x,y,w,h/3,'#fff'); stripe(c,x,y+h/3,w,h/3,'#0039a6'); stripe(c,x,y+h*2/3,w,h/3,'#d52b1e'); },
+  en: (c,x,y,w,h,r)=>{
+    rr(c,x,y,w,h,r); c.fillStyle='#012169'; c.fill();
+    // Диагональные полосы
+    c.save(); c.clip();
+    [[0,0,w,h],[w,0,0,h]].forEach(([x1,y1,x2,y2])=>{
+      c.strokeStyle='#fff'; c.lineWidth=h*0.3; c.beginPath(); c.moveTo(x+x1,y+y1); c.lineTo(x+x2,y+y2); c.stroke();
+      c.strokeStyle='#c8102e'; c.lineWidth=h*0.15; c.beginPath(); c.moveTo(x+x1,y+y1); c.lineTo(x+x2,y+y2); c.stroke();
+    });
+    stripe(c,x,y+h*.35,w,h*.3,'#fff'); stripe(c,x+w*.38,y,w*.24,h,'#fff');
+    stripe(c,x,y+h*.4,w,h*.2,'#c8102e'); stripe(c,x+w*.42,y,w*.16,h,'#c8102e');
+    c.restore();
+  },
+  de: (c,x,y,w,h,r)=>{ rr(c,x,y,w,h,r); stripe(c,x,y,w,h/3,'#000'); stripe(c,x,y+h/3,w,h/3,'#d00'); stripe(c,x,y+h*2/3,w,h/3,'#ffce00'); },
+  fr: (c,x,y,w,h,r)=>{ rr(c,x,y,w,h,r); stripe(c,x,y,w/3,h,'#002395'); stripe(c,x+w/3,y,w/3,h,'#fff'); stripe(c,x+w*2/3,y,w/3,h,'#ed2939'); },
+  es: (c,x,y,w,h,r)=>{ rr(c,x,y,w,h,r); stripe(c,x,y,w,h,'#c60b1e'); stripe(c,x,y+h*.25,w,h*.5,'#ffc400'); stripe(c,x,y+h*.75,w,h*.25,'#c60b1e'); },
+  pt: (c,x,y,w,h,r)=>{ rr(c,x,y,w,h,r); stripe(c,x,y,w*0.4,h,'#006600'); stripe(c,x+w*0.4,y,w*0.6,h,'#FF0000'); c.beginPath(); c.arc(x+w*0.4,y+h/2,h*0.28,0,Math.PI*2); c.fillStyle='#FFD700'; c.fill(); },
+  tr: (c,x,y,w,h,r)=>{ rr(c,x,y,w,h,r); c.fillStyle='#e30a17'; c.fill(); c.beginPath(); c.arc(x+w*0.38,y+h/2,h*0.28,0,Math.PI*2); c.fillStyle='#fff'; c.fill(); c.beginPath(); c.arc(x+w*0.44,y+h/2,h*0.21,0,Math.PI*2); c.fillStyle='#e30a17'; c.fill(); },
+  uk: (c,x,y,w,h,r)=>{ rr(c,x,y,w,h,r); stripe(c,x,y,w,h/2,'#005BBB'); stripe(c,x,y+h/2,w,h/2,'#FFD500'); },
+};
+
+function rr(c,x,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.lineTo(x+w-r,y); c.quadraticCurveTo(x+w,y,x+w,y+r); c.lineTo(x+w,y+h-r); c.quadraticCurveTo(x+w,y+h,x+w-r,y+h); c.lineTo(x+r,y+h); c.quadraticCurveTo(x,y+h,x,y+h-r); c.lineTo(x,y+r); c.quadraticCurveTo(x,y,x+r,y); c.closePath(); }
+function stripe(c,x,y,w,h,col){ c.fillStyle=col; c.fillRect(x,y,w,h); }
+
+let curLang = localStorage.getItem('dvx_lang')||'ru';
+function t(key){ return (LANGS[curLang]||LANGS.ru)[key]||LANGS.ru[key]||key; }
+
+function applyLang(){
+  const L = LANGS[curLang]||LANGS.ru;
+  const s = (id,txt)=>{ const el=document.getElementById(id); if(el)el.textContent=txt; };
+  const sb = (id,txt)=>{ const el=document.getElementById(id); if(el)el.textContent=txt; };
+  sb('playBtn', L.play);
+  sb('skinsMenuBtn', L.skins);
+  sb('questsMenuBtn', L.quests);
+  document.getElementById('musicMenuBtn').textContent = musicEnabled ? L.music_on : L.music_off;
+  s('skinsBack', L.back);
+  s('skTitle', L.skins);
+  document.querySelectorAll('.cat-btn').forEach(b=>{
+    const cat=b.dataset.cat;
+    const map={all:L.all,standard:L.standard,rare:L.rare,legendary:L.legendary};
+    if(map[cat])b.textContent=map[cat];
+  });
+  document.querySelector('.lb-title').textContent=L.top;
+  document.querySelector('.hud-lbl').textContent=L.mass;
+  document.querySelectorAll('.hud-lbl')[1].textContent=L.place;
+  document.querySelector('.ap-btn span').textContent=L.autopilot;
+  document.querySelector('.death-title').textContent=L.killed;
+  document.querySelector('.death-sub').textContent=L.your_score;
+  s('restartBtn', L.again);
+  s('menuBackBtn', L.main_menu);
+  document.querySelector('.rec-title').textContent=L.top_records;
+  document.querySelector('.qp-title').textContent=L.daily;
+  document.querySelector('#questsPanel div:last-child').textContent=L.updates;
+  document.querySelector('.q-lbl').textContent=L.quests;
+  document.getElementById('onlineCounter').innerHTML=L.online+': <span id="onlineNum">0</span>';
+  // Обновить подсказки
+  TIPS.length=0; L.tips.forEach(tip=>TIPS.push(tip));
+  renderLangPanel();
+}
+
+function renderLangPanel(){
+  const list = document.getElementById('langList');
+  list.innerHTML='';
+  Object.values(LANGS).forEach(lang=>{
+    const row = document.createElement('div');
+    row.className='lang-row'+(lang.code===curLang?' active':'');
+    // Canvas флаг
+    const fc = document.createElement('canvas');
+    fc.width=42; fc.height=28;
+    const fctx = fc.getContext('2d');
+    FLAG_DRAW[lang.code]?.(fctx,0,0,42,28,5);
+    const name = document.createElement('span');
+    name.className='lang-name'; name.textContent=lang.name;
+    row.appendChild(fc); row.appendChild(name);
+    row.onclick=()=>{
+      curLang=lang.code;
+      localStorage.setItem('dvx_lang',curLang);
+      applyLang();
+      langOpen=false;
+      document.getElementById('langPanel').style.display='none';
+    };
+    list.appendChild(row);
+  });
+}
+
+// Шестерёнка через canvas
+function drawGear(){
+  const c=document.getElementById('gearCanvas');if(!c)return;
+  const x=c.getContext('2d'),s=14,cx=14,cy=14,teeth=8;
+  x.clearRect(0,0,28,28);
+  x.fillStyle='#2ecc71';
+  x.beginPath();
+  for(let i=0;i<teeth*2;i++){
+    const a=i*Math.PI/teeth;
+    const r=i%2===0?s:s*0.72;
+    x.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);
+  }
+  x.closePath(); x.fill();
+  x.beginPath(); x.arc(cx,cy,s*0.38,0,Math.PI*2);
+  x.fillStyle='#0a1a0f'; x.fill();
+}
+
+let langOpen=false;
+document.getElementById('gearBtn').addEventListener('click',e=>{
+  e.stopPropagation();
+  langOpen=!langOpen;
+  document.getElementById('langPanel').style.display=langOpen?'flex':'none';
+  if(langOpen)renderLangPanel();
+});
+document.addEventListener('click',e=>{
+  if(langOpen&&!document.getElementById('langPanel').contains(e.target)&&e.target!==document.getElementById('gearBtn')){
+    langOpen=false; document.getElementById('langPanel').style.display='none';
+  }
+});
+
+const TIPS=[];
 let tipI=0;setInterval(()=>{tipI=(tipI+1)%TIPS.length;document.getElementById('tipEl').textContent=TIPS[tipI];},4000);
 
 // ══════ SCREENS ══════
@@ -296,7 +545,9 @@ function showMenu(){
   document.getElementById('menuScreen').classList.add('active');
   document.getElementById('hud').style.display='none';
   document.getElementById('xpBarWrap').style.display='block';
-  document.getElementById('questsBtn').style.display='none';  showJoystick(false);
+  document.getElementById('questsBtn').style.display='none';
+  document.getElementById('gearBtn').style.display='flex';
+  showJoystick(false);
   updateXPBar();
 }
 function showSkins(){renderSkins();document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('skinsScreen').classList.add('active');}
@@ -394,7 +645,8 @@ function connectWS(){
           document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
           document.getElementById('hud').style.display='block';
           document.getElementById('xpBarWrap').style.display='none';
-          document.getElementById('questsBtn').style.display='none';          document.getElementById('questsPanel').style.display='none';
+          document.getElementById('questsBtn').style.display='none';
+          document.getElementById('gearBtn').style.display='none';          document.getElementById('questsPanel').style.display='none';
           questsOpen=false;
           autopilotMode=false;
           document.getElementById('apBtn').classList.remove('active');
@@ -652,7 +904,7 @@ function drawRobotIcon(){
   x.fillStyle='#00e5cc';x.fillRect(5,23,5,6);x.fillRect(26,23,5,6);x.fillRect(11,32,5,4);x.fillRect(20,32,5,4);
 }
 function toggleAutopilot(){autopilotMode=!autopilotMode;document.getElementById('apBtn').classList.toggle('active',autopilotMode);drawRobotIcon();}
-window.addEventListener('load',()=>{drawRobotIcon();});
+window.addEventListener('load',()=>{drawRobotIcon();drawGear();applyLang();});
 // ══════ RECORDS ══════
 function loadRecords(){return JSON.parse(localStorage.getItem('dvx_records')||'[]');}
 function saveRecord(score){let recs=loadRecords();recs.push(score);recs.sort((a,b)=>b-a);recs=recs.slice(0,5);localStorage.setItem('dvx_records',JSON.stringify(recs));return{recs,rank:recs.indexOf(score)+1};}
@@ -830,6 +1082,9 @@ function showToast(msg,color='#fff'){
   t.className='toast';t.textContent=msg;t.style.borderColor=color;t.style.color=color;
   w.appendChild(t);setTimeout(()=>t.remove(),2300);
 }
+
+if('serviceWorker' in navigator)
+  navigator.serviceWorker.register('/service-worker.js');
 </script>
 </body>
 </html>
