@@ -279,7 +279,7 @@ const RARITY_C={standard:'#a8d8b8',rare:'#a29bfe',legendary:'#f9ca24'};
 
 let selSkin=(()=>{const s=localStorage.getItem('dvx_selSkin');return s!==null?parseInt(s):0;})();
 let essence=parseInt(localStorage.getItem('dvx_coins')||'18'),curCat='all';
-const MIN_LEN=10,MAX_BODY=600;
+const MIN_LEN=10,MAX_BODY=750;
 
 function syncEss(){localStorage.setItem('dvx_coins',essence);document.getElementById('essCnt').textContent=essence;document.getElementById('essCnt2').textContent=essence;}
 function saveSkins(){localStorage.setItem('dvx_skins',JSON.stringify(SKINS_DATA.map(s=>({id:s.id,owned:s.owned}))));localStorage.setItem('dvx_selSkin',selSkin);}
@@ -520,7 +520,7 @@ function updHUD(){
     } else {
       runAutopilot();
     }
-    ws.send(JSON.stringify({type:'input',angle:player.tAngle,boost:player.boosting}));
+    ws.send(JSON.stringify({type:'input',angle:player.tAngle,boost:player.boosting,devour:hasPU('big')}));
   }
 
   if(serverWorld){
@@ -547,7 +547,6 @@ function drawMM(){
   if(serverWorld){
     for(const f of(serverWorld.foods||[]).filter((_,i)=>i%5===0)){mctx.fillStyle='rgba(46,204,113,0.3)';mctx.fillRect(f.x*sc,f.y*sc,2,2);}
     for(const p of(serverWorld.players||[])){if(!p.segs||!p.segs.length)continue;const h=p.segs[0];mctx.beginPath();mctx.arc(h.x*sc,h.y*sc,p.isMe?4:3,0,Math.PI*2);mctx.fillStyle=p.isMe?'#f9ca24':'#00e5cc';mctx.fill();}
-    for(const p of powerups){mctx.beginPath();mctx.arc(p.x*sc,p.y*sc,3,0,Math.PI*2);mctx.fillStyle=p.color;mctx.fill();}
   }
 }
 
@@ -636,11 +635,9 @@ requestAnimationFrame(loop);
 // Бонусы живут ТОЛЬКО на клиенте (визуал + подбор). 
 // Позиции генерируются локально синхронно (seed по времени).
 const PU_TYPES=[
-  {type:'magnet',  name:'Магнит',    color:'#e84393',dur:8000, w:0.25,icon:'🧲'},
-  {type:'shield',  name:'Щит',       color:'#00cec9',dur:6000, w:0.20,icon:'🛡'},
-  {type:'speed',   name:'Ускорение', color:'#fdcb6e',dur:7000, w:0.30,icon:'⚡'},
-  {type:'ghost',   name:'Призрак',   color:'#b2bec3',dur:5000, w:0.15,icon:'👻'},
-  {type:'big',     name:'Пожиратель',color:'#ff6b9d',dur:6000, w:0.10,icon:'🔥'},
+  {type:'magnet',  name:'Магнит',    color:'#e84393',dur:8000, w:0.33,icon:'🧲'},
+  {type:'speed',   name:'Молния',    color:'#fdcb6e',dur:7000, w:0.34,icon:'⚡'},
+  {type:'big',     name:'Пожиратель',color:'#ff6b9d',dur:6000, w:0.33,icon:'🔥'},
 ];
 let powerups=[],activePU=null,lastPUSpawn=0;
 const MAX_PU=8,PU_INT=4000;
@@ -716,7 +713,7 @@ function applyMagnet(sn){
   else return;
   for(const f of serverWorld.foods){
     const dx=hx-f.x,dy=hy-f.y,d2=dx*dx+dy*dy;
-    if(d2<220*220&&d2>1){const d=Math.sqrt(d2);f.x+=dx/d*5;f.y+=dy/d*5;}
+    if(d2<120*120&&d2>1){const d=Math.sqrt(d2);f.x+=dx/d*18;f.y+=dy/d*18;}
   }
 }
 
@@ -750,10 +747,6 @@ function drawPowerups(cx,cy){
     ctx.strokeStyle=p.color;ctx.lineWidth=2.5;ctx.stroke();
     // Иконка
     drawPUIcon(ctx,p.type,p.color,px,py,r*0.55);
-    // Подпись
-    ctx.font='bold 12px Nunito,sans-serif';ctx.textAlign='center';ctx.textBaseline='top';
-    ctx.fillStyle='#fff';
-    ctx.fillText(p.icon+' '+p.name,px,py+r+5);
   }
 }
 
