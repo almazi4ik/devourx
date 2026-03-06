@@ -38,7 +38,7 @@ canvas { display:block; position:fixed; inset:0; }
 .btn-music.off{color:rgba(255,255,255,0.3); border-color:rgba(255,255,255,0.1);}
 
 /* ═══ ШЕСТЕРЁНКА И ЯЗЫКИ ═══ */
-#gearBtn { position:fixed; bottom:20px; left:20px; width:48px; height:48px; background:rgba(0,0,0,0.55); border:2px solid rgba(255,255,255,0.2); border-radius:50%; cursor:pointer; z-index:200; display:none; align-items:center; justify-content:center; transition:transform .3s, border-color .2s; font-size:22px; }
+#gearBtn { position:fixed; bottom:20px; left:20px; width:48px; height:48px; background:rgba(0,0,0,0.55); border:2px solid rgba(255,255,255,0.2); border-radius:50%; cursor:pointer; z-index:200; display:flex; align-items:center; justify-content:center; transition:transform .3s, border-color .2s; font-size:22px; }
 #gearBtn:hover { border-color:#2ecc71; transform:rotate(60deg); }
 #langPanel { position:fixed; bottom:78px; left:20px; background:rgba(8,18,12,0.97); border:2px solid rgba(46,204,113,0.3); border-radius:20px; padding:14px; z-index:200; display:none; flex-direction:column; gap:6px; min-width:180px; }
 #langPanel .lp-title { font-family:'Fredoka One',cursive; font-size:15px; color:#2ecc71; letter-spacing:2px; margin-bottom:4px; text-align:center; }
@@ -160,9 +160,9 @@ canvas { display:block; position:fixed; inset:0; }
     <div class="name-row">
       <input class="name-input" id="nameInput" placeholder="Введи ник..." maxlength="16" value="Player">
     </div>
-    <button class="btn-play" id="playBtn">ИГРАТЬ</button>
-    <button class="btn-skins" id="skinsMenuBtn">СКИНЫ</button>
-    <button class="btn-quests-menu" id="questsMenuBtn">ЗАДАНИЯ</button>
+    <button class="btn-play" id="playBtn" data-i18n="play">PLAY</button>
+    <button class="btn-skins" id="skinsMenuBtn" data-i18n="skins">SKINS</button>
+    <button class="btn-quests-menu" id="questsMenuBtn" data-i18n="quests">QUESTS</button>
     <button class="btn-music" id="musicMenuBtn">🔊 МУЗЫКА: ВКЛ</button>
   </div>
 </div>
@@ -174,38 +174,38 @@ canvas { display:block; position:fixed; inset:0; }
   </div>
   <div class="load-spinner-wrap">
     <div class="load-bar-bg"><div class="load-bar-fill" id="loadBarFill"></div></div>
-    <div class="load-status" id="loadStatus">Подключение<span class="load-dots" id="loadDots"></span></div>
+    <div class="load-status" id="loadStatus"><span id="loadStatusText"></span><span class="load-dots"></span></div>
   </div>
 </div>
 
 <!-- СКИНЫ -->
 <div id="skinsScreen" class="screen">
   <div class="sk-header">
-    <div class="sk-title" id="skTitle">Скины</div>
+    <div class="sk-title" id="skTitle" data-i18n="skins">Skins</div>
     <div style="display:flex;align-items:center;gap:14px">
       <div class="essence-badge"><span class="ess-cnt" id="essCnt2">0</span> 🪙</div>
-      <button class="back-btn" id="skinsBack">Назад</button>
+      <button class="back-btn" id="skinsBack" data-i18n="back">Back</button>
     </div>
   </div>
   <div class="sk-cats" id="skCats">
-    <button class="cat-btn active" data-cat="all">Все</button>
-    <button class="cat-btn" data-cat="standard">Стандартные</button>
-    <button class="cat-btn" data-cat="rare">Редкие</button>
-    <button class="cat-btn" data-cat="legendary">Легендарные</button>
+    <button class="cat-btn active" data-cat="all" data-i18n="all">All</button>
+    <button class="cat-btn" data-cat="standard" data-i18n="standard">Standard</button>
+    <button class="cat-btn" data-cat="rare" data-i18n="rare">Rare</button>
+    <button class="cat-btn" data-cat="legendary" data-i18n="legendary">Legendary</button>
   </div>
   <div class="skins-grid" id="skinsGrid"></div>
 </div>
 
 <!-- HUD -->
 <div id="hud">
-  <div class="leaderboard"><div class="lb-title">ТОП</div><div id="lbList"></div></div>
+  <div class="leaderboard"><div class="lb-title" data-i18n="top">TOP</div><div id="lbList"></div></div>
   <div class="hud-bottom">
-    <div class="hud-stat"><div class="hud-lbl">Масса</div><div class="hud-val" id="hudLen">10</div></div>
-    <div class="hud-stat"><div class="hud-lbl">Место</div><div class="hud-val" id="hudRank">#1</div></div>
+    <div class="hud-stat"><div class="hud-lbl" data-i18n="mass">Mass</div><div class="hud-val" id="hudLen">10</div></div>
+    <div class="hud-stat"><div class="hud-lbl" data-i18n="place">Rank</div><div class="hud-val" id="hudRank">#1</div></div>
   </div>
   <button class="ap-btn" id="apBtn" onclick="toggleAutopilot()">
     <canvas width="36" height="36" id="icRobot"></canvas>
-    <span>АВТОПИЛОТ</span>
+    <span data-i18n="autopilot">AUTOPILOT</span>
   </button>
   <canvas class="minimap-c" id="minimap"></canvas>
 </div>
@@ -218,12 +218,12 @@ canvas { display:block; position:fixed; inset:0; }
 
 <!-- СМЕРТЬ -->
 <div id="deathScreen" class="screen">
-  <div class="death-title">УБИТ!</div>
-  <div class="death-sub">Твой результат</div>
+  <div class="death-title" data-i18n="killed">DEAD!</div>
+  <div class="death-sub" data-i18n="your_score">Your score</div>
   <div class="death-score" id="deathScore">Масса: 0</div>
-  <div class="death-records"><div class="rec-title">ТОП РЕКОРДОВ</div><div id="recList"></div></div>
-  <button class="btn-restart" id="restartBtn">Снова!</button>
-  <button class="btn-back-menu" id="menuBackBtn">Главное меню</button>
+  <div class="death-records"><div class="rec-title" data-i18n="top_records">TOP RECORDS</div><div id="recList"></div></div>
+  <button class="btn-restart" id="restartBtn" data-i18n="again">Again!</button>
+  <button class="btn-back-menu" id="menuBackBtn" data-i18n="main_menu">Main Menu</button>
 </div>
 
 <div id="xpBarWrap">
@@ -240,8 +240,8 @@ canvas { display:block; position:fixed; inset:0; }
 </div>
 
 <div id="lvlUpBanner"><div class="lup-title" id="lupTitle">УРОВЕНЬ 2!</div></div>
-<div id="questsBtn" style="display:none;"><span class="q-lbl">ЗАДАНИЯ</span><span id="questsBadge"></span></div>
-<div id="questsPanel"><div class="qp-title">Ежедневные задания</div><div id="questsList"></div><div style="text-align:center;font-size:11px;color:#666;margin-top:4px">Обновляются каждый день</div></div>
+<div id="questsBtn" style="display:none;"><span class="q-lbl" data-i18n="quests">QUESTS</span><span id="questsBadge"></span></div>
+<div id="questsPanel"><div class="qp-title" data-i18n="daily">Daily Quests</div><div id="questsList"></div><div style="text-align:center;font-size:11px;color:#666;margin-top:4px" data-i18n="updates">Reset every day</div></div>
 <div id="toastWrap"></div>
 <div id="onlineCounter">Онлайн: <span id="onlineNum">0</span></div>
 <div class="coins-fixed"><span style="font-size:18px;">🪙</span><span class="ess-cnt" id="essCnt" style="font-family:'Fredoka One',cursive;font-size:20px;color:#f9ca24;">0</span></div>
@@ -425,34 +425,19 @@ let curLang = localStorage.getItem('dvx_lang')||'en';
 function t(key){ return (LANGS[curLang]||LANGS.ru)[key]||LANGS.ru[key]||key; }
 
 function applyLang(){
-  const L = LANGS[curLang]||LANGS.ru;
-  const s = (id,txt)=>{ const el=document.getElementById(id); if(el)el.textContent=txt; };
-  const sb = (id,txt)=>{ const el=document.getElementById(id); if(el)el.textContent=txt; };
-  sb('playBtn', L.play);
-  sb('skinsMenuBtn', L.skins);
-  sb('questsMenuBtn', L.quests);
-  document.getElementById('musicMenuBtn').textContent = musicEnabled ? L.music_on : L.music_off;
-  s('skinsBack', L.back);
-  s('skTitle', L.skins);
-  document.querySelectorAll('.cat-btn').forEach(b=>{
-    const cat=b.dataset.cat;
-    const map={all:L.all,standard:L.standard,rare:L.rare,legendary:L.legendary};
-    if(map[cat])b.textContent=map[cat];
+  const L = LANGS[curLang]||LANGS.en;
+  // Все элементы с data-i18n
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key=el.dataset.i18n;
+    if(L[key])el.textContent=L[key];
   });
-  document.querySelector('.lb-title').textContent=L.top;
-  document.querySelector('.hud-lbl').textContent=L.mass;
-  document.querySelectorAll('.hud-lbl')[1].textContent=L.place;
-  document.querySelector('.ap-btn span').textContent=L.autopilot;
-  document.querySelector('.death-title').textContent=L.killed;
-  document.querySelector('.death-sub').textContent=L.your_score;
-  s('restartBtn', L.again);
-  s('menuBackBtn', L.main_menu);
-  document.querySelector('.rec-title').textContent=L.top_records;
-  document.querySelector('.qp-title').textContent=L.daily;
-  document.querySelector('#questsPanel div:last-child').textContent=L.updates;
-  document.querySelector('.q-lbl').textContent=L.quests;
-  document.getElementById('onlineCounter').innerHTML=L.online+': <span id="onlineNum">0</span>';
-  // Обновить подсказки
+  // Музыка отдельно (зависит от состояния)
+  const mb=document.getElementById('musicMenuBtn');
+  if(mb)mb.textContent=musicEnabled?L.music_on:L.music_off;
+  // Онлайн счётчик
+  const oc=document.getElementById('onlineCounter');
+  if(oc)oc.innerHTML=L.online+': <span id="onlineNum">0</span>';
+  // Подсказки
   TIPS.length=0; L.tips.forEach(tip=>TIPS.push(tip));
   renderLangPanel();
 }
@@ -503,13 +488,15 @@ function showMenu(){
   updateXPBar();
 }
 function showSkins(){renderSkins();document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('skinsScreen').classList.add('active');}
-function showLoading(status='Подключение'){
+function showLoading(status){
+  if(!status)status=t('connecting');
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('loadingScreen').classList.add('active');
   setLoadStatus(status,0);
 }
 function setLoadStatus(text,pct){
-  document.getElementById('loadStatus').innerHTML=text+'<span class="load-dots"></span>';
+  const el=document.getElementById('loadStatusText');
+  if(el)el.textContent=text;
   const fill=document.getElementById('loadBarFill');
   if(fill)fill.style.width=pct+'%';
 }
@@ -543,7 +530,7 @@ function connectWS(){
   serverWorld=null;
   if(ws){try{ws.close();}catch(e){}ws=null;}
 
-  showLoading('Подключение');
+  showLoading(t('connecting'));
   let loadPct=0;
   _loadInterval=setInterval(()=>{
     loadPct=Math.min(loadPct+3,85);
@@ -557,7 +544,7 @@ function connectWS(){
       clearInterval(_loadInterval);
       wsConnecting=false;
       if(ws){try{ws.close();}catch(e){}ws=null;}
-      setLoadStatus('Нет связи с сервером. Попробуй позже.',100);
+      setLoadStatus(t('no_server'),100);
       document.getElementById('loadBarFill').style.background='#e74c3c';
       setTimeout(()=>showMenu(),3000);
     }
@@ -566,7 +553,7 @@ function connectWS(){
   ws.onopen=()=>{
     clearInterval(_loadInterval);
     document.getElementById('loadBarFill').style.width='92%';
-    setLoadStatus('Авторизация');
+    setLoadStatus(t('auth'));
     const name=document.getElementById('nameInput').value.trim()||'Player';
     ws.send(JSON.stringify({type:'join',name,skinId:selSkin}));
   };
@@ -579,7 +566,7 @@ function connectWS(){
         clearTimeout(_connectTimeout);
         wsConnecting=false;
         document.getElementById('loadBarFill').style.width='100%';
-        setLoadStatus('Готово!');
+        setLoadStatus(t('ready'));
 
         if(msg.playerCount){document.getElementById('onlineNum').textContent=msg.playerCount;}
 
@@ -595,6 +582,7 @@ function connectWS(){
 
         setTimeout(()=>{
           document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('gearBtn').style.display='none';
           document.getElementById('hud').style.display='block';
           document.getElementById('xpBarWrap').style.display='none';
           document.getElementById('questsBtn').style.display='none';
@@ -634,7 +622,7 @@ function connectWS(){
       if(msg.type==='dead'){
         clearTimeout(_connectTimeout);
         const score=msg.score||0;
-        document.getElementById('deathScore').textContent='Масса: '+score;
+        document.getElementById('deathScore').textContent=t('mass')+': '+score;
         document.getElementById('hud').style.display='none';
         document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
         document.getElementById('deathScreen').classList.add('active');
@@ -656,7 +644,7 @@ function connectWS(){
     clearTimeout(_connectTimeout);
     clearInterval(_loadInterval);
     wsConnecting=false;
-    setLoadStatus('Ошибка подключения',100);
+    setLoadStatus(t('conn_err'),100);
     document.getElementById('loadBarFill').style.background='#e74c3c';
     setTimeout(()=>showMenu(),3000);
   };
@@ -828,7 +816,7 @@ document.getElementById('restartBtn').onclick=()=>{
   if(ws&&ws.readyState===WebSocket.OPEN){
     running=false;
     serverWorld=null;
-    showLoading('Респавн');
+    showLoading(t('respawn'));
     ws.send(JSON.stringify({type:'respawn'}));
   } else {
     connectWS();
