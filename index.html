@@ -27,6 +27,9 @@ canvas { display:block; position:fixed; inset:0; }
 .btn-skins:hover{transform:translateY(-3px)} .btn-skins:active{transform:translateY(3px)}
 .btn-quests-menu { background:linear-gradient(180deg,#f9ca24 0%,#e67e22 100%); border:none; border-radius:60px; color:#fff; font-family:'Fredoka One',cursive; font-size:22px; letter-spacing:2px; padding:13px 0; width:100%; cursor:pointer; box-shadow:0 5px 0 #a04000; transition:transform .1s; }
 .btn-quests-menu:hover{transform:translateY(-2px)}
+.btn-music { background:rgba(255,255,255,0.07); border:2px solid rgba(255,255,255,0.2); border-radius:60px; color:#a8d8b8; font-family:'Fredoka One',cursive; font-size:16px; letter-spacing:1px; padding:10px 0; width:100%; cursor:pointer; transition:all .15s; }
+.btn-music:hover{background:rgba(255,255,255,0.13); color:#fff;}
+.btn-music.off{color:rgba(255,255,255,0.3); border-color:rgba(255,255,255,0.1);}
 
 /* ═══ ЭКРАН ЗАГРУЗКИ ═══ */
 #loadingScreen { flex-direction:column; align-items:center; justify-content:center; background:radial-gradient(ellipse 100% 80% at 50% 0%, #1e5e30 0%, #0a1f10 60%, #050e08 100%); gap:28px; }
@@ -158,6 +161,7 @@ canvas { display:block; position:fixed; inset:0; }
     <button class="btn-play" id="playBtn">ИГРАТЬ</button>
     <button class="btn-skins" id="skinsMenuBtn">СКИНЫ</button>
     <button class="btn-quests-menu" id="questsMenuBtn">ЗАДАНИЯ</button>
+    <button class="btn-music" id="musicMenuBtn">🔊 МУЗЫКА: ВКЛ</button>
   </div>
 </div>
 
@@ -783,7 +787,94 @@ document.addEventListener('click',e=>{
   if(topPanelOpen&&!document.getElementById('topPanel').contains(e.target)&&e.target!==document.getElementById('topBtn')){topPanelOpen=false;document.getElementById('topPanel').style.display='none';}
 });
 
-// ══════ TOAST ══════
+// ══════ МУЗЫКА ══════
+let audioCtx=null, musicEnabled=localStorage.getItem('dvx_music')!=='off';
+let musicMasterGain=null, _chordTimer=null, _audioStarted=false;
+
+function initMusic(){
+  if(_audioStarted)return;
+  _audioStarted=true;
+  audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+
+  musicMasterGain=audioCtx.createGain();
+  musicMasterGain.gain.value=musicEnabled?0.32:0;
+  musicMasterGain.connect(audioCtx.destination);
+
+  // Реверб
+  const convSize=audioCtx.sampleRate*3;
+  const convBuf=audioCtx.createBuffer(2,convSize,audioCtx.sampleRate);
+  for(let c=0;c<2;c++){const cd=convBuf.getChannelData(c);for(let i=0;i<convSize;i++)cd[i]=(Math.random()*2-1)*Math.pow(1-i/convSize,2.5);}
+  const conv=audioCtx.createConvolver();conv.buffer=convBuf;
+  const convGain=audioCtx.createGain();convGain.gain.value=0.55;
+  conv.connect(convGain);convGain.connect(musicMasterGain);
+
+  // Dm9 → Gmaj7 → Am9 → Em7
+  const chords=[
+    [146.83,174.61,220.00,261.63,311.13],
+    [196.00,246.94,293.66,349.23,392.00],
+    [110.00,130.81,164.81,220.00,261.63],
+    [164.81,196.00,246.94,293.66,329.63],
+  ];
+  let chordIdx=0;
+
+  function playChord(){
+    if(!audioCtx)return;
+    const now=audioCtx.currentTime;
+    const freqs=chords[chordIdx%chords.length];
+    chordIdx++;
+    freqs.forEach((f,i)=>{
+      const osc=audioCtx.createOscillator();
+      const g=audioCtx.createGain();
+      osc.type=i<2?'sine':'triangle';
+      osc.frequency.value=f;
+      const lfo=audioCtx.createOscillator();lfo.frequency.value=0.4+Math.random()*0.3;
+      const lfoG=audioCtx.createGain();lfoG.gain.value=0.8;
+      lfo.connect(lfoG);lfoG.connect(osc.frequency);lfo.start(now);
+      g.gain.setValueAtTime(0,now);
+      g.gain.linearRampToValueAtTime(0.06+(freqs.length-i)*0.008,now+1.5);
+      g.gain.setValueAtTime(0.06+(freqs.length-i)*0.008,now+6);
+      g.gain.linearRampToValueAtTime(0,now+9);
+      osc.connect(g);g.connect(conv);
+      osc.start(now);osc.stop(now+10);
+    });
+    _chordTimer=setTimeout(playChord,8000);
+  }
+  _chordTimer=setTimeout(playChord,600);
+}
+
+function startMusic(){
+  if(!musicEnabled)return;
+  if(!_audioStarted)initMusic();
+  else if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();
+  if(musicMasterGain)musicMasterGain.gain.setValueAtTime(0.32,audioCtx.currentTime);
+}
+
+function stopMusic(){
+  if(audioCtx&&audioCtx.state==='running')audioCtx.suspend();
+}
+
+function toggleMusic(){
+  musicEnabled=!musicEnabled;
+  localStorage.setItem('dvx_music',musicEnabled?'on':'off');
+  const btn=document.getElementById('musicMenuBtn');
+  if(musicEnabled){
+    btn.textContent='🔊 МУЗЫКА: ВКЛ';btn.classList.remove('off');
+    startMusic();
+  } else {
+    btn.textContent='🔇 МУЗЫКА: ВЫКЛ';btn.classList.add('off');
+    stopMusic();
+  }
+}
+
+document.getElementById('musicMenuBtn').onclick=toggleMusic;
+document.addEventListener('click',()=>{
+  if(musicEnabled)startMusic();
+},{once:true});
+
+(()=>{
+  const btn=document.getElementById('musicMenuBtn');
+  if(!musicEnabled){btn.textContent='🔇 МУЗЫКА: ВЫКЛ';btn.classList.add('off');}
+})();
 function showToast(msg,color='#fff'){
   const w=document.getElementById('toastWrap'),t=document.createElement('div');
   t.className='toast';t.textContent=msg;t.style.borderColor=color;t.style.color=color;
