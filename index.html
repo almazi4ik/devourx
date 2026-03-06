@@ -257,22 +257,22 @@ canvas { display:block; position:fixed; inset:0; }
 <script>
 // ══════ SKINS ══════
 const SKINS_DATA=[
-  {id:0,name:'Зелёный',h:'#27ae60',b:['#2ecc71','#27ae60'],rarity:'standard',cost:0,owned:true},
-  {id:1,name:'Красный',h:'#c0392b',b:['#e74c3c','#c0392b'],rarity:'standard',cost:0,owned:true},
-  {id:2,name:'Синий',h:'#1a6fa8',b:['#3498db','#1a6fa8'],rarity:'standard',cost:0,owned:true},
-  {id:3,name:'Золотой',h:'#c9a007',b:['#f9ca24','#c9a007'],rarity:'rare',cost:50,owned:false},
-  {id:4,name:'Фиолет',h:'#6c3483',b:['#a29bfe','#6c3483'],rarity:'rare',cost:80,owned:false},
-  {id:5,name:'Розовый',h:'#a93226',b:['#ff6b9d','#a93226'],rarity:'rare',cost:100,owned:false},
-  {id:6,name:'Бирюза',h:'#0e8578',b:['#00e5cc','#0e8578'],rarity:'rare',cost:120,owned:false},
-  {id:7,name:'Оранжевый',h:'#ca6f1e',b:['#ff9f43','#ca6f1e'],rarity:'rare',cost:100,owned:false},
-  {id:8,name:'Огонь',h:'#7b241c',b:['#ff4e4e','#7b241c'],rarity:'legendary',cost:400,owned:false},
-  {id:9,name:'Лёд',h:'#1a5276',b:['#85c1e9','#1a5276'],rarity:'legendary',cost:450,owned:false},
-  {id:10,name:'Неон',h:'#0b5345',b:['#39ff14','#0b5345'],rarity:'legendary',cost:500,owned:false},
-  {id:11,name:'Галактика',h:'#4a235a',b:['#d7bde2','#4a235a'],rarity:'legendary',cost:600,owned:false},
-  {id:12,name:'Тьма',h:'#1c1c2e',b:['#40407a','#1c1c2e'],rarity:'legendary',cost:700,owned:false},
-  {id:13,name:'Золото X',h:'#7d6608',b:['#ffd700','#7d6608'],rarity:'legendary',cost:900,owned:false},
-  {id:14,name:'Радуга',h:'#922b21',b:['#f9ca24','#1abc9c'],rarity:'legendary',cost:1200,owned:false},
-  {id:15,name:'Тёмный X',h:'#0a0a0a',b:['#2c2c2c','#0a0a0a'],rarity:'legendary',cost:2000,owned:false},
+  {id:0,key:'sk_green',h:'#27ae60',b:['#2ecc71','#27ae60'],rarity:'standard',cost:0,owned:true},
+  {id:1,key:'sk_red',h:'#c0392b',b:['#e74c3c','#c0392b'],rarity:'standard',cost:0,owned:true},
+  {id:2,key:'sk_blue',h:'#1a6fa8',b:['#3498db','#1a6fa8'],rarity:'standard',cost:0,owned:true},
+  {id:3,key:'sk_gold',h:'#c9a007',b:['#f9ca24','#c9a007'],rarity:'rare',cost:50,owned:false},
+  {id:4,key:'sk_violet',h:'#6c3483',b:['#a29bfe','#6c3483'],rarity:'rare',cost:80,owned:false},
+  {id:5,key:'sk_pink',h:'#a93226',b:['#ff6b9d','#a93226'],rarity:'rare',cost:100,owned:false},
+  {id:6,key:'sk_teal',h:'#0e8578',b:['#00e5cc','#0e8578'],rarity:'rare',cost:120,owned:false},
+  {id:7,key:'sk_orange',h:'#ca6f1e',b:['#ff9f43','#ca6f1e'],rarity:'rare',cost:100,owned:false},
+  {id:8,key:'sk_fire',h:'#7b241c',b:['#ff4e4e','#7b241c'],rarity:'legendary',cost:400,owned:false},
+  {id:9,key:'sk_ice',h:'#1a5276',b:['#85c1e9','#1a5276'],rarity:'legendary',cost:450,owned:false},
+  {id:10,key:'sk_neon',h:'#0b5345',b:['#39ff14','#0b5345'],rarity:'legendary',cost:500,owned:false},
+  {id:11,key:'sk_galaxy',h:'#4a235a',b:['#d7bde2','#4a235a'],rarity:'legendary',cost:600,owned:false},
+  {id:12,key:'sk_dark',h:'#1c1c2e',b:['#40407a','#1c1c2e'],rarity:'legendary',cost:700,owned:false},
+  {id:13,key:'sk_goldx',h:'#7d6608',b:['#ffd700','#7d6608'],rarity:'legendary',cost:900,owned:false},
+  {id:14,key:'sk_rainbow',h:'#922b21',b:['#f9ca24','#1abc9c'],rarity:'legendary',cost:1200,owned:false},
+  {id:15,key:'sk_darkx',h:'#0a0a0a',b:['#2c2c2c','#0a0a0a'],rarity:'legendary',cost:2000,owned:false},
 ];
 const RARITY_C={standard:'#a8d8b8',rare:'#a29bfe',legendary:'#f9ca24'};
 
@@ -296,7 +296,7 @@ function renderSkins(){
     const locked=!s.owned,card=document.createElement('div');
     card.className='skin-card'+(s.id===selSkin?' selected':'')+(locked?' locked':'');
     const rc=RARITY_C[s.rarity];
-    card.innerHTML=`${locked?'<span class="lock-ico">🔒</span>':''}<div class="skin-preview" style="background:linear-gradient(135deg,${s.b[0]},${s.b[1]})"></div><div class="sk-name" style="color:${rc}">${s.name}</div>${locked?`<div class="sk-cost">🪙 ${s.cost}</div>`:(s.id===selSkin?'<div class="sk-equip">Надет</div>':'<div class="sk-equip" style="color:#888">Надеть</div>')}<div class="rarity-bar" style="background:${rc}55"></div>`;
+    card.innerHTML=`${locked?'<span class="lock-ico">🔒</span>':''}<div class="skin-preview" style="background:linear-gradient(135deg,${s.b[0]},${s.b[1]})"></div><div class="sk-name" style="color:${rc}">${t(s.key)}</div>${locked?`<div class="sk-cost">🪙 ${s.cost}</div>`:(s.id===selSkin?`<div class="sk-equip">${t('equipped')}</div>`:`<div class="sk-equip" style="color:#888">${t('equip')}</div>`)}<div class="rarity-bar" style="background:${rc}55"></div>`;
     card.onclick=()=>{
       if(locked){if(essence>=s.cost){essence-=s.cost;s.owned=true;selSkin=s.id;syncEss();saveSkins();renderSkins();}else alert('Нужно '+s.cost+' монет');return;}
       selSkin=s.id;saveSkins();renderSkins();
@@ -322,7 +322,8 @@ const LANGS = {
     daily:'Ежедневные задания', updates:'Обновляются каждый день',
     all:'Все', standard:'Стандартные', rare:'Редкие', legendary:'Легендарные', back:'Назад',
     task_done:'Задание выполнено!', kill_reward:'монеты за убийство!',
-    need_coins:'Нужно', coins:'монет',
+    equipped:'Надет',equip:'Надеть',need_coins:'Нужно', coins:'монет',
+    sk_green:'Зелёный',sk_red:'Красный',sk_blue:'Синий',sk_gold:'Золотой',sk_violet:'Фиолет',sk_pink:'Розовый',sk_teal:'Бирюза',sk_orange:'Оранжевый',sk_fire:'Огонь',sk_ice:'Лёд',sk_neon:'Неон',sk_galaxy:'Галактика',sk_dark:'Тьма',sk_goldx:'Золото X',sk_rainbow:'Радуга',sk_darkx:'Тёмный X',
     tips:['Зажми ЛКМ — ускорение!','Заставь врага врезаться в хвост!','Убивай игроков — монеты!','Минимум 10 массы для ускорения','A — автопилот'],
   },
   en: {
@@ -335,7 +336,8 @@ const LANGS = {
     daily:'Daily Quests', updates:'Reset every day',
     all:'All', standard:'Standard', rare:'Rare', legendary:'Legendary', back:'Back',
     task_done:'Quest complete!', kill_reward:'coins for kill!',
-    need_coins:'Need', coins:'coins',
+    equipped:'Equipped',equip:'Equip',need_coins:'Need', coins:'coins',
+    sk_green:'Green',sk_red:'Red',sk_blue:'Blue',sk_gold:'Gold',sk_violet:'Violet',sk_pink:'Pink',sk_teal:'Teal',sk_orange:'Orange',sk_fire:'Fire',sk_ice:'Ice',sk_neon:'Neon',sk_galaxy:'Galaxy',sk_dark:'Dark',sk_goldx:'Gold X',sk_rainbow:'Rainbow',sk_darkx:'Dark X',
     tips:['Hold LMB — speed boost!','Make enemies hit your tail!','Kill players — earn coins!','Need 10+ mass to boost','A — autopilot'],
   },
   de: {
@@ -348,7 +350,8 @@ const LANGS = {
     daily:'Tägliche Aufgaben', updates:'Täglich zurückgesetzt',
     all:'Alle', standard:'Standard', rare:'Selten', legendary:'Legendär', back:'Zurück',
     task_done:'Aufgabe erledigt!', kill_reward:'Münzen für Kill!',
-    need_coins:'Brauche', coins:'Münzen',
+    equipped:'Ausgerüstet',equip:'Ausrüsten',need_coins:'Brauche', coins:'Münzen',
+    sk_green:'Grün',sk_red:'Rot',sk_blue:'Blau',sk_gold:'Gold',sk_violet:'Violett',sk_pink:'Rosa',sk_teal:'Türkis',sk_orange:'Orange',sk_fire:'Feuer',sk_ice:'Eis',sk_neon:'Neon',sk_galaxy:'Galaxie',sk_dark:'Dunkel',sk_goldx:'Gold X',sk_rainbow:'Regenbogen',sk_darkx:'Dunkel X',
     tips:['LMB halten — Boost!','Feinde in deinen Schwanz lenken!','Spieler töten — Münzen!','Min. 10 Masse für Boost','A — Autopilot'],
   },
   fr: {
@@ -361,7 +364,8 @@ const LANGS = {
     daily:'Quêtes du jour', updates:'Réinitialisé chaque jour',
     all:'Tous', standard:'Standard', rare:'Rare', legendary:'Légendaire', back:'Retour',
     task_done:'Quête accomplie!', kill_reward:'pièces pour kill!',
-    need_coins:'Besoin de', coins:'pièces',
+    equipped:'Équipé',equip:'Équiper',need_coins:'Besoin de', coins:'pièces',
+    sk_green:'Vert',sk_red:'Rouge',sk_blue:'Bleu',sk_gold:'Or',sk_violet:'Violet',sk_pink:'Rose',sk_teal:'Cyan',sk_orange:'Orange',sk_fire:'Feu',sk_ice:'Glace',sk_neon:'Néon',sk_galaxy:'Galaxie',sk_dark:'Sombre',sk_goldx:'Or X',sk_rainbow:'Arc-en-ciel',sk_darkx:'Sombre X',
     tips:['Maintenir clic — boost!','Faites heurter les ennemis!','Tuez pour des pièces!','10+ masse pour booster','A — pilote automatique'],
   },
   es: {
@@ -374,7 +378,8 @@ const LANGS = {
     daily:'Misiones diarias', updates:'Se reinician cada día',
     all:'Todos', standard:'Estándar', rare:'Raro', legendary:'Legendario', back:'Volver',
     task_done:'¡Misión completa!', kill_reward:'monedas por matar!',
-    need_coins:'Necesitas', coins:'monedas',
+    equipped:'Equipado',equip:'Equipar',need_coins:'Necesitas', coins:'monedas',
+    sk_green:'Verde',sk_red:'Rojo',sk_blue:'Azul',sk_gold:'Oro',sk_violet:'Violeta',sk_pink:'Rosa',sk_teal:'Cian',sk_orange:'Naranja',sk_fire:'Fuego',sk_ice:'Hielo',sk_neon:'Neón',sk_galaxy:'Galaxia',sk_dark:'Oscuro',sk_goldx:'Oro X',sk_rainbow:'Arcoíris',sk_darkx:'Oscuro X',
     tips:['Mantén clic — boost!','¡Haz que enemigos choquen!','¡Mata — gana monedas!','10+ masa para boost','A — autopiloto'],
   },
   pt: {
@@ -387,7 +392,8 @@ const LANGS = {
     daily:'Missões diárias', updates:'Reinicia todo dia',
     all:'Todos', standard:'Padrão', rare:'Raro', legendary:'Lendário', back:'Voltar',
     task_done:'Missão completa!', kill_reward:'moedas por matar!',
-    need_coins:'Precisa de', coins:'moedas',
+    equipped:'Equipado',equip:'Equipar',need_coins:'Precisa de', coins:'moedas',
+    sk_green:'Verde',sk_red:'Vermelho',sk_blue:'Azul',sk_gold:'Ouro',sk_violet:'Violeta',sk_pink:'Rosa',sk_teal:'Ciano',sk_orange:'Laranja',sk_fire:'Fogo',sk_ice:'Gelo',sk_neon:'Neon',sk_galaxy:'Galáxia',sk_dark:'Escuro',sk_goldx:'Ouro X',sk_rainbow:'Arco-íris',sk_darkx:'Escuro X',
     tips:['Segure clique — boost!','Faça inimigos baterem!','Mate — ganhe moedas!','10+ massa para boost','A — autopiloto'],
   },
   tr: {
@@ -400,7 +406,8 @@ const LANGS = {
     daily:'Günlük Görevler', updates:'Her gün sıfırlanır',
     all:'Hepsi', standard:'Standart', rare:'Nadir', legendary:'Efsanevi', back:'Geri',
     task_done:'Görev tamamlandı!', kill_reward:'öldürme için para!',
-    need_coins:'Gerekli', coins:'para',
+    equipped:'Giyildi',equip:'Giy',need_coins:'Gerekli', coins:'para',
+    sk_green:'Yeşil',sk_red:'Kırmızı',sk_blue:'Mavi',sk_gold:'Altın',sk_violet:'Mor',sk_pink:'Pembe',sk_teal:'Camgöbeği',sk_orange:'Turuncu',sk_fire:'Ateş',sk_ice:'Buz',sk_neon:'Neon',sk_galaxy:'Galaksi',sk_dark:'Karanlık',sk_goldx:'Altın X',sk_rainbow:'Gökkuşağı',sk_darkx:'Karanlık X',
     tips:['Sol tıkla tut — boost!','Düşmanları kuyruğuna çarp!','Öldür — para kazan!','Boost için 10+ kütle','A — otopilot'],
   },
   uk: {
@@ -413,7 +420,8 @@ const LANGS = {
     daily:'Щоденні завдання', updates:'Оновлюються щодня',
     all:'Всі', standard:'Стандартні', rare:'Рідкісні', legendary:'Легендарні', back:'Назад',
     task_done:'Завдання виконано!', kill_reward:'монети за вбивство!',
-    need_coins:'Потрібно', coins:'монет',
+    equipped:'Надіто',equip:'Надіти',need_coins:'Потрібно', coins:'монет',
+    sk_green:'Зелений',sk_red:'Червоний',sk_blue:'Синій',sk_gold:'Золотий',sk_violet:'Фіолет',sk_pink:'Рожевий',sk_teal:'Бірюза',sk_orange:'Помаранч',sk_fire:'Вогонь',sk_ice:'Лід',sk_neon:'Неон',sk_galaxy:'Галактика',sk_dark:'Темрява',sk_goldx:'Золото X',sk_rainbow:'Веселка',sk_darkx:'Темний X',
     tips:['Затисни ЛКМ — прискорення!','Змусь ворога врізатись!','Вбивай гравців — монети!','Мін. 10 маси для буста','A — автопілот'],
   },
 };
@@ -724,7 +732,6 @@ function updHUD(){
 function drawMM(){
   mctx.clearRect(0,0,108,108);const sc=108/WORLD;
   if(serverWorld){
-    for(const f of(serverWorld.foods||[]).filter((_,i)=>i%5===0)){mctx.fillStyle='rgba(46,204,113,0.3)';mctx.fillRect(f.x*sc,f.y*sc,2,2);}
     for(const p of(serverWorld.players||[])){if(!p.segs||!p.segs.length)continue;const h=p.segs[0];mctx.beginPath();mctx.arc(h.x*sc,h.y*sc,p.isMe?4:3,0,Math.PI*2);mctx.fillStyle=p.isMe?'#f9ca24':'#00e5cc';mctx.fill();}
   }
 }
