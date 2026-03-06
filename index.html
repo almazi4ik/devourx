@@ -38,12 +38,11 @@ canvas { display:block; position:fixed; inset:0; }
 .btn-music.off{color:rgba(255,255,255,0.3); border-color:rgba(255,255,255,0.1);}
 
 /* ═══ ШЕСТЕРЁНКА И ЯЗЫКИ ═══ */
-#gearBtn { position:fixed; bottom:20px; left:20px; width:48px; height:48px; background:rgba(0,0,0,0.55); border:2px solid rgba(255,255,255,0.2); border-radius:50%; cursor:pointer; z-index:200; display:none; align-items:center; justify-content:center; transition:transform .3s, border-color .2s; }
-#gearBtn:hover { border-color:#2ecc71; transform:rotate(45deg); }
-#gearBtn canvas { pointer-events:none; }
-#langPanel { position:fixed; bottom:78px; left:20px; background:rgba(8,18,12,0.97); border:2px solid rgba(46,204,113,0.3); border-radius:20px; padding:14px; z-index:200; display:none; flex-direction:column; gap:8px; min-width:220px; }
+#gearBtn { position:fixed; bottom:20px; left:20px; width:48px; height:48px; background:rgba(0,0,0,0.55); border:2px solid rgba(255,255,255,0.2); border-radius:50%; cursor:pointer; z-index:200; display:none; align-items:center; justify-content:center; transition:transform .3s, border-color .2s; font-size:22px; }
+#gearBtn:hover { border-color:#2ecc71; transform:rotate(60deg); }
+#langPanel { position:fixed; bottom:78px; left:20px; background:rgba(8,18,12,0.97); border:2px solid rgba(46,204,113,0.3); border-radius:20px; padding:14px; z-index:200; display:none; flex-direction:column; gap:6px; min-width:180px; }
 #langPanel .lp-title { font-family:'Fredoka One',cursive; font-size:15px; color:#2ecc71; letter-spacing:2px; margin-bottom:4px; text-align:center; }
-.lang-row { display:flex; align-items:center; gap:10px; padding:6px 10px; border-radius:12px; cursor:pointer; transition:background .15s; }
+.lang-row { display:flex; align-items:center; gap:10px; padding:7px 12px; border-radius:12px; cursor:pointer; transition:background .15s; }
 .lang-row:hover { background:rgba(46,204,113,0.12); }
 .lang-row.active { background:rgba(46,204,113,0.18); border:1px solid rgba(46,204,113,0.35); }
 .lang-name { font-family:'Nunito',sans-serif; font-weight:800; font-size:14px; color:#d4f5e9; }
@@ -248,7 +247,7 @@ canvas { display:block; position:fixed; inset:0; }
 <div class="coins-fixed"><span style="font-size:18px;">🪙</span><span class="ess-cnt" id="essCnt" style="font-family:'Fredoka One',cursive;font-size:20px;color:#f9ca24;">0</span></div>
 
 <!-- ШЕСТЕРЁНКА -->
-<button id="gearBtn"><canvas id="gearCanvas" width="28" height="28"></canvas></button>
+<button id="gearBtn">⚙️</button>
 <div id="langPanel">
   <div class="lp-title">🌐 ЯЗЫК</div>
   <div id="langList"></div>
@@ -419,33 +418,10 @@ const LANGS = {
   },
 };
 
-// Флаги через canvas
-const FLAG_DRAW = {
-  ru: (c,x,y,w,h,r)=>{ rr(c,x,y,w,h,r); stripe(c,x,y,w,h/3,'#fff'); stripe(c,x,y+h/3,w,h/3,'#0039a6'); stripe(c,x,y+h*2/3,w,h/3,'#d52b1e'); },
-  en: (c,x,y,w,h,r)=>{
-    rr(c,x,y,w,h,r); c.fillStyle='#012169'; c.fill();
-    // Диагональные полосы
-    c.save(); c.clip();
-    [[0,0,w,h],[w,0,0,h]].forEach(([x1,y1,x2,y2])=>{
-      c.strokeStyle='#fff'; c.lineWidth=h*0.3; c.beginPath(); c.moveTo(x+x1,y+y1); c.lineTo(x+x2,y+y2); c.stroke();
-      c.strokeStyle='#c8102e'; c.lineWidth=h*0.15; c.beginPath(); c.moveTo(x+x1,y+y1); c.lineTo(x+x2,y+y2); c.stroke();
-    });
-    stripe(c,x,y+h*.35,w,h*.3,'#fff'); stripe(c,x+w*.38,y,w*.24,h,'#fff');
-    stripe(c,x,y+h*.4,w,h*.2,'#c8102e'); stripe(c,x+w*.42,y,w*.16,h,'#c8102e');
-    c.restore();
-  },
-  de: (c,x,y,w,h,r)=>{ rr(c,x,y,w,h,r); stripe(c,x,y,w,h/3,'#000'); stripe(c,x,y+h/3,w,h/3,'#d00'); stripe(c,x,y+h*2/3,w,h/3,'#ffce00'); },
-  fr: (c,x,y,w,h,r)=>{ rr(c,x,y,w,h,r); stripe(c,x,y,w/3,h,'#002395'); stripe(c,x+w/3,y,w/3,h,'#fff'); stripe(c,x+w*2/3,y,w/3,h,'#ed2939'); },
-  es: (c,x,y,w,h,r)=>{ rr(c,x,y,w,h,r); stripe(c,x,y,w,h,'#c60b1e'); stripe(c,x,y+h*.25,w,h*.5,'#ffc400'); stripe(c,x,y+h*.75,w,h*.25,'#c60b1e'); },
-  pt: (c,x,y,w,h,r)=>{ rr(c,x,y,w,h,r); stripe(c,x,y,w*0.4,h,'#006600'); stripe(c,x+w*0.4,y,w*0.6,h,'#FF0000'); c.beginPath(); c.arc(x+w*0.4,y+h/2,h*0.28,0,Math.PI*2); c.fillStyle='#FFD700'; c.fill(); },
-  tr: (c,x,y,w,h,r)=>{ rr(c,x,y,w,h,r); c.fillStyle='#e30a17'; c.fill(); c.beginPath(); c.arc(x+w*0.38,y+h/2,h*0.28,0,Math.PI*2); c.fillStyle='#fff'; c.fill(); c.beginPath(); c.arc(x+w*0.44,y+h/2,h*0.21,0,Math.PI*2); c.fillStyle='#e30a17'; c.fill(); },
-  uk: (c,x,y,w,h,r)=>{ rr(c,x,y,w,h,r); stripe(c,x,y,w,h/2,'#005BBB'); stripe(c,x,y+h/2,w,h/2,'#FFD500'); },
-};
+// Флаги эмодзи
+const LANG_FLAGS = { ru:'🇷🇺', en:'🇺🇸', de:'🇩🇪', fr:'🇫🇷', es:'🇪🇸', pt:'🇧🇷', tr:'🇹🇷', uk:'🇺🇦' };
 
-function rr(c,x,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.lineTo(x+w-r,y); c.quadraticCurveTo(x+w,y,x+w,y+r); c.lineTo(x+w,y+h-r); c.quadraticCurveTo(x+w,y+h,x+w-r,y+h); c.lineTo(x+r,y+h); c.quadraticCurveTo(x,y+h,x,y+h-r); c.lineTo(x,y+r); c.quadraticCurveTo(x,y,x+r,y); c.closePath(); }
-function stripe(c,x,y,w,h,col){ c.fillStyle=col; c.fillRect(x,y,w,h); }
-
-let curLang = localStorage.getItem('dvx_lang')||'ru';
+let curLang = localStorage.getItem('dvx_lang')||'en';
 function t(key){ return (LANGS[curLang]||LANGS.ru)[key]||LANGS.ru[key]||key; }
 
 function applyLang(){
@@ -487,14 +463,7 @@ function renderLangPanel(){
   Object.values(LANGS).forEach(lang=>{
     const row = document.createElement('div');
     row.className='lang-row'+(lang.code===curLang?' active':'');
-    // Canvas флаг
-    const fc = document.createElement('canvas');
-    fc.width=42; fc.height=28;
-    const fctx = fc.getContext('2d');
-    FLAG_DRAW[lang.code]?.(fctx,0,0,42,28,5);
-    const name = document.createElement('span');
-    name.className='lang-name'; name.textContent=lang.name;
-    row.appendChild(fc); row.appendChild(name);
+    row.innerHTML=`<span style="font-size:20px">${LANG_FLAGS[lang.code]}</span><span class="lang-name">${lang.name}</span>`;
     row.onclick=()=>{
       curLang=lang.code;
       localStorage.setItem('dvx_lang',curLang);
@@ -504,23 +473,6 @@ function renderLangPanel(){
     };
     list.appendChild(row);
   });
-}
-
-// Шестерёнка через canvas
-function drawGear(){
-  const c=document.getElementById('gearCanvas');if(!c)return;
-  const x=c.getContext('2d'),s=14,cx=14,cy=14,teeth=8;
-  x.clearRect(0,0,28,28);
-  x.fillStyle='#2ecc71';
-  x.beginPath();
-  for(let i=0;i<teeth*2;i++){
-    const a=i*Math.PI/teeth;
-    const r=i%2===0?s:s*0.72;
-    x.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);
-  }
-  x.closePath(); x.fill();
-  x.beginPath(); x.arc(cx,cy,s*0.38,0,Math.PI*2);
-  x.fillStyle='#0a1a0f'; x.fill();
 }
 
 let langOpen=false;
@@ -904,7 +856,7 @@ function drawRobotIcon(){
   x.fillStyle='#00e5cc';x.fillRect(5,23,5,6);x.fillRect(26,23,5,6);x.fillRect(11,32,5,4);x.fillRect(20,32,5,4);
 }
 function toggleAutopilot(){autopilotMode=!autopilotMode;document.getElementById('apBtn').classList.toggle('active',autopilotMode);drawRobotIcon();}
-window.addEventListener('load',()=>{drawRobotIcon();drawGear();applyLang();});
+window.addEventListener('load',()=>{drawRobotIcon();applyLang();});
 // ══════ RECORDS ══════
 function loadRecords(){return JSON.parse(localStorage.getItem('dvx_records')||'[]');}
 function saveRecord(score){let recs=loadRecords();recs.push(score);recs.sort((a,b)=>b-a);recs=recs.slice(0,5);localStorage.setItem('dvx_records',JSON.stringify(recs));return{recs,rank:recs.indexOf(score)+1};}
