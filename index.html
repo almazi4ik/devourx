@@ -324,7 +324,7 @@ let W,H;
 function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
 resize();window.addEventListener('resize',resize);
 
-const WORLD=12000,CELL=22;
+const WORLD=4000,CELL=22;
 let serverWorld=null,player=null,running=false;
 let camX=0,camY=0,boosting=false,pname='Player';
 let autopilotMode=false;
@@ -383,12 +383,12 @@ function connectWS(){
         pname=document.getElementById('nameInput').value.trim()||'Player';
 
         player={
-          segs:[{x:WORLD/2,y:WORLD/2}],
+          segs:[{x:msg.spawnX||WORLD/2,y:msg.spawnY||WORLD/2}],
           tAngle:0, angle:0, score:MIN_LEN,
           boosting:false, alive:true
         };
-        camX=WORLD/2-W/2;
-        camY=WORLD/2-H/2;
+        camX=(msg.spawnX||WORLD/2)-W/2;
+        camY=(msg.spawnY||WORLD/2)-H/2;
 
         setTimeout(()=>{
           document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
