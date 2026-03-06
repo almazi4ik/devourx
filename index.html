@@ -287,7 +287,7 @@ document.getElementById('skCats').addEventListener('click',e=>{
   btn.classList.add('active');curCat=btn.dataset.cat;renderSkins();
 });
 
-const TIPS=['Зажми ЛКМ — ускорение!','Заставь врага врезаться в хвост!','Убивай ботов — монеты!','Минимум 10 массы для ускорения','A — автопилот'];
+const TIPS=['Зажми ЛКМ — ускорение!','Заставь врага врезаться в хвост!','Убивай игроков — монеты!','Минимум 10 массы для ускорения','A — автопилот'];
 let tipI=0;setInterval(()=>{tipI=(tipI+1)%TIPS.length;document.getElementById('tipEl').textContent=TIPS[tipI];},4000);
 
 // ══════ SCREENS ══════
@@ -400,7 +400,7 @@ function connectWS(){
           document.getElementById('apBtn').classList.remove('active');
           running=true;
           surviveTimer=0;lastSurviveTick=performance.now();
-          _xpFoodCounter=0; _prevScore=MIN_LEN;
+          _xpFoodCounter=0; _prevScore=MIN_LEN; _foodCoinCounter=0;
           if(isMobile())showJoystick(true);
         },300);
       }
@@ -421,8 +421,10 @@ function connectWS(){
                 _xpFoodCounter+=gained;
                 const xg=Math.floor(_xpFoodCounter/5);
                 if(xg>0){_xpFoodCounter-=xg*5;addXP(xg);}
-                // Монеты за еду
-                essence=Math.min(9999,essence+gained);syncEss();
+                // 1 монета за каждые 3 еды
+                _foodCoinCounter=((_foodCoinCounter||0)+gained);
+                const coins=Math.floor(_foodCoinCounter/3);
+                if(coins>0){_foodCoinCounter-=coins*3;essence=Math.min(9999,essence+coins);syncEss();}
               }
               player.segs=me.segs;player.score=me.score||player.score;
               _prevScore=me.score;
@@ -440,6 +442,10 @@ function connectWS(){
         running=false;
         renderRecords(score);
         trackQuest('reach_mass',score);
+      }
+      if(msg.type==='kill_reward'){
+        essence=Math.min(9999,essence+msg.coins);syncEss();
+        showToast('💀 +'+msg.coins+' монеты за убийство!','#ff6b6b');
       }
     }catch(err){console.warn('WS msg error',err);}
   };
@@ -731,7 +737,7 @@ document.getElementById('questsMenuBtn').addEventListener('click',e=>{e.stopProp
 document.addEventListener('click',e=>{
   if(questsOpen&&!document.getElementById('questsPanel').contains(e.target)&&!document.getElementById('questsBtn').contains(e.target)&&e.target!==document.getElementById('questsMenuBtn')){questsOpen=false;document.getElementById('questsPanel').style.display='none';}
 });
-let surviveTimer=0,lastSurviveTick=0,_xpFoodCounter=0;
+let surviveTimer=0,lastSurviveTick=0,_xpFoodCounter=0,_foodCoinCounter=0;
 
 // ══════ МУЗЫКА ══════
 let audioCtx=null, musicEnabled=localStorage.getItem('dvx_music')!=='off';
