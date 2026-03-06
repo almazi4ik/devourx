@@ -88,13 +88,6 @@ canvas { display:block; position:fixed; inset:0; }
 #xpBarBox .xp-nums { font-size:10px; font-weight:800; color:#6aa8e0; margin-top:2px; text-align:right; }
 #lvlUpBanner { position:fixed; top:30%; left:50%; transform:translateX(-50%) scale(0); z-index:80; background:linear-gradient(135deg,#6c5ce7,#a29bfe); border-radius:24px; padding:18px 44px; text-align:center; pointer-events:none; transition:transform .25s cubic-bezier(.175,.885,.32,1.275), opacity .3s; opacity:0; }
 #lvlUpBanner .lup-title { font-family:'Fredoka One',cursive; font-size:38px; color:#fff; }
-#activePowerup { position:fixed; top:80px; left:14px; display:none; z-index:20; align-items:center; gap:10px; background:rgba(0,0,0,0.65); border:2px solid rgba(255,255,255,0.15); border-radius:16px; padding:8px 14px 8px 8px; backdrop-filter:blur(6px); }
-.pu-ring-wrap { position:relative; width:44px; height:44px; flex-shrink:0; }
-.pu-ring-wrap canvas { position:absolute; top:0; left:0; }
-.pu-ring-icon { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:20px; line-height:1; }
-.pu-info { display:flex; flex-direction:column; gap:1px; }
-.pu-name-lbl { font-family:'Fredoka One',cursive; font-size:14px; color:#fff; line-height:1; }
-.pu-timer-lbl { font-family:'Fredoka One',cursive; font-size:12px; color:rgba(255,255,255,0.55); line-height:1; }
 #questsBtn { position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.55); border:2px solid rgba(255,200,0,0.5); border-radius:50px; padding:7px 16px; display:flex; align-items:center; gap:8px; cursor:pointer; z-index:100; pointer-events:all !important; }
 #questsBtn .q-lbl { font-family:'Fredoka One',cursive; font-size:14px; color:#f9ca24; }
 #questsBadge { background:#e74c3c; border-radius:50%; width:18px; height:18px; font-size:11px; font-weight:900; color:#fff; display:none; align-items:center; justify-content:center; }
@@ -247,16 +240,6 @@ canvas { display:block; position:fixed; inset:0; }
 </div>
 
 <div id="lvlUpBanner"><div class="lup-title" id="lupTitle">УРОВЕНЬ 2!</div></div>
-<div id="activePowerup">
-  <div class="pu-ring-wrap">
-    <canvas id="puRingCanvas" width="44" height="44"></canvas>
-    <div class="pu-ring-icon" id="puIcon">⚡</div>
-  </div>
-  <div class="pu-info">
-    <span class="pu-name-lbl" id="puName">Молния</span>
-    <span class="pu-timer-lbl" id="puTimer">7s</span>
-  </div>
-</div>
 <div id="questsBtn" style="display:none;"><span class="q-lbl">ЗАДАНИЯ</span><span id="questsBadge"></span></div>
 <div id="questsPanel"><div class="qp-title">Ежедневные задания</div><div id="questsList"></div><div style="text-align:center;font-size:11px;color:#666;margin-top:4px">Обновляются каждый день</div></div>
 <div id="toastWrap"></div>
@@ -425,10 +408,6 @@ function connectWS(){
         camX=WORLD/2-W/2;
         camY=WORLD/2-H/2;
 
-        // Сбрасываем бонусы при каждом спавне
-        powerups=[];activePU=null;
-        document.getElementById('activePowerup').style.display='none';
-
         setTimeout(()=>{
           document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
           document.getElementById('hud').style.display='block';
@@ -485,8 +464,6 @@ function connectWS(){
         document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
         document.getElementById('deathScreen').classList.add('active');
         running=false;
-        powerups=[];activePU=null;
-        document.getElementById('activePowerup').style.display='none';
         renderRecords(score);
         trackQuest('reach_mass',score);
       }
@@ -552,9 +529,7 @@ function updHUD(){
     ws.send(JSON.stringify({
       type:'input',
       angle:player.tAngle,
-      boost:player.boosting,
-      devour:hasPU('big'),
-      speed:hasPU('speed')
+      boost:player.boosting
     }));
   }
 
@@ -638,7 +613,6 @@ function draw(cx,cy){
     drawFoodList(serverWorld.foods||[],cx,cy);
     for(const p of(serverWorld.players||[]))drawServerSnake(p,cx,cy);
   }
-  drawPowerups(cx,cy);
 }
 
 // ══════ LOOP ══════
@@ -650,13 +624,9 @@ function loop(ts){
   if(running){
     drawMM();
     const now=performance.now();
-    spawnPowerups(now);
     // ★ ФИКС: бонусы подбираются всегда (не только в локальном режиме!)
     if(player&&player.alive){
-      pickupPowerup(player,now);
-      applyMagnet(player);
     }
-    updatePowerup(now);
     if(player&&player.alive&&now-lastSurviveTick>=1000){
       surviveTimer++;lastSurviveTick=now;trackQuest('survive_time',1);
     }
@@ -664,128 +634,6 @@ function loop(ts){
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
-
-// ══════ POWERUPS ══════
-// Бонусы живут ТОЛЬКО на клиенте (визуал + подбор). 
-// Позиции генерируются локально синхронно (seed по времени).
-const PU_TYPES=[
-  {type:'magnet',  name:'Магнит',    color:'#e84393',dur:8000, w:0.33,icon:'🧲'},
-  {type:'speed',   name:'Молния',    color:'#fdcb6e',dur:7000, w:0.34,icon:'⚡'},
-  {type:'big',     name:'Пожиратель',color:'#ff6b9d',dur:6000, w:0.33,icon:'🔥'},
-];
-let powerups=[],activePU=null,lastPUSpawn=0,_prevScore=MIN_LEN;
-const MAX_PU=8,PU_INT=4000;
-
-function mkPU(){
-  const tw=PU_TYPES.reduce((a,t)=>a+t.w,0);
-  let r=Math.random()*tw,idx=0;
-  for(let i=0;i<PU_TYPES.length;i++){r-=PU_TYPES[i].w;if(r<=0){idx=i;break;}}
-  const t=PU_TYPES[idx];
-  return{x:200+Math.random()*(WORLD-400),y:200+Math.random()*(WORLD-400),...t,p:0,id:Math.random()};
-}
-
-function spawnPowerups(now){
-  if(now-lastPUSpawn>PU_INT&&powerups.length<MAX_PU){
-    powerups.push(mkPU());lastPUSpawn=now;
-  }
-}
-
-// ★ ГЛАВНЫЙ ФИКС БОНУСОВ: используем позицию из serverWorld для игрока
-function pickupPowerup(sn,now){
-  // Берём позицию головы из серверных данных (самые актуальные координаты)
-  let hx,hy,r;
-  if(serverWorld){
-    const me=serverWorld.players?serverWorld.players.find(p=>p.isMe):null;
-    if(me&&me.segs&&me.segs.length){
-      hx=me.segs[0].x;hy=me.segs[0].y;
-      r=6+(Math.min(me.score||10,1000)/1000)*22;
-    }
-  }
-  // Фолбек на локального игрока
-  if(hx===undefined&&sn.segs&&sn.segs.length){
-    hx=sn.segs[0].x;hy=sn.segs[0].y;r=16;
-  }
-  if(hx===undefined)return;
-
-  for(let i=powerups.length-1;i>=0;i--){
-    const p=powerups[i];
-    const dx=hx-p.x,dy=hy-p.y;
-    const pickR=(r||16)+28; // увеличенный радиус подбора
-    if(dx*dx+dy*dy<pickR*pickR){
-      activePU={...p,endsAt:now+p.dur};
-      const el=document.getElementById('activePowerup');
-      el.style.display='flex';
-      el.style.borderColor=p.color+'88';
-      document.getElementById('puName').textContent=p.name;
-      document.getElementById('puName').style.color=p.color;
-      document.getElementById('puIcon').textContent=p.icon;
-      showToast(p.icon+' '+p.name+' активирован!',p.color);
-      trackQuest('collect_powerup',1);
-      powerups.splice(i,1);
-      // Монеты за подбор
-      essence=Math.min(9999,essence+5);syncEss();
-    }
-  }
-}
-
-function applyMagnet(sn){
-  if(!hasPU('magnet')||!serverWorld||!serverWorld.foods)return;
-  // Магнит визуально притягивает еду на клиенте
-  let hx,hy;
-  if(sn.segs&&sn.segs.length){hx=sn.segs[0].x;hy=sn.segs[0].y;}
-  else return;
-  for(const f of serverWorld.foods){
-    const dx=hx-f.x,dy=hy-f.y,d2=dx*dx+dy*dy;
-    if(d2<120*120&&d2>1){const d=Math.sqrt(d2);f.x+=dx/d*18;f.y+=dy/d*18;}
-  }
-}
-
-function drawPUIcon(c,type,x,y,s){
-  c.save();c.translate(x,y);
-  if(type==='magnet'){c.strokeStyle='#fff';c.lineWidth=s*0.35;c.lineCap='round';c.beginPath();c.arc(0,0,s*0.7,Math.PI,0,false);c.stroke();c.strokeStyle='#f00';c.lineWidth=s*0.28;c.beginPath();c.moveTo(-s*0.7,0);c.lineTo(-s*0.7,s*0.55);c.stroke();c.strokeStyle='#00f';c.beginPath();c.moveTo(s*0.7,0);c.lineTo(s*0.7,s*0.55);c.stroke();}
-  else if(type==='speed'){c.fillStyle='#fff';c.beginPath();c.moveTo(s*0.2,-s);c.lineTo(-s*0.3,0);c.lineTo(s*0.1,0);c.lineTo(-s*0.2,s);c.lineTo(s*0.3,0);c.lineTo(-s*0.1,0);c.closePath();c.fill();}
-  else if(type==='big'){c.font='bold '+(s*1.4)+'px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('🔥',0,s*0.1);}
-  c.restore();
-}
-
-function updatePowerup(now){
-  if(!activePU)return;
-  const left=Math.max(0,activePU.endsAt-now);
-  const frac=left/activePU.dur; // 1=full, 0=empty
-  document.getElementById('puTimer').textContent=Math.ceil(left/1000)+'s';
-
-  // Рисуем кольцо-таймер
-  const rc=document.getElementById('puRingCanvas');
-  if(rc){
-    const rx=rc.getContext('2d');
-    rx.clearRect(0,0,44,44);
-    const cx=22,cy=22,rad=18,lw=4;
-    // Фон кольца
-    rx.beginPath();rx.arc(cx,cy,rad,0,Math.PI*2);
-    rx.strokeStyle='rgba(255,255,255,0.12)';rx.lineWidth=lw;rx.stroke();
-    // Заполненная часть (по часовой, убывает)
-    rx.beginPath();
-    rx.arc(cx,cy,rad,-Math.PI/2,-Math.PI/2+Math.PI*2*frac);
-    rx.strokeStyle=activePU.color;rx.lineWidth=lw;
-    rx.lineCap='round';rx.stroke();
-  }
-
-  if(left<=0){activePU=null;document.getElementById('activePowerup').style.display='none';}
-}
-function hasPU(type){return!!(activePU&&activePU.type===type);}
-function drawPowerups(cx,cy){
-  for(const p of powerups){
-    const px=p.x-cx,py=p.y-cy;
-    if(px<-60||px>W+60||py<-60||py>H+60)continue;
-    p.p=(p.p||0)+0.04;
-    const pulse=1+0.15*Math.sin(p.p*3),r=18*pulse;
-    ctx.beginPath();ctx.arc(px,py,r+12,0,Math.PI*2);ctx.fillStyle=p.color+'22';ctx.fill();
-    ctx.beginPath();ctx.arc(px,py,r+6,0,Math.PI*2);ctx.fillStyle=p.color+'44';ctx.fill();
-    ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);ctx.fillStyle=p.color+'cc';ctx.fill();
-    ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);ctx.strokeStyle=p.color;ctx.lineWidth=2.5;ctx.stroke();
-    drawPUIcon(ctx,p.type,px,py,r*0.55);
-  }
-}
 
 // ══════ КНОПКИ ══════
 document.getElementById('playBtn').onclick=()=>{
@@ -798,8 +646,6 @@ document.getElementById('restartBtn').onclick=()=>{
   if(ws&&ws.readyState===WebSocket.OPEN){
     running=false;
     serverWorld=null;
-    powerups=[];activePU=null;
-    document.getElementById('activePowerup').style.display='none';
     showLoading('Респавн');
     ws.send(JSON.stringify({type:'respawn'}));
   } else {
@@ -810,8 +656,6 @@ document.getElementById('restartBtn').onclick=()=>{
 document.getElementById('menuBackBtn').onclick=()=>{
   if(ws){try{ws.close();}catch(e){}ws=null;}
   serverWorld=null;running=false;
-  powerups=[];activePU=null;
-  document.getElementById('activePowerup').style.display='none';
   showMenu();
 };
 
@@ -881,7 +725,6 @@ updateXPBar();
 const QUEST_DEFS=[
   {id:'eat_food',name:'Съешь 100 еды',goal:100,reward:273,icon:'🍎'},
   {id:'reach_mass',name:'Набери 500 массы',goal:500,reward:289,icon:'📈'},
-  {id:'collect_powerup',name:'Подбери 2 бонуса',goal:2,reward:261,icon:'⚡'},
   {id:'survive_time',name:'Выживи 3 минуты',goal:180,reward:304,icon:'⏱'},
   {id:'top3',name:'Займи топ-3 в раунде',goal:1,reward:347,icon:'🏆'},
   {id:'eat_500',name:'Съешь 500 еды',goal:500,reward:412,icon:'🍎'},
