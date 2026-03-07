@@ -31,8 +31,25 @@ canvas { display:block; position:fixed; inset:0; }
 .btn-play:hover{transform:translateY(-3px)} .btn-play:active{transform:translateY(3px)}
 .btn-skins { background:linear-gradient(180deg,#ff9f43 0%,#e67e22 50%,#ca6f1e 100%); border:none; border-radius:60px; color:#fff; font-family:'Fredoka One',cursive; font-size:28px; letter-spacing:3px; padding:15px 0; width:100%; cursor:pointer; box-shadow:0 6px 0 #a04000; transition:transform .1s; text-shadow:0 2px 4px rgba(0,0,0,0.25); }
 .btn-skins:hover{transform:translateY(-3px)} .btn-skins:active{transform:translateY(3px)}
-.btn-quests-menu { background:linear-gradient(180deg,#f9ca24 0%,#e67e22 100%); border:none; border-radius:60px; color:#fff; font-family:'Fredoka One',cursive; font-size:22px; letter-spacing:2px; padding:13px 0; width:100%; cursor:pointer; box-shadow:0 5px 0 #a04000; transition:transform .1s; }
+.btn-quests-menu { background:linear-gradient(180deg,#a29bfe 0%,#6c5ce7 100%); border:none; border-radius:60px; color:#fff; font-family:'Fredoka One',cursive; font-size:22px; letter-spacing:2px; padding:13px 0; width:100%; cursor:pointer; box-shadow:0 5px 0 #4a2cb0; transition:transform .1s; }
 .btn-quests-menu:hover{transform:translateY(-2px)}
+
+/* ═══ ACHIEVEMENTS PANEL ═══ */
+#achPanel { position:fixed; bottom:150px; left:50%; transform:translateX(-50%); background:rgba(10,10,22,0.97); border:2px solid rgba(162,155,254,0.4); border-radius:20px; padding:16px; width:320px; z-index:100; display:none; flex-direction:column; gap:8px; pointer-events:all !important; max-height:70vh; overflow-y:auto; }
+#achPanel .ach-title { font-family:'Fredoka One',cursive; font-size:20px; color:#a29bfe; text-align:center; margin-bottom:4px; }
+.ach-item { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:10px 12px; display:flex; align-items:center; gap:10px; transition:border-color .2s; }
+.ach-item.done { border-color:rgba(249,202,36,0.4); background:rgba(249,202,36,0.06); }
+.ach-icon { font-size:26px; flex-shrink:0; }
+.ach-info { flex:1; }
+.ach-name { font-size:13px; font-weight:800; color:#e8f5e9; }
+.ach-desc { font-size:11px; color:rgba(168,230,192,0.5); margin-top:1px; }
+.ach-bar-bg { background:rgba(255,255,255,0.08); border-radius:10px; height:5px; margin-top:5px; }
+.ach-bar-fill { height:100%; border-radius:10px; background:linear-gradient(90deg,#a29bfe,#6c5ce7); transition:width .4s; }
+.ach-reward { font-size:11px; font-weight:800; color:#f9ca24; white-space:nowrap; }
+.ach-check { font-size:18px; }
+
+/* ═══ XP LEVEL BADGE в лидерборде ═══ */
+.lb-lvl { display:inline-flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#1a6fd4,#0a3d8f); border:1.5px solid #4db8ff; border-radius:50%; width:20px; height:20px; font-family:'Fredoka One',cursive; font-size:9px; color:#fff; margin-right:3px; flex-shrink:0; box-shadow:0 0 5px rgba(77,184,255,0.5); }
 .btn-music { background:rgba(255,255,255,0.07); border:2px solid rgba(255,255,255,0.2); border-radius:60px; color:#a8d8b8; font-family:'Fredoka One',cursive; font-size:16px; letter-spacing:1px; padding:10px 0; width:100%; cursor:pointer; transition:all .15s; }
 .btn-music:hover{background:rgba(255,255,255,0.13); color:#fff;}
 .btn-music.off{color:rgba(255,255,255,0.3); border-color:rgba(255,255,255,0.1);}
@@ -160,11 +177,7 @@ canvas { display:block; position:fixed; inset:0; }
 #xpBarBox .xp-nums { font-size:10px; font-weight:800; color:#6aa8e0; margin-top:2px; text-align:right; }
 #lvlUpBanner { position:fixed; top:30%; left:50%; transform:translateX(-50%) scale(0); z-index:80; background:linear-gradient(135deg,#6c5ce7,#a29bfe); border-radius:24px; padding:18px 44px; text-align:center; pointer-events:none; transition:transform .25s cubic-bezier(.175,.885,.32,1.275), opacity .3s; opacity:0; }
 #lvlUpBanner .lup-title { font-family:'Fredoka One',cursive; font-size:38px; color:#fff; }
-#questsBtn { position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.55); border:2px solid rgba(255,200,0,0.5); border-radius:50px; padding:7px 16px; display:flex; align-items:center; gap:8px; cursor:pointer; z-index:100; pointer-events:all !important; }
-#questsBtn .q-lbl { font-family:'Fredoka One',cursive; font-size:14px; color:#f9ca24; }
-#questsBadge { background:#e74c3c; border-radius:50%; width:18px; height:18px; font-size:11px; font-weight:900; color:#fff; display:none; align-items:center; justify-content:center; }
-#questsPanel { position:fixed; bottom:150px; left:50%; transform:translateX(-50%); background:rgba(10,20,14,0.96); border:2px solid rgba(255,200,0,0.35); border-radius:20px; padding:16px; width:280px; z-index:100; display:none; flex-direction:column; gap:10px; pointer-events:all !important; }
-#questsPanel .qp-title { font-family:'Fredoka One',cursive; font-size:20px; color:#f9ca24; text-align:center; margin-bottom:4px; }
+/* achBtn стили заменили questsBtn */
 .quest-item { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:10px 12px; }
 .quest-name { font-size:13px; font-weight:800; color:#e8f5e9; margin-bottom:5px; }
 .quest-bar-bg { background:rgba(255,255,255,0.1); border-radius:10px; height:6px; }
@@ -217,7 +230,7 @@ canvas { display:block; position:fixed; inset:0; }
     </div>
     <button class="btn-play" id="playBtn" data-i18n="play">PLAY</button>
     <button class="btn-skins" id="skinsMenuBtn" data-i18n="skins">SKINS</button>
-    <button class="btn-quests-menu" id="questsMenuBtn" data-i18n="quests">QUESTS</button>
+    <button class="btn-quests-menu" id="achMenuBtn">🏆 ДОСТИЖЕНИЯ</button>
     <button class="btn-music" id="musicMenuBtn">🔊 МУЗЫКА: ВКЛ</button>
   </div>
 </div>
@@ -316,8 +329,8 @@ canvas { display:block; position:fixed; inset:0; }
 </div>
 
 <div id="lvlUpBanner"><div class="lup-title" id="lupTitle">УРОВЕНЬ 2!</div></div>
-<div id="questsBtn" style="display:none;"><span class="q-lbl" data-i18n="quests">QUESTS</span><span id="questsBadge"></span></div>
-<div id="questsPanel"><div class="qp-title" data-i18n="daily">Daily Quests</div><div id="questsList"></div><div style="text-align:center;font-size:11px;color:#666;margin-top:4px" data-i18n="updates">Reset every day</div></div>
+<div id="achBtn" style="display:none;"><span style="font-family:'Fredoka One',cursive;font-size:14px;color:#a29bfe;">🏆 ДОСТИЖЕНИЯ</span><span id="achBadge" style="background:#e74c3c;border-radius:50%;width:18px;height:18px;font-size:11px;font-weight:900;color:#fff;display:none;align-items:center;justify-content:center;"></span></div>
+<div id="achPanel"><div class="ach-title">🏆 ДОСТИЖЕНИЯ</div><div id="achList"></div></div>
 <div id="toastWrap"></div>
 <div id="onlineCounter">Онлайн: <span id="onlineNum">0</span></div>
 <div class="coins-fixed"><span style="font-size:18px;">🪙</span><span class="ess-cnt" id="essCnt" style="font-family:'Fredoka One',cursive;font-size:20px;color:#f9ca24;">0</span></div>
@@ -359,6 +372,41 @@ const RARITY_C={standard:'#a8d8b8',rare:'#a29bfe',legendary:'#f9ca24'};
 let selSkin=(()=>{const s=localStorage.getItem('dvx_selSkin');return s!==null?parseInt(s):0;})();
 let essence=parseInt(localStorage.getItem('dvx_coins')||'18'),curCat='all';
 const MIN_LEN=10,MAX_BODY=750;
+let musicEnabled=localStorage.getItem('dvx_music')!=='off';
+// ══════ XP СИСТЕМА ══════
+function buildLevels(){
+  const lvls=[{xp:0}];
+  [50,150,350,700,1200,2000,3500,6000,10000].forEach(x=>lvls.push({xp:x}));
+  for(let i=11;i<=50;i++)  lvls.push({xp:lvls[lvls.length-1].xp+2000});
+  for(let i=51;i<=100;i++) lvls.push({xp:lvls[lvls.length-1].xp+5000});
+  for(let i=101;i<=200;i++)lvls.push({xp:lvls[lvls.length-1].xp+10000});
+  for(let i=201;i<=500;i++)lvls.push({xp:lvls[lvls.length-1].xp+20000});
+  for(let i=501;i<=1000;i++)lvls.push({xp:lvls[lvls.length-1].xp+50000});
+  return lvls;
+}
+const LEVELS=buildLevels();
+let playerXP=parseInt(localStorage.getItem('dvx_xp')||'0');
+function getLevel(xp){
+  let lv=0;
+  for(let i=0;i<LEVELS.length;i++){if(LEVELS[i]&&xp>=LEVELS[i].xp)lv=i;else break;}
+  return lv;
+}
+function getStartMass(){return MIN_LEN+getLevel(playerXP)*2;}
+function addXP(amount){playerXP=Math.min(playerXP+amount,99999);localStorage.setItem('dvx_xp',playerXP);updateXPBar();}
+function updateXPBar(){
+  const lv=getLevel(playerXP);
+  const curLvlData=LEVELS[lv]||{xp:0};
+  const nextLvlData=LEVELS[lv+1]||null;
+  const cur=playerXP-curLvlData.xp;
+  const need=nextLvlData?(nextLvlData.xp-curLvlData.xp):1;
+  const pct=nextLvlData?Math.min(100,(cur/need)*100):100;
+  const fill=document.getElementById('xpBarFill');if(fill)fill.style.width=pct+'%';
+  const ln=document.getElementById('lvlNum');if(ln)ln.textContent=lv+1;
+  const xc=document.getElementById('xpCur');if(xc)xc.textContent=cur;
+  const xn=document.getElementById('xpNext');if(xn)xn.textContent=nextLvlData?need:'MAX';
+}
+updateXPBar();
+
 
 function syncEss(){localStorage.setItem('dvx_coins',essence);document.getElementById('essCnt').textContent=essence;document.getElementById('essCnt2').textContent=essence;}
 function saveSkins(){localStorage.setItem('dvx_skins',JSON.stringify(SKINS_DATA.map(s=>({id:s.id,owned:s.owned}))));localStorage.setItem('dvx_selSkin',selSkin);}
@@ -431,7 +479,7 @@ function showMenu(){
   document.getElementById('menuScreen').classList.add('active');
   document.getElementById('hud').style.display='none';
   document.getElementById('xpBarWrap').style.display='block';
-  document.getElementById('questsBtn').style.display='none';
+  document.getElementById('achBtn').style.display='none';
   document.getElementById('gearBtn').style.display='flex';
   showJoystick(false);updateXPBar();
 }
@@ -526,7 +574,8 @@ function initOffline(){
   const spawnX=300+Math.random()*(WORLD-600),spawnY=300+Math.random()*(WORLD-600);
   const angle=Math.random()*Math.PI*2;
   const playerSegs=[];for(let i=0;i<MIN_LEN;i++)playerSegs.push({x:spawnX-Math.cos(angle)*i*14,y:spawnY-Math.sin(angle)*i*14});
-  const me={x:spawnX,y:spawnY,name:pname,skinId:selSkin,angle,tAngle:angle,speed:2.8,boosting:false,alive:true,length:MIN_LEN,score:MIN_LEN,segs:playerSegs,isMe:true,_growBuf:0,foodEaten:0,_deathHandled:false};
+  const startM=getStartMass();
+  const me={x:spawnX,y:spawnY,name:pname,skinId:selSkin,angle,tAngle:angle,speed:2.8,boosting:false,alive:true,length:startM,score:startM,segs:playerSegs,isMe:true,_growBuf:0,foodEaten:0,_deathHandled:false};
   const usedNames=[...BOT_NAMES].sort(()=>Math.random()-.5).slice(0,OFFLINE_BOTS_COUNT);
   const bots=usedNames.map((n,i)=>mkBot(n,i%3));
   const foods=[];for(let i=0;i<OFFLINE_FOOD_COUNT;i++)foods.push(mkOfflineFood());
@@ -564,7 +613,7 @@ function offlineEatFood(sn){
       if(sn.isMe){
         sn.foodEaten=(sn.foodEaten||0)+1;
         if(sn.foodEaten>=3){sn.foodEaten-=3;essence=Math.min(9999,essence+1);syncEss();}
-        trackQuest('eat_food',g);
+        trackAch('eat',1);
         _xpFoodCounter+=g;
         const xg=Math.floor(_xpFoodCounter/5);
         if(xg>0){_xpFoodCounter-=xg*5;addXP(xg);}
@@ -628,7 +677,7 @@ function offlineCheckCollisions(){
           if(!sn.isMe&&other.isMe){
             essence=Math.min(9999,essence+3);syncEss();
             showToast('💀 +3 монеты за убийство!','#ff6b6b');
-            trackQuest('top3',1);
+            trackAch('kills',1);
           }
           break;
         }
@@ -660,7 +709,7 @@ function offlineTick(){
       document.getElementById('hud').style.display='none';
       document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
       document.getElementById('deathScreen').classList.add('active');
-      renderRecords(score);trackQuest('reach_mass',score);
+      renderRecords(score);trackAch('mass',score);trackAch('survive',surviveTimer);
     }
     return;
   }
@@ -704,14 +753,15 @@ function startOffline(){
   document.getElementById('gearBtn').style.display='none';
   document.getElementById('hud').style.display='block';
   document.getElementById('xpBarWrap').style.display='none';
-  document.getElementById('questsBtn').style.display='none';
-  document.getElementById('questsPanel').style.display='none';
-  questsOpen=false;autopilotMode=false;
+  document.getElementById('achBtn').style.display='none';
+  document.getElementById('achPanel').style.display='none';
+  achOpen=false;autopilotMode=false;
   document.getElementById('apBtn').classList.remove('active');
   running=true;surviveTimer=0;lastSurviveTick=performance.now();
   _xpFoodCounter=0;_foodCoinCounter=0;
   if(isMobile())showJoystick(true);
   offlineTickInterval=setInterval(offlineTick,33);
+  trackAch('games',1);
 }
 
 // ══════ СЕРВЕР ОНЛАЙН ══════
@@ -750,8 +800,8 @@ function connectWS(){
           document.getElementById('gearBtn').style.display='none';
           document.getElementById('hud').style.display='block';
           document.getElementById('xpBarWrap').style.display='none';
-          document.getElementById('questsBtn').style.display='none';
-          document.getElementById('questsPanel').style.display='none';
+          document.getElementById('achBtn').style.display='none';
+          document.getElementById('achPanel').style.display='none';
           questsOpen=false;autopilotMode=false;
           document.getElementById('apBtn').classList.remove('active');
           running=true;surviveTimer=0;lastSurviveTick=performance.now();
@@ -833,7 +883,10 @@ function updHUD(){
   }
   if(serverWorld){
     if(serverWorld.leaderboard){
-      let h='';serverWorld.leaderboard.forEach((s,i)=>{h+=`<div class="lb-row${s.isMe?' me':''}"><span class="lb-rank">${i+1}</span><span class="lb-name">${s.name}</span><span class="lb-score">${s.score}</span></div>`;});
+      let h='';serverWorld.leaderboard.forEach((s,i)=>{
+        const lv=s.isMe?(getLevel(playerXP)+1):Math.min(50,Math.max(1,Math.floor(s.score/80)+1));
+        h+=`<div class="lb-row${s.isMe?' me':''}"><span class="lb-rank">${i+1}</span><span class="lb-lvl">${lv}</span><span class="lb-name">${s.name}</span><span class="lb-score">${s.score}</span></div>`;
+      });
       document.getElementById('lbList').innerHTML=h;
     }
     const me=serverWorld.players?serverWorld.players.find(p=>p.isMe):null;
@@ -998,52 +1051,140 @@ canvas.addEventListener('touchstart',()=>boosting=true,{passive:true});
 canvas.addEventListener('touchend',()=>boosting=false,{passive:true});
 
 // ══════ XP ══════
-const LEVELS=[{xp:0},{xp:50},{xp:150},{xp:350},{xp:700},{xp:1200},{xp:2000},{xp:3500},{xp:6000},{xp:10000}];
-let playerXP=parseInt(localStorage.getItem('dvx_xp')||'0');
-function getLevel(xp){let lv=0;for(let i=0;i<LEVELS.length;i++)if(xp>=LEVELS[i].xp)lv=i;return lv;}
-function addXP(amount){playerXP=Math.min(playerXP+amount,99999);localStorage.setItem('dvx_xp',playerXP);updateXPBar();}
-function updateXPBar(){
-  const lv=getLevel(playerXP);const cur=playerXP-LEVELS[lv].xp;
-  const need=lv>=LEVELS.length-1?1:(LEVELS[lv+1].xp-LEVELS[lv].xp);
-  const fill=document.getElementById('xpBarFill');if(fill)fill.style.width=Math.min(100,(cur/need)*100)+'%';
-  const ln=document.getElementById('lvlNum');if(ln)ln.textContent=lv+1;
-  const xc=document.getElementById('xpCur');if(xc)xc.textContent=cur;
-  const xn=document.getElementById('xpNext');if(xn)xn.textContent=lv>=LEVELS.length-1?'MAX':need;
-}
-updateXPBar();
+// Уровни до 1000 — каждый уровень даёт +2 к стартовой массе
+// XP система перенесена наверх
 
-// ══════ QUESTS ══════
-const QUEST_DEFS=[
-  {id:'eat_food',name:'Съешь 100 еды',goal:100,reward:273,icon:'🍎'},
-  {id:'reach_mass',name:'Набери 500 массы',goal:500,reward:289,icon:'📈'},
-  {id:'survive_time',name:'Выживи 3 минуты',goal:180,reward:304,icon:'⏱'},
-  {id:'top3',name:'Займи топ-3 в раунде',goal:1,reward:347,icon:'🏆'},
-  {id:'eat_500',name:'Съешь 500 еды',goal:500,reward:412,icon:'🍎'},
+// ══════ ДОСТИЖЕНИЯ ══════
+const ACH_DEFS = [
+  // Убийства
+  {id:'kill_1',   icon:'⚔️', name:'Первая кровь',      desc:'Убей 1 змею',         type:'kills', goal:1,    reward:50,   xp:20},
+  {id:'kill_10',  icon:'💀', name:'Убийца',             desc:'Убей 10 змей',        type:'kills', goal:10,   reward:200,  xp:100},
+  {id:'kill_50',  icon:'☠️', name:'Мясник',             desc:'Убей 50 змей',        type:'kills', goal:50,   reward:800,  xp:500},
+  {id:'kill_100', icon:'👑', name:'Повелитель смерти',  desc:'Убей 100 змей',       type:'kills', goal:100,  reward:2000, xp:1500},
+  {id:'kill_500', icon:'🔱', name:'Бог войны',          desc:'Убей 500 змей',       type:'kills', goal:500,  reward:8000, xp:8000},
+  // Масса
+  {id:'mass_100', icon:'🌱', name:'Росток',             desc:'Набери 100 массы',    type:'mass',  goal:100,  reward:30,   xp:15},
+  {id:'mass_500', icon:'🐍', name:'Змея',               desc:'Набери 500 массы',    type:'mass',  goal:500,  reward:150,  xp:80},
+  {id:'mass_1000',icon:'🐲', name:'Дракон',             desc:'Набери 1000 массы',   type:'mass',  goal:1000, reward:500,  xp:300},
+  {id:'mass_5000',icon:'🌊', name:'Левиафан',           desc:'Набери 5000 массы',   type:'mass',  goal:5000, reward:2000, xp:2000},
+  // Игры
+  {id:'games_1',  icon:'🎮', name:'Первый шаг',         desc:'Сыграй 1 игру',       type:'games', goal:1,    reward:20,   xp:10},
+  {id:'games_10', icon:'🎯', name:'Постоянный игрок',   desc:'Сыграй 10 игр',       type:'games', goal:10,   reward:100,  xp:50},
+  {id:'games_50', icon:'🏅', name:'Ветеран',            desc:'Сыграй 50 игр',       type:'games', goal:50,   reward:500,  xp:300},
+  {id:'games_100',icon:'🥇', name:'Профессионал',       desc:'Сыграй 100 игр',      type:'games', goal:100,  reward:1500, xp:1000},
+  {id:'games_500',icon:'🏆', name:'Легенда',            desc:'Сыграй 500 игр',      type:'games', goal:500,  reward:5000, xp:5000},
+  // Выживание
+  {id:'surv_60',  icon:'⏱', name:'Минута',             desc:'Выживи 1 минуту',     type:'survive',goal:60,  reward:40,   xp:20},
+  {id:'surv_300', icon:'⏳', name:'Терпеливый',         desc:'Выживи 5 минут',      type:'survive',goal:300, reward:200,  xp:150},
+  {id:'surv_600', icon:'🕐', name:'Долгожитель',        desc:'Выживи 10 минут',     type:'survive',goal:600, reward:600,  xp:500},
+  // Еда
+  {id:'eat_100',  icon:'🍎', name:'Перекус',            desc:'Съешь 100 еды',       type:'eat',   goal:100,  reward:50,   xp:25},
+  {id:'eat_1000', icon:'🍕', name:'Обжора',             desc:'Съешь 1000 еды',      type:'eat',   goal:1000, reward:300,  xp:200},
+  {id:'eat_10000',icon:'🍖', name:'Пожиратель',         desc:'Съешь 10000 еды',     type:'eat',   goal:10000,reward:2000, xp:2000},
 ];
-function getTodayKey(){return'dvx_q_'+new Date().toDateString();}
-function loadQuests(){const k=getTodayKey(),s=localStorage.getItem(k);if(s)return JSON.parse(s);const q=[...QUEST_DEFS].sort(()=>Math.random()-.5).slice(0,3).map(q=>({...q,progress:0,done:false}));localStorage.setItem(k,JSON.stringify(q));return q;}
-function saveQuests(){localStorage.setItem(getTodayKey(),JSON.stringify(dailyQuests));}
-let dailyQuests=loadQuests();
+
+function loadAch(){
+  const saved=JSON.parse(localStorage.getItem('dvx_ach')||'{}');
+  return ACH_DEFS.map(a=>({...a,progress:saved[a.id]?.progress||0,done:saved[a.id]?.done||false}));
+}
+function saveAch(){
+  const obj={};
+  achievements.forEach(a=>{obj[a.id]={progress:a.progress,done:a.done};});
+  localStorage.setItem('dvx_ach',JSON.stringify(obj));
+}
+let achievements=loadAch();
+
+// Статистика для достижений
+let achStats={kills:0,maxMass:0,games:0,survive:0,eat:0};
+function loadAchStats(){
+  const s=JSON.parse(localStorage.getItem('dvx_achstats')||'{}');
+  achStats.kills=s.kills||0;achStats.maxMass=s.maxMass||0;
+  achStats.games=s.games||0;achStats.survive=s.survive||0;achStats.eat=s.eat||0;
+}
+function saveAchStats(){localStorage.setItem('dvx_achstats',JSON.stringify(achStats));}
+loadAchStats();
+
+function trackAch(type,amount){
+  if(!amount||amount<=0)return;
+  let changed=false;
+  if(type==='kills')  {achStats.kills+=amount;}
+  if(type==='mass')   {if(amount>achStats.maxMass)achStats.maxMass=amount;}
+  if(type==='games')  {achStats.games+=amount;}
+  if(type==='survive'){achStats.survive+=amount;}
+  if(type==='eat')    {achStats.eat+=amount;}
+  saveAchStats();
+  for(const a of achievements){
+    if(a.done)continue;
+    const val = achStats[a.type]||0;
+    const newProg = Math.min(a.goal, val);
+    if(newProg!==a.progress){a.progress=newProg;changed=true;}
+    if(a.progress>=a.goal&&!a.done){
+      a.done=true;changed=true;
+      showToast(a.icon+' '+a.name+'! +'+a.reward+'🪙 +'+a.xp+'XP','#a29bfe');
+      essence=Math.min(9999,essence+a.reward);syncEss();
+      addXP(a.xp);
+    }
+  }
+  if(changed){saveAch();renderAch();}
+}
+
+// trackQuest теперь вызывает trackAch для совместимости
 function trackQuest(id,amount){
-  if(amount===0)return;let ch=false;
-  for(const q of dailyQuests){if(q.id===id&&!q.done){q.progress=Math.min(q.goal,q.progress+amount);if(q.progress>=q.goal){q.done=true;showToast(q.icon+' Задание выполнено! +'+q.reward+'🪙','#f9ca24');essence=Math.min(9999,essence+q.reward);syncEss();addXP(q.reward);}ch=true;}}
-  if(ch){saveQuests();renderQuests();}
+  if(id==='eat_food')   trackAch('eat',amount);
+  if(id==='reach_mass') trackAch('mass',amount);
+  if(id==='survive_time')trackAch('survive',amount);
+  if(id==='top3')       {}
+  if(id==='kills')      trackAch('kills',amount);
 }
-function renderQuests(){
-  const list=document.getElementById('questsList');if(!list)return;
-  list.innerHTML=dailyQuests.map(q=>`<div class="quest-item"><div class="quest-name">${q.icon} ${q.name}</div><div class="quest-bar-bg"><div class="quest-bar-fill" style="width:${Math.min(100,(q.progress/q.goal)*100)}%"></div></div><div class="quest-prog"><span>${q.progress}/${q.goal}</span><span class="${q.done?'quest-done':''}">${q.done?'✅ +'+q.reward+'🪙':'🪙 '+q.reward}</span></div></div>`).join('');
-  const badge=document.getElementById('questsBadge');if(badge){const d=dailyQuests.filter(q=>q.done).length;if(d>0){badge.style.display='flex';badge.textContent=d;}else badge.style.display='none';}
+
+function renderAch(){
+  const list=document.getElementById('achList');if(!list)return;
+  const sorted=[...achievements].sort((a,b)=>{
+    if(a.done&&!b.done)return 1;if(!a.done&&b.done)return -1;
+    return (b.progress/b.goal)-(a.progress/a.goal);
+  });
+  list.innerHTML=sorted.map(a=>{
+    const pct=Math.min(100,Math.round((a.progress/a.goal)*100));
+    return `<div class="ach-item${a.done?' done':''}">
+      <span class="ach-icon">${a.icon}</span>
+      <div class="ach-info">
+        <div class="ach-name">${a.name}</div>
+        <div class="ach-desc">${a.desc}</div>
+        ${!a.done?`<div class="ach-bar-bg"><div class="ach-bar-fill" style="width:${pct}%"></div></div>`:''}
+      </div>
+      <div>
+        ${a.done
+          ?'<div class="ach-check">✅</div>'
+          :`<div class="ach-reward">🪙${a.reward}</div><div style="font-size:10px;color:rgba(162,155,254,0.6);text-align:right">${a.progress}/${a.goal}</div>`}
+      </div>
+    </div>`;
+  }).join('');
+  // Бейдж
+  const badge=document.getElementById('achBadge');
+  if(badge){
+    const newDone=achievements.filter(a=>a.done).length;
+    const prevDone=parseInt(badge.dataset.prev||'0');
+    if(newDone>prevDone){badge.style.display='flex';badge.textContent=newDone;badge.dataset.prev=newDone;}
+    else if(newDone===0)badge.style.display='none';
+  }
 }
-renderQuests();
-let questsOpen=false;
-function toggleQuests(){questsOpen=!questsOpen;document.getElementById('questsPanel').style.display=questsOpen?'flex':'none';renderQuests();}
-document.getElementById('questsBtn').addEventListener('click',e=>{e.stopPropagation();toggleQuests();});
-document.getElementById('questsMenuBtn').addEventListener('click',e=>{e.stopPropagation();toggleQuests();});
-document.addEventListener('click',e=>{if(questsOpen&&!document.getElementById('questsPanel').contains(e.target)&&!document.getElementById('questsBtn').contains(e.target)&&e.target!==document.getElementById('questsMenuBtn')){questsOpen=false;document.getElementById('questsPanel').style.display='none';}});
+renderAch();
+
+let achOpen=false;
+function toggleAch(){achOpen=!achOpen;document.getElementById('achPanel').style.display=achOpen?'flex':'none';if(achOpen)renderAch();}
+document.getElementById('achBtn').addEventListener('click',e=>{e.stopPropagation();toggleAch();});
+document.getElementById('achMenuBtn').addEventListener('click',e=>{e.stopPropagation();toggleAch();});
+document.addEventListener('click',e=>{
+  if(achOpen&&!document.getElementById('achPanel').contains(e.target)
+    &&!document.getElementById('achBtn').contains(e.target)
+    &&e.target!==document.getElementById('achMenuBtn')){
+    achOpen=false;document.getElementById('achPanel').style.display='none';
+  }
+});
 let surviveTimer=0,lastSurviveTick=0,_xpFoodCounter=0,_foodCoinCounter=0,_prevScore=MIN_LEN;
 
 // ══════ МУЗЫКА ══════
-let audioCtx=null,musicEnabled=localStorage.getItem('dvx_music')!=='off';
+let audioCtx=null;
 let musicMasterGain=null,_chordTimer=null,_audioStarted=false;
 function initMusic(){
   if(_audioStarted)return;_audioStarted=true;
