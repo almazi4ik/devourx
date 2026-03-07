@@ -1153,24 +1153,28 @@ function startOffline(){
   gameMode='offline';
   if(offlineTickInterval){clearInterval(offlineTickInterval);offlineTickInterval=null;}
   serverWorld=null;_prevWorld=null;
-  const{spawnX,spawnY}=initOffline();
-  camX=spawnX-W/2;camY=spawnY-H/2;
-  player=offlineState.player;
-  // Плавно скрываем текущий экран и запускаем игру
-  const _curScr=document.querySelector('.screen.active');
-  if(_curScr){_curScr.style.transition='opacity 0.3s ease';_curScr.style.opacity='0';setTimeout(()=>{document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});},280);}
-  document.getElementById('gearBtn').style.display='none';
-  document.getElementById('hud').style.display='block';
-  document.getElementById('xpBarWrap').style.display='none';
-  document.getElementById('achBtn').style.display='none';
-  document.getElementById('achPanel').classList.remove('open'); achOpen=false;
-  achOpen=false;autopilotMode=false;
-  document.getElementById('apBtn').classList.remove('active');
-  running=true;surviveTimer=0;lastSurviveTick=performance.now();
-  _xpFoodCounter=0;_foodCoinCounter=0;
-  if(isMobile())showJoystick(true);
-  offlineTickInterval=setInterval(offlineTick,33);
-  trackAch('games',1);
+  playIrisOpen(
+    ()=>{
+      // на чёрном экране запускаем игру
+      const{spawnX,spawnY}=initOffline();
+      camX=spawnX-W/2;camY=spawnY-H/2;
+      player=offlineState.player;
+      document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});
+      document.getElementById('gearBtn').style.display='none';
+      document.getElementById('hud').style.display='block';
+      document.getElementById('xpBarWrap').style.display='none';
+      document.getElementById('achBtn').style.display='none';
+      document.getElementById('achPanel').classList.remove('open'); achOpen=false;
+      achOpen=false;autopilotMode=false;
+      document.getElementById('apBtn').classList.remove('active');
+      running=true;surviveTimer=0;lastSurviveTick=performance.now();
+      _xpFoodCounter=0;_foodCoinCounter=0;
+      if(isMobile())showJoystick(true);
+      offlineTickInterval=setInterval(offlineTick,33);
+      trackAch('games',1);
+    },
+    null
+  );
 }
 
 // ══════ СЕРВЕР ОНЛАЙН ══════
@@ -1205,20 +1209,22 @@ function connectWS(){
         player={segs:[{x:msg.spawnX||WORLD/2,y:msg.spawnY||WORLD/2}],tAngle:0,angle:0,score:MIN_LEN,boosting:false,alive:true};
         camX=(msg.spawnX||WORLD/2)-W/2;camY=(msg.spawnY||WORLD/2)-H/2;
         const _curScrOnline=document.querySelector('.screen.active');
-        if(_curScrOnline){_curScrOnline.style.transition='opacity 0.3s ease';_curScrOnline.style.opacity='0';}
-        setTimeout(()=>{
-          document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});
-          document.getElementById('gearBtn').style.display='none';
-          document.getElementById('hud').style.display='block';
-          document.getElementById('xpBarWrap').style.display='none';
-          document.getElementById('achBtn').style.display='none';
-          document.getElementById('achPanel').classList.remove('open'); achOpen=false;
-          achOpen=false;autopilotMode=false;
-          document.getElementById('apBtn').classList.remove('active');
-          running=true;surviveTimer=0;lastSurviveTick=performance.now();
-          _xpFoodCounter=0;_prevScore=MIN_LEN;_foodCoinCounter=0;
-          if(isMobile())showJoystick(true);
-        },320);
+        playIrisOpen(
+          ()=>{
+            document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});
+            document.getElementById('gearBtn').style.display='none';
+            document.getElementById('hud').style.display='block';
+            document.getElementById('xpBarWrap').style.display='none';
+            document.getElementById('achBtn').style.display='none';
+            document.getElementById('achPanel').classList.remove('open'); achOpen=false;
+            achOpen=false;autopilotMode=false;
+            document.getElementById('apBtn').classList.remove('active');
+            running=true;surviveTimer=0;lastSurviveTick=performance.now();
+            _xpFoodCounter=0;_prevScore=MIN_LEN;_foodCoinCounter=0;
+            if(isMobile())showJoystick(true);
+          },
+          null
+        );
       }
       if(msg.type==='world'){
         _prevWorld=serverWorld?{players:serverWorld.players,_segsMap:buildSegsMap(serverWorld)}:null;
@@ -1901,6 +1907,61 @@ function initRipples(){
 }
 
 window.addEventListener('load', ()=>{ drawRobotIcon(); applyLang(); initRipples(); });
+
+// ══════ IRIS WIPE TRANSITION ══════
+function playIrisOpen(onMidpoint, onDone){
+  // Фаза 1: затемнение (0 → 600ms)
+  // Фаза 2: iris открывается с центра (600ms → 1400ms)
+  const W2=fxCv.width, H2=fxCv.height;
+  const maxR = Math.sqrt(W2*W2+H2*H2)*0.55;
+  let start=null;
+  const FADE_DUR = 500;   // затемнение
+  const HOLD_DUR = 180;   // пауза на черном
+  const OPEN_DUR = 680;   // открытие iris
+  const TOTAL = FADE_DUR+HOLD_DUR+OPEN_DUR;
+  let midDone=false;
+
+  function frame(ts){
+    if(!start) start=ts;
+    const elapsed=ts-start;
+
+    fxCx.clearRect(0,0,W2,H2);
+
+    if(elapsed < FADE_DUR){
+      // затемнение
+      const alpha = elapsed/FADE_DUR;
+      fxCx.fillStyle=`rgba(0,0,0,${alpha.toFixed(3)})`;
+      fxCx.fillRect(0,0,W2,H2);
+      requestAnimationFrame(frame);
+    } else if(elapsed < FADE_DUR+HOLD_DUR){
+      // полностью чёрный
+      fxCx.fillStyle='rgba(0,0,0,1)';
+      fxCx.fillRect(0,0,W2,H2);
+      if(!midDone){ midDone=true; onMidpoint && onMidpoint(); }
+      requestAnimationFrame(frame);
+    } else if(elapsed < TOTAL){
+      // iris открывается — вырезаем круг из чёрного
+      const t = (elapsed-FADE_DUR-HOLD_DUR)/OPEN_DUR;
+      const ease = 1-Math.pow(1-t,3); // ease-out cubic
+      const r = maxR * ease;
+      fxCx.fillStyle='rgba(0,0,0,1)';
+      fxCx.beginPath();
+      fxCx.rect(0,0,W2,H2);
+      fxCx.arc(W2/2,H2/2,r,0,Math.PI*2,true); // hole
+      fxCx.fill('evenodd');
+      requestAnimationFrame(frame);
+    } else {
+      fxCx.clearRect(0,0,W2,H2);
+      onDone && onDone();
+    }
+  }
+  requestAnimationFrame(frame);
+}
+document.addEventListener('pointerdown', e=>{
+  if(running) return;
+  const color = '#b8f5c0';
+  addRipple(e.clientX, e.clientY, color);
+}, {passive:true});
 
 function showToast(msg,color='#fff'){
   const w=document.getElementById('toastWrap'),tt=document.createElement('div');
