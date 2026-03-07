@@ -672,7 +672,8 @@ function offlineCheckCollisions(){
       if(!other.alive||other===sn)continue;
       for(let i=2;i<other.segs.length;i++){
         const s=other.segs[i],dx=h.x-s.x,dy=h.y-s.y;
-        if(dx*dx+dy*dy<(r+offlineGetR(other.score)-2)**2){
+        const otherR=offlineGetR(other.score)*0.55; // только радиус тела, не головы
+        if(dx*dx+dy*dy<(r*0.85+otherR)**2){
           offlineKill(sn);
           if(!sn.isMe&&other.isMe){
             essence=Math.min(9999,essence+3);syncEss();
