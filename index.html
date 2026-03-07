@@ -198,119 +198,7 @@ canvas { display:block; position:fixed; inset:0; }
 #onlineCounter span { color:#fff; font-weight:900; }
 .top-panel-title { font-family:'Fredoka One',cursive; font-size:20px; text-align:center; background:linear-gradient(90deg,#f9ca24,#ff9f43); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:6px; }
 
-/* ═══ ТУТОРИАЛ ═══ */
-#tutorialOverlay {
-  position:fixed; inset:0; z-index:300; pointer-events:none;
-  display:none;
-}
-#tutorialOverlay.active { display:block; }
 
-/* Затемнение всего экрана кроме spotlight */
-#tutorialDim {
-  position:absolute; inset:0;
-  background:rgba(0,0,0,0); /* управляется JS */
-  transition:background .4s;
-}
-
-/* Карточка подсказки */
-#tutorialCard {
-  position:absolute;
-  background:linear-gradient(135deg,rgba(10,30,18,0.97),rgba(5,15,10,0.99));
-  border:2px solid rgba(46,204,113,0.6);
-  border-radius:22px;
-  padding:18px 22px;
-  max-width:280px;
-  box-shadow:0 0 40px rgba(46,204,113,0.25), 0 8px 32px rgba(0,0,0,0.6);
-  pointer-events:all;
-  transform:scale(0) translateY(10px);
-  transition:transform .35s cubic-bezier(.175,.885,.32,1.275), opacity .3s, left .4s ease, top .4s ease, bottom .4s ease;
-  opacity:0;
-}
-#tutorialCard.visible {
-  transform:scale(1) translateY(0);
-  opacity:1;
-}
-.tut-step-num {
-  font-family:'Fredoka One',cursive;
-  font-size:11px;
-  color:rgba(46,204,113,0.5);
-  letter-spacing:3px;
-  text-transform:uppercase;
-  margin-bottom:5px;
-}
-.tut-icon { font-size:38px; line-height:1; margin-bottom:6px; display:block; }
-.tut-title {
-  font-family:'Fredoka One',cursive;
-  font-size:22px;
-  color:#fff;
-  margin-bottom:5px;
-  line-height:1.2;
-}
-.tut-desc {
-  font-size:13px;
-  font-weight:700;
-  color:rgba(168,230,192,0.75);
-  line-height:1.5;
-  margin-bottom:14px;
-}
-.tut-hint {
-  font-size:11px;
-  font-weight:800;
-  color:rgba(249,202,36,0.7);
-  letter-spacing:1px;
-  animation: tut-pulse 1.5s infinite;
-}
-@keyframes tut-pulse { 0%,100%{opacity:.7} 50%{opacity:1} }
-
-/* Стрелка-указатель */
-#tutorialArrow {
-  position:absolute;
-  font-size:32px;
-  animation: tut-arrow-bounce .7s ease-in-out infinite alternate;
-  pointer-events:none;
-  transition:left .4s ease, top .4s ease;
-  filter:drop-shadow(0 0 8px rgba(57,255,20,0.8));
-}
-@keyframes tut-arrow-bounce { from{transform:translate(0,0)} to{transform:translate(0,-10px)} }
-
-/* Подсветка еды в туториале */
-.tut-food-highlight {
-  position:absolute;
-  border-radius:50%;
-  border:3px solid #39ff14;
-  box-shadow:0 0 20px #39ff1488;
-  pointer-events:none;
-  animation:tut-ring-pulse 1s infinite;
-}
-@keyframes tut-ring-pulse {
-  0%,100%{transform:scale(1);opacity:1}
-  50%{transform:scale(1.3);opacity:.6}
-}
-
-/* Кнопка "Понятно!" */
-.tut-btn {
-  background:linear-gradient(180deg,#4af078,#20c44a);
-  border:none; border-radius:50px;
-  color:#fff; font-family:'Fredoka One',cursive;
-  font-size:16px; letter-spacing:2px;
-  padding:9px 28px; cursor:pointer;
-  box-shadow:0 4px 0 #0e5a22, 0 6px 18px rgba(46,204,113,0.4);
-  transition:transform .1s;
-}
-.tut-btn:hover{transform:translateY(-2px)}
-.tut-btn:active{transform:translateY(2px)}
-
-/* Прогресс-точки */
-.tut-dots {
-  display:flex; gap:6px; margin-bottom:12px;
-}
-.tut-dot {
-  width:7px; height:7px; border-radius:50%;
-  background:rgba(255,255,255,0.15);
-  transition:background .3s;
-}
-.tut-dot.done { background:#2ecc71; }
-.tut-dot.active { background:#f9ca24; box-shadow:0 0 6px #f9ca2488; }
 </style>
 </head>
 <body>
@@ -439,21 +327,6 @@ canvas { display:block; position:fixed; inset:0; }
   <div class="lp-title">🌐 ЯЗЫК</div>
   <div id="langList"></div>
 </div>
-<!-- ТУТОРИАЛ -->
-<div id="tutorialOverlay">
-  <div id="tutorialDim"></div>
-  <div id="tutorialArrow" style="display:none">⬇️</div>
-  <div id="tutorialCard">
-    <div class="tut-dots" id="tutDots"></div>
-    <div class="tut-step-num" id="tutStepNum">ШАГ 1 / 4</div>
-    <span class="tut-icon" id="tutIcon">🖱️</span>
-    <div class="tut-title" id="tutTitle">Двигай мышкой!</div>
-    <div class="tut-desc" id="tutDesc">Змейка следует за твоим курсором. Просто двигай мышку — змейка поворачивает!</div>
-    <div class="tut-hint" id="tutHint">⬆ ДВИГАЙ МЫШКОЙ...</div>
-    <button class="tut-btn" id="tutBtn" style="display:none">Понятно! 👍</button>
-  </div>
-</div>
-
 <canvas id="gameCanvas"></canvas>
 
 <script>
@@ -692,7 +565,6 @@ function offlineEatFood(sn){
         sn.foodEaten=(sn.foodEaten||0)+1;
         if(sn.foodEaten>=3){sn.foodEaten-=3;essence=Math.min(9999,essence+1);syncEss();}
         trackQuest('eat_food',g);
-        tutCheckEat();
         _xpFoodCounter+=g;
         const xg=Math.floor(_xpFoodCounter/5);
         if(xg>0){_xpFoodCounter-=xg*5;addXP(xg);}
@@ -840,8 +712,6 @@ function startOffline(){
   _xpFoodCounter=0;_foodCoinCounter=0;
   if(isMobile())showJoystick(true);
   offlineTickInterval=setInterval(offlineTick,33);
-  // Запускаем туториал только при первом запуске
-  setTimeout(()=>startTutorial(), 800);
 }
 
 // ══════ СЕРВЕР ОНЛАЙН ══════
@@ -931,11 +801,11 @@ function connectWS(){
 
 // ══════ INPUT ══════
 let mx=400,my=300;
-canvas.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;tutCheckMouseMove();});
-canvas.addEventListener('mousedown',e=>{if(e.button===0){boosting=true;tutCheckBoost();}});
+canvas.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+canvas.addEventListener('mousedown',e=>{if(e.button===0)boosting=true;});
 canvas.addEventListener('mouseup',e=>{if(e.button===0)boosting=false;});
 window.addEventListener('keydown',e=>{
-  if(e.code==='Space'||e.code==='ShiftLeft'){e.preventDefault();boosting=true;tutCheckBoost();}
+  if(e.code==='Space'||e.code==='ShiftLeft'){e.preventDefault();boosting=true;}
   if(e.code==='KeyA'&&running){autopilotMode=!autopilotMode;document.getElementById('apBtn').classList.toggle('active',autopilotMode);}
 });
 window.addEventListener('keyup',e=>{if(e.code==='Space'||e.code==='ShiftLeft')boosting=false;});
@@ -1215,265 +1085,6 @@ function showToast(msg,color='#fff'){
   tt.className='toast';tt.textContent=msg;tt.style.borderColor=color;tt.style.color=color;
   w.appendChild(tt);setTimeout(()=>tt.remove(),2300);
 }
-
-// ══════ ТУТОРИАЛ ══════
-const TUT_KEY = 'dvx_tutorial_done';
-
-const TUT_STEPS = [
-  {
-    icon:'🖱️',
-    title:'Двигай мышкой!',
-    desc:'Змейка следует за твоим курсором. Просто двигай — она поворачивает!',
-    hint:'⬆ ДВИГАЙ МЫШКОЙ...',
-    pos:'center-bottom',      // где показывать карточку
-    arrow:true,               // показывать стрелку
-    arrowDir:'up',
-    trigger:'mousemove',      // ждём движения мыши
-    triggerCount:5,           // 5 движений мыши
-    btnText:null,             // null = без кнопки, авто-переход
-  },
-  {
-    icon:'🍎',
-    title:'Съешь еду!',
-    desc:'Цветные кружочки на карте — это еда. Подъезжай к ним — змейка растёт!',
-    hint:'⬆ СЪЕШЬ ПОДСВЕЧЕННУЮ ЕДУ',
-    pos:'top-right',
-    arrow:false,
-    trigger:'eat',            // ждём поедания еды
-    triggerCount:1,
-    btnText:null,
-    highlightFood:true,       // подсвечиваем ближайшую еду
-  },
-  {
-    icon:'⚡',
-    title:'Ускорение!',
-    desc:'Зажми левую кнопку мыши или Пробел — и помчишься! Но масса уменьшается.',
-    hint:'ЗАЖМИ МЫШКУ / ПРОБЕЛ',
-    pos:'top-right',
-    arrow:false,
-    trigger:'boost',          // ждём буста
-    triggerCount:1,
-    btnText:null,
-  },
-  {
-    icon:'💀',
-    title:'Убивай врагов!',
-    desc:'Подрежь врага — заставь его врезаться в твой хвост. Он умирает, ты получаешь монеты!',
-    hint:'',
-    pos:'center-bottom',
-    arrow:false,
-    trigger:'btn',            // просто кнопка
-    btnText:'Всё понял, играть! 🎮',
-  },
-];
-
-let tutActive = false;
-let tutStep = 0;
-let tutTriggerCounter = 0;
-let tutFoodHighlightEl = null;
-let tutMouseMoves = 0;
-let tutBoosted = false;
-let tutAte = false;
-
-function isTutorialDone(){
-  return localStorage.getItem(TUT_KEY) === '1';
-}
-
-function startTutorial(){
-  if(isTutorialDone()) return;
-  tutActive = true;
-  tutStep = 0;
-  tutTriggerCounter = 0;
-  document.getElementById('tutorialOverlay').classList.add('active');
-  showTutStep(0);
-}
-
-function showTutStep(idx){
-  tutStep = idx;
-  tutTriggerCounter = 0;
-  tutMouseMoves = 0;
-  tutBoosted = false;
-  tutAte = false;
-
-  const step = TUT_STEPS[idx];
-  const card = document.getElementById('tutorialCard');
-  const total = TUT_STEPS.length;
-
-  // Точки прогресса
-  let dotsHtml = '';
-  for(let i=0;i<total;i++){
-    dotsHtml += `<div class="tut-dot ${i<idx?'done':i===idx?'active':''}"></div>`;
-  }
-  document.getElementById('tutDots').innerHTML = dotsHtml;
-
-  // Контент
-  document.getElementById('tutStepNum').textContent = `ШАГ ${idx+1} / ${total}`;
-  document.getElementById('tutIcon').textContent = step.icon;
-  document.getElementById('tutTitle').textContent = step.title;
-  document.getElementById('tutDesc').textContent = step.desc;
-  document.getElementById('tutHint').textContent = step.hint;
-
-  const btn = document.getElementById('tutBtn');
-  if(step.btnText){
-    btn.style.display = 'block';
-    btn.textContent = step.btnText;
-    btn.onclick = () => advanceTutorial();
-  } else {
-    btn.style.display = 'none';
-  }
-
-  // Позиция карточки
-  positionTutCard(step.pos);
-
-  // Анимация появления
-  card.classList.remove('visible');
-  setTimeout(()=>card.classList.add('visible'), 30);
-
-  // Стрелка
-  const arrow = document.getElementById('tutorialArrow');
-  if(step.arrow){
-    arrow.style.display = 'block';
-    updateTutArrow();
-  } else {
-    arrow.style.display = 'none';
-  }
-
-  // Подсветка еды
-  removeTutFoodHighlight();
-  if(step.highlightFood) scheduleFoodHighlight();
-}
-
-function positionTutCard(pos){
-  const card = document.getElementById('tutorialCard');
-  card.style.cssText = card.style.cssText; // reset
-  const margin = 24;
-  switch(pos){
-    case 'center-bottom':
-      card.style.bottom = '160px';
-      card.style.left = '50%';
-      card.style.transform = 'translateX(-50%) scale(1)';
-      card.style.top = 'auto';
-      card.style.right = 'auto';
-      break;
-    case 'top-right':
-      card.style.top = '80px';
-      card.style.right = margin+'px';
-      card.style.left = 'auto';
-      card.style.bottom = 'auto';
-      card.style.transform = 'scale(1)';
-      break;
-    case 'top-left':
-      card.style.top = '80px';
-      card.style.left = margin+'px';
-      card.style.right = 'auto';
-      card.style.bottom = 'auto';
-      card.style.transform = 'scale(1)';
-      break;
-  }
-}
-
-function updateTutArrow(){
-  // Стрелка указывает на змейку игрока
-  if(!offlineState||!offlineState.player||!offlineState.player.segs.length) return;
-  const arrow = document.getElementById('tutorialArrow');
-  const h = offlineState.player.segs[0];
-  const sx = h.x - camX, sy = h.y - camY;
-  arrow.style.left = (sx - 16) + 'px';
-  arrow.style.top = (sy - 60) + 'px';
-}
-
-function scheduleFoodHighlight(){
-  setTimeout(()=>{
-    if(!tutActive || TUT_STEPS[tutStep].trigger !== 'eat') return;
-    if(!offlineState) return;
-    const h = offlineState.player.segs[0];
-    // Ближайшая еда
-    let best = Infinity, tgt = null;
-    for(const f of offlineState.foods){
-      const dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;
-      if(d<best){best=d;tgt=f;}
-    }
-    if(!tgt) return;
-    // Создаём DOM-элемент подсветки
-    removeTutFoodHighlight();
-    tutFoodHighlightEl = document.createElement('div');
-    tutFoodHighlightEl.className = 'tut-food-highlight';
-    const fx = tgt.x - camX, fy = tgt.y - camY;
-    const size = (tgt.r + 12) * 2;
-    tutFoodHighlightEl.style.cssText = `left:${fx-size/2}px;top:${fy-size/2}px;width:${size}px;height:${size}px;`;
-    document.getElementById('tutorialOverlay').appendChild(tutFoodHighlightEl);
-    // Обновляем позицию каждые 100мс
-    tutFoodHighlightEl._updateInterval = setInterval(()=>{
-      if(!tutFoodHighlightEl || !tgt) return;
-      const fx2 = tgt.x - camX, fy2 = tgt.y - camY;
-      tutFoodHighlightEl.style.left = (fx2-size/2)+'px';
-      tutFoodHighlightEl.style.top = (fy2-size/2)+'px';
-    }, 100);
-  }, 500);
-}
-
-function removeTutFoodHighlight(){
-  if(tutFoodHighlightEl){
-    clearInterval(tutFoodHighlightEl._updateInterval);
-    tutFoodHighlightEl.remove();
-    tutFoodHighlightEl = null;
-  }
-}
-
-function advanceTutorial(){
-  removeTutFoodHighlight();
-  const card = document.getElementById('tutorialCard');
-  card.classList.remove('visible');
-
-  if(tutStep >= TUT_STEPS.length - 1){
-    // Конец туториала
-    setTimeout(()=>{
-      tutActive = false;
-      document.getElementById('tutorialOverlay').classList.remove('active');
-      localStorage.setItem(TUT_KEY, '1');
-      showToast('🎉 Обучение пройдено! Удачи!', '#2ecc71');
-    }, 300);
-  } else {
-    setTimeout(()=>showTutStep(tutStep+1), 350);
-  }
-}
-
-// Отслеживаем события для авто-триггеров
-function tutCheckMouseMove(){
-  if(!tutActive) return;
-  const step = TUT_STEPS[tutStep];
-  if(step.trigger !== 'mousemove') return;
-  tutMouseMoves++;
-  if(tutMouseMoves >= step.triggerCount) advanceTutorial();
-  // Обновляем стрелку
-  if(step.arrow) updateTutArrow();
-}
-
-function tutCheckEat(){
-  if(!tutActive) return;
-  const step = TUT_STEPS[tutStep];
-  if(step.trigger !== 'eat') return;
-  advanceTutorial();
-}
-
-function tutCheckBoost(){
-  if(!tutActive || tutBoosted) return;
-  const step = TUT_STEPS[tutStep];
-  if(step.trigger !== 'boost') return;
-  tutBoosted = true;
-  setTimeout(()=>advanceTutorial(), 600);
-}
-
-// Скипнуть туториал по Escape
-window.addEventListener('keydown', e=>{
-  if(e.key === 'Escape' && tutActive){
-    tutActive = false;
-    removeTutFoodHighlight();
-    document.getElementById('tutorialCard').classList.remove('visible');
-    document.getElementById('tutorialOverlay').classList.remove('active');
-    localStorage.setItem(TUT_KEY, '1');
-  }
-});
 
 
 </script>
