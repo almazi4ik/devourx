@@ -37,9 +37,12 @@ canvas { display:block; position:fixed; inset:0; }
 .btn-music:hover{background:rgba(255,255,255,0.13); color:#fff;}
 .btn-music.off{color:rgba(255,255,255,0.3); border-color:rgba(255,255,255,0.1);}
 
+
 /* ═══ ШЕСТЕРЁНКА И ЯЗЫКИ ═══ */
-#gearBtn { position:fixed; bottom:20px; left:20px; width:48px; height:48px; background:rgba(0,0,0,0.55); border:2px solid rgba(255,255,255,0.2); border-radius:50%; cursor:pointer; z-index:200; display:flex; align-items:center; justify-content:center; transition:transform .3s, border-color .2s; font-size:22px; }
-#gearBtn:hover { border-color:#2ecc71; transform:rotate(60deg); }
+#gearBtn { position:fixed; bottom:20px; left:20px; width:48px; height:48px; background:rgba(0,0,0,0.55); border:2px solid rgba(255,255,255,0.2); border-radius:50%; cursor:pointer; z-index:200; display:flex; align-items:center; justify-content:center; transition:transform .3s, border-color .2s; }
+#gearBtn:hover { border-color:#2ecc71; }
+#gearBtn canvas { pointer-events:none; transition:transform .4s cubic-bezier(.34,1.56,.64,1); }
+#gearBtn:hover canvas { transform:rotate(90deg); }
 #langPanel { position:fixed; bottom:78px; left:20px; background:rgba(8,18,12,0.97); border:2px solid rgba(46,204,113,0.3); border-radius:20px; padding:14px; z-index:200; display:none; flex-direction:column; gap:6px; min-width:180px; }
 #langPanel .lp-title { font-family:'Fredoka One',cursive; font-size:15px; color:#2ecc71; letter-spacing:2px; margin-bottom:4px; text-align:center; }
 .lang-row { display:flex; align-items:center; gap:10px; padding:7px 12px; border-radius:12px; cursor:pointer; transition:background .15s; }
@@ -66,17 +69,20 @@ canvas { display:block; position:fixed; inset:0; }
 .sk-cats { display:flex; gap:10px; margin-bottom:18px; }
 .cat-btn { background:rgba(255,255,255,0.07); border:2px solid rgba(255,255,255,0.13); border-radius:50px; color:#aaa; font-family:'Nunito',sans-serif; font-weight:800; font-size:13px; padding:7px 20px; cursor:pointer; }
 .cat-btn.active { background:rgba(162,155,254,0.2); border-color:#a29bfe; color:#a29bfe; }
-.skins-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; width:88%; max-width:860px; overflow-y:auto; max-height:58vh; padding:4px; }
-.skin-card { background:rgba(255,255,255,0.05); border:2px solid rgba(255,255,255,0.1); border-radius:18px; padding:16px 10px; display:flex; flex-direction:column; align-items:center; gap:9px; cursor:pointer; transition:all .15s; position:relative; }
+.skins-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; width:88%; max-width:860px; overflow-y:auto; max-height:58vh; padding:4px; }
+.skin-card { background:rgba(255,255,255,0.05); border:2px solid rgba(255,255,255,0.1); border-radius:18px; padding:12px 10px 10px; display:flex; flex-direction:column; align-items:center; gap:7px; cursor:pointer; transition:all .15s; position:relative; overflow:hidden; }
 .skin-card:hover{transform:translateY(-4px)}
 .skin-card.selected{border-color:#f9ca24;background:rgba(249,202,36,0.1);box-shadow:0 0 22px rgba(249,202,36,0.3)}
-.skin-card.locked{filter:brightness(0.45)}
-.skin-preview { width:58px; height:58px; border-radius:50%; box-shadow:0 4px 14px rgba(0,0,0,0.5); }
-.sk-name { font-size:12px; font-weight:800; text-align:center; }
+.skin-card.locked{filter:brightness(0.5)}
+.skin-card.rarity-galactic { box-shadow:0 0 18px rgba(255,100,255,0.25); }
+.skin-card.rarity-galactic:hover { box-shadow:0 0 32px rgba(255,100,255,0.5); }
+.skin-preview-canvas { display:block; border-radius:8px; background:rgba(0,0,0,0.4); }
+.sk-name { font-size:12px; font-weight:800; text-align:center; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,0.9); }
 .sk-cost { background:rgba(249,202,36,0.18); border:1px solid rgba(249,202,36,0.35); border-radius:20px; padding:3px 10px; font-size:12px; font-weight:800; color:#f9ca24; }
 .sk-equip { font-size:11px; font-weight:800; color:#2ecc71; letter-spacing:1px; text-transform:uppercase; }
 .lock-ico { position:absolute; top:9px; right:9px; font-size:15px; }
-.rarity-bar { position:absolute; bottom:0; left:0; right:0; height:3px; border-radius:0 0 16px 16px; }
+.rarity-bar { position:absolute; bottom:0; left:0; right:0; height:4px; border-radius:0 0 16px 16px; }
+@keyframes galacticBar{0%{background-position:0%}100%{background-position:200%}}
 .essence-badge { background:#1a4a25; border:3px solid #2ecc71; border-radius:50px; padding:6px 16px 6px 10px; display:flex; align-items:center; gap:8px; }
 .ess-cnt { font-family:'Fredoka One',cursive; font-size:22px; color:#2ecc71; }
 #hud { position:fixed; inset:0; z-index:10; pointer-events:none; display:none; }
@@ -192,6 +198,7 @@ canvas { display:block; position:fixed; inset:0; }
     <button class="cat-btn" data-cat="standard" data-i18n="standard">Standard</button>
     <button class="cat-btn" data-cat="rare" data-i18n="rare">Rare</button>
     <button class="cat-btn" data-cat="legendary" data-i18n="legendary">Legendary</button>
+    <button class="cat-btn" data-cat="galactic" data-i18n="galactic" style="border-color:rgba(255,0,255,0.4);color:#ff88ff">Galactic</button>
   </div>
   <div class="skins-grid" id="skinsGrid"></div>
 </div>
@@ -217,8 +224,7 @@ canvas { display:block; position:fixed; inset:0; }
 <div id="boostBtn">BOOST</div>
 
 <!-- СМЕРТЬ -->
-<div id="deathScreen" class="screen">
-  <div class="death-title" data-i18n="killed">DEAD!</div>
+<div id="deathScreen" class="screen">  <div class="death-title" data-i18n="killed">DEAD!</div>
   <div class="death-sub" data-i18n="your_score">Your score</div>
   <div class="death-score" id="deathScore">Масса: 0</div>
   <div class="death-records"><div class="rec-title" data-i18n="top_records">TOP RECORDS</div><div id="recList"></div></div>
@@ -226,7 +232,6 @@ canvas { display:block; position:fixed; inset:0; }
   <button class="btn-back-menu" id="menuBackBtn" data-i18n="main_menu">Main Menu</button>
 </div>
 
-<div id="xpBarWrap">
   <div id="xpWidget">
     <div id="xpLvlBubble">
       <span class="xp-lv-lbl">УР.</span>
@@ -247,7 +252,7 @@ canvas { display:block; position:fixed; inset:0; }
 <div class="coins-fixed"><span style="font-size:18px;">🪙</span><span class="ess-cnt" id="essCnt" style="font-family:'Fredoka One',cursive;font-size:20px;color:#f9ca24;">0</span></div>
 
 <!-- ШЕСТЕРЁНКА -->
-<button id="gearBtn">⚙️</button>
+<button id="gearBtn"><canvas id="gearCanvas" width="28" height="28"></canvas></button>
 <div id="langPanel">
   <div class="lp-title">🌐 ЯЗЫК</div>
   <div id="langList"></div>
@@ -265,16 +270,19 @@ const SKINS_DATA=[
   {id:5,key:'sk_pink',h:'#a93226',b:['#ff6b9d','#a93226'],rarity:'rare',cost:100,owned:false},
   {id:6,key:'sk_teal',h:'#0e8578',b:['#00e5cc','#0e8578'],rarity:'rare',cost:120,owned:false},
   {id:7,key:'sk_orange',h:'#ca6f1e',b:['#ff9f43','#ca6f1e'],rarity:'rare',cost:100,owned:false},
-  {id:8,key:'sk_fire',h:'#7b241c',b:['#ff4e4e','#7b241c'],rarity:'legendary',cost:400,owned:false},
-  {id:9,key:'sk_ice',h:'#1a5276',b:['#85c1e9','#1a5276'],rarity:'legendary',cost:450,owned:false},
-  {id:10,key:'sk_neon',h:'#0b5345',b:['#39ff14','#0b5345'],rarity:'legendary',cost:500,owned:false},
-  {id:11,key:'sk_galaxy',h:'#4a235a',b:['#d7bde2','#4a235a'],rarity:'legendary',cost:600,owned:false},
-  {id:12,key:'sk_dark',h:'#1c1c2e',b:['#40407a','#1c1c2e'],rarity:'legendary',cost:700,owned:false},
-  {id:13,key:'sk_goldx',h:'#7d6608',b:['#ffd700','#7d6608'],rarity:'legendary',cost:900,owned:false},
-  {id:14,key:'sk_rainbow',h:'#922b21',b:['#f9ca24','#1abc9c'],rarity:'legendary',cost:1200,owned:false},
-  {id:15,key:'sk_darkx',h:'#0a0a0a',b:['#2c2c2c','#0a0a0a'],rarity:'legendary',cost:2000,owned:false},
+  {id:8,key:'sk_fire',h:'#7b241c',b:['#ff4e4e','#c0392b'],rarity:'legendary',cost:400,owned:false},
+  {id:9,key:'sk_ice',h:'#1a5276',b:['#85c1e9','#aed6f1'],rarity:'legendary',cost:450,owned:false},
+  {id:10,key:'sk_neon',h:'#0b5345',b:['#39ff14','#00e5cc'],rarity:'legendary',cost:500,owned:false},
+  {id:11,key:'sk_dark',h:'#1c1c2e',b:['#40407a','#2c2c54'],rarity:'legendary',cost:700,owned:false},
+  {id:12,key:'sk_goldx',h:'#7d6608',b:['#ffd700','#ff9f43'],rarity:'legendary',cost:900,owned:false},
+  {id:13,key:'sk_rainbow',h:'#922b21',b:['#f9ca24','#1abc9c'],rarity:'legendary',cost:1200,owned:false},
+  {id:14,key:'sk_darkx',h:'#0a0a0a',b:['#2c2c2c','#0a0a0a'],rarity:'legendary',cost:2000,owned:false},
+  {id:15,key:'sk_nebula',h:'#4a0050',b:['#ff00ff','#8800ff'],rarity:'galactic',cost:10000,owned:false},
+  {id:16,key:'sk_cosmos',h:'#000428',b:['#004e92','#a8edea'],rarity:'galactic',cost:25000,owned:false},
+  {id:17,key:'sk_void',h:'#000000',b:['#434343','#000000'],rarity:'galactic',cost:50000,owned:false},
+  {id:18,key:'sk_supernova',h:'#7f0000',b:['#ff6a00','#ee0979'],rarity:'galactic',cost:99999,owned:false},
 ];
-const RARITY_C={standard:'#a8d8b8',rare:'#a29bfe',legendary:'#f9ca24'};
+const RARITY_C={standard:'#a8d8b8',rare:'#a29bfe',legendary:'#f9ca24',galactic:'#ff00ff'};
 
 (function loadSavedSkins(){
   const saved=JSON.parse(localStorage.getItem('dvx_skins')||'null');
@@ -289,16 +297,84 @@ function syncEss(){localStorage.setItem('dvx_coins',essence);document.getElement
 function saveSkins(){localStorage.setItem('dvx_skins',JSON.stringify(SKINS_DATA.map(s=>({id:s.id,owned:s.owned}))));localStorage.setItem('dvx_selSkin',selSkin);}
 syncEss();
 
+function drawSnakePreview(canvas, skin) {
+  const W=canvas.width, H=canvas.height;
+  const c=canvas.getContext('2d');
+  c.clearRect(0,0,W,H);
+
+  // Сегменты — плавная волна слева направо
+  const n=12, segs=[];
+  for(let i=0;i<n;i++){
+    const t=i/(n-1);
+    segs.push({
+      x: W*0.1 + t*W*0.8,
+      y: H*0.5 + Math.sin(t*Math.PI*1.8)*H*0.28
+    });
+  }
+
+  const r=8;
+  // Тело (от хвоста к голове)
+  for(let i=segs.length-1;i>=1;i--){
+    const seg=segs[i], fade=i/segs.length;
+    c.beginPath();
+    c.arc(seg.x, seg.y, r*(0.55+0.45*fade), 0, Math.PI*2);
+    // Галактические — красивый градиент по длине
+    if(skin.rarity==='galactic'){
+      const hue=i*(280/n);
+      c.fillStyle=`hsl(${hue},100%,62%)`;
+    } else {
+      c.fillStyle = i%2===0 ? skin.b[0] : skin.b[1];
+    }
+    c.fill();
+  }
+
+  // Голова
+  const h=segs[0];
+  c.beginPath(); c.arc(h.x,h.y,r,0,Math.PI*2);
+  c.fillStyle=skin.h; c.fill();
+
+  // Глаза
+  const ang=Math.atan2(segs[0].y-segs[1].y, segs[0].x-segs[1].x);
+  [ang-0.5, ang+0.5].forEach(a=>{
+    const ex=h.x+Math.cos(a)*r*0.48, ey=h.y+Math.sin(a)*r*0.48;
+    c.beginPath(); c.arc(ex,ey,r*0.3,0,Math.PI*2); c.fillStyle='#fff'; c.fill();
+    c.beginPath(); c.arc(ex+Math.cos(ang)*r*0.12, ey+Math.sin(ang)*r*0.12, r*0.15,0,Math.PI*2);
+    c.fillStyle='#111'; c.fill();
+  });
+}
+
 function renderSkins(){
   const grid=document.getElementById('skinsGrid');grid.innerHTML='';
   const list=curCat==='all'?SKINS_DATA:SKINS_DATA.filter(s=>s.rarity===curCat);
   list.forEach(s=>{
-    const locked=!s.owned,card=document.createElement('div');
-    card.className='skin-card'+(s.id===selSkin?' selected':'')+(locked?' locked':'');
-    const rc=RARITY_C[s.rarity];
-    card.innerHTML=`${locked?'<span class="lock-ico">🔒</span>':''}<div class="skin-preview" style="background:linear-gradient(135deg,${s.b[0]},${s.b[1]})"></div><div class="sk-name" style="color:${rc}">${t(s.key)}</div>${locked?`<div class="sk-cost">🪙 ${s.cost}</div>`:(s.id===selSkin?`<div class="sk-equip">${t('equipped')}</div>`:`<div class="sk-equip" style="color:#888">${t('equip')}</div>`)}<div class="rarity-bar" style="background:${rc}55"></div>`;
+    const locked=!s.owned, rc=RARITY_C[s.rarity]||'#fff';
+    const card=document.createElement('div');
+    card.className='skin-card rarity-'+s.rarity+(s.id===selSkin?' selected':'')+(locked?' locked':'');
+    card.style.borderColor=s.id===selSkin?'#f9ca24':rc+'55';
+    if(s.rarity==='galactic') card.style.background='rgba(60,0,60,0.2)';
+
+    const cv=document.createElement('canvas');
+    cv.className='skin-preview-canvas'; cv.width=110; cv.height=60;
+    drawSnakePreview(cv,s);
+
+    const name=document.createElement('div');
+    name.className='sk-name'; name.textContent=t(s.key);
+    // Rarity badge под именем
+    const badge=document.createElement('div');
+    badge.style.cssText=`font-size:9px;font-weight:900;letter-spacing:1px;color:${rc};text-transform:uppercase;opacity:0.85;`;
+    badge.textContent=t(s.rarity)||s.rarity;
+
+    const bot=document.createElement('div');
+    if(locked){ bot.className='sk-cost'; bot.textContent='🪙 '+s.cost.toLocaleString(); }
+    else { bot.className='sk-equip'; bot.style.color=s.id===selSkin?'#2ecc71':'#666'; bot.textContent=s.id===selSkin?t('equipped'):t('equip'); }
+
+    const bar=document.createElement('div'); bar.className='rarity-bar';
+    bar.style.background=s.rarity==='galactic'?'linear-gradient(90deg,#ff00ff,#8800ff,#00eeff,#ff00ff)':rc+'99';
+
+    if(locked) card.appendChild(Object.assign(document.createElement('span'),{className:'lock-ico',textContent:'🔒'}));
+    card.appendChild(name); card.appendChild(badge); card.appendChild(cv); card.appendChild(bot); card.appendChild(bar);
     card.onclick=()=>{
-      if(locked){if(essence>=s.cost){essence-=s.cost;s.owned=true;selSkin=s.id;syncEss();saveSkins();renderSkins();}else alert('Нужно '+s.cost+' монет');return;}
+      if(locked){if(essence>=s.cost){essence-=s.cost;s.owned=true;selSkin=s.id;syncEss();saveSkins();renderSkins();}else alert(t('need_coins')+' '+s.cost.toLocaleString()+' '+t('coins'));return;}
       selSkin=s.id;saveSkins();renderSkins();
     };
     grid.appendChild(card);
@@ -320,10 +396,10 @@ const LANGS = {
     killed:'УБИТ!', your_score:'Твой результат', again:'Снова!', main_menu:'Главное меню',
     top_records:'ТОП РЕКОРДОВ', top:'ТОП', online:'Онлайн',
     daily:'Ежедневные задания', updates:'Обновляются каждый день',
-    all:'Все', standard:'Стандартные', rare:'Редкие', legendary:'Легендарные', back:'Назад',
-    task_done:'Задание выполнено!', kill_reward:'монеты за убийство!',
+    all:'Все', standard:'Стандартные', rare:'Редкие', legendary:'Легендарные',galactic:'Галактические', back:'Назад',
+    task_done:'Задание выполнено!',q_eat_food:'Съешь 100 еды',q_kill:'Убей 3 игроков',q_reach_mass:'Набери 300 массы',q_survive:'Выживи 3 минуты',q_top3:'Займи топ-3',q_kill5:'Убей 5 игроков',q_eat_300:'Съешь 300 еды',q_reach_500:'Набери 500 массы', kill_reward:'монеты за убийство!',
     equipped:'Надет',equip:'Надеть',need_coins:'Нужно', coins:'монет',
-    sk_green:'Зелёный',sk_red:'Красный',sk_blue:'Синий',sk_gold:'Золотой',sk_violet:'Фиолет',sk_pink:'Розовый',sk_teal:'Бирюза',sk_orange:'Оранжевый',sk_fire:'Огонь',sk_ice:'Лёд',sk_neon:'Неон',sk_galaxy:'Галактика',sk_dark:'Тьма',sk_goldx:'Золото X',sk_rainbow:'Радуга',sk_darkx:'Тёмный X',
+    sk_green:'Зелёный',sk_red:'Красный',sk_blue:'Синий',sk_gold:'Золотой',sk_violet:'Фиолет',sk_pink:'Розовый',sk_teal:'Бирюза',sk_orange:'Оранжевый',sk_fire:'Огонь',sk_ice:'Лёд',sk_neon:'Неон',sk_galaxy:'Галактика',sk_dark:'Тьма',sk_goldx:'Золото X',sk_rainbow:'Радуга',sk_darkx:'Тёмный X',sk_nebula:'Туманность',sk_cosmos:'Космос',sk_void:'Пустота',sk_supernova:'Сверхнова',
     tips:['Зажми ЛКМ — ускорение!','Заставь врага врезаться в хвост!','Убивай игроков — монеты!','Минимум 10 массы для ускорения','A — автопилот'],
   },
   en: {
@@ -334,10 +410,10 @@ const LANGS = {
     killed:'DEAD!', your_score:'Your score', again:'Again!', main_menu:'Main Menu',
     top_records:'TOP RECORDS', top:'TOP', online:'Online',
     daily:'Daily Quests', updates:'Reset every day',
-    all:'All', standard:'Standard', rare:'Rare', legendary:'Legendary', back:'Back',
-    task_done:'Quest complete!', kill_reward:'coins for kill!',
+    all:'All', standard:'Standard', rare:'Rare', legendary:'Legendary',galactic:'Galactic', back:'Back',
+    task_done:'Quest complete!',q_eat_food:'Eat 100 food',q_kill:'Kill 3 players',q_reach_mass:'Reach 300 mass',q_survive:'Survive 3 minutes',q_top3:'Reach top-3',q_kill5:'Kill 5 players',q_eat_300:'Eat 300 food',q_reach_500:'Reach 500 mass', kill_reward:'coins for kill!',
     equipped:'Equipped',equip:'Equip',need_coins:'Need', coins:'coins',
-    sk_green:'Green',sk_red:'Red',sk_blue:'Blue',sk_gold:'Gold',sk_violet:'Violet',sk_pink:'Pink',sk_teal:'Teal',sk_orange:'Orange',sk_fire:'Fire',sk_ice:'Ice',sk_neon:'Neon',sk_galaxy:'Galaxy',sk_dark:'Dark',sk_goldx:'Gold X',sk_rainbow:'Rainbow',sk_darkx:'Dark X',
+    sk_green:'Green',sk_red:'Red',sk_blue:'Blue',sk_gold:'Gold',sk_violet:'Violet',sk_pink:'Pink',sk_teal:'Teal',sk_orange:'Orange',sk_fire:'Fire',sk_ice:'Ice',sk_neon:'Neon',sk_galaxy:'Galaxy',sk_dark:'Dark',sk_goldx:'Gold X',sk_rainbow:'Rainbow',sk_darkx:'Dark X',sk_nebula:'Nebula',sk_cosmos:'Cosmos',sk_void:'Void',sk_supernova:'Supernova',
     tips:['Hold LMB — speed boost!','Make enemies hit your tail!','Kill players — earn coins!','Need 10+ mass to boost','A — autopilot'],
   },
   de: {
@@ -348,10 +424,10 @@ const LANGS = {
     killed:'TOT!', your_score:'Dein Ergebnis', again:'Nochmal!', main_menu:'Hauptmenü',
     top_records:'TOP REKORDE', top:'TOP', online:'Online',
     daily:'Tägliche Aufgaben', updates:'Täglich zurückgesetzt',
-    all:'Alle', standard:'Standard', rare:'Selten', legendary:'Legendär', back:'Zurück',
-    task_done:'Aufgabe erledigt!', kill_reward:'Münzen für Kill!',
+    all:'Alle', standard:'Standard', rare:'Selten', legendary:'Legendär',galactic:'Galaktisch', back:'Zurück',
+    task_done:'Aufgabe erledigt!',q_eat_food:'100 Essen fressen',q_kill:'3 Spieler töten',q_reach_mass:'300 Masse erreichen',q_survive:'3 Minuten überleben',q_top3:'Top-3 erreichen',q_kill5:'5 Spieler töten',q_eat_300:'300 Essen fressen',q_reach_500:'500 Masse erreichen', kill_reward:'Münzen für Kill!',
     equipped:'Ausgerüstet',equip:'Ausrüsten',need_coins:'Brauche', coins:'Münzen',
-    sk_green:'Grün',sk_red:'Rot',sk_blue:'Blau',sk_gold:'Gold',sk_violet:'Violett',sk_pink:'Rosa',sk_teal:'Türkis',sk_orange:'Orange',sk_fire:'Feuer',sk_ice:'Eis',sk_neon:'Neon',sk_galaxy:'Galaxie',sk_dark:'Dunkel',sk_goldx:'Gold X',sk_rainbow:'Regenbogen',sk_darkx:'Dunkel X',
+    sk_green:'Grün',sk_red:'Rot',sk_blue:'Blau',sk_gold:'Gold',sk_violet:'Violett',sk_pink:'Rosa',sk_teal:'Türkis',sk_orange:'Orange',sk_fire:'Feuer',sk_ice:'Eis',sk_neon:'Neon',sk_galaxy:'Galaxie',sk_dark:'Dunkel',sk_goldx:'Gold X',sk_rainbow:'Regenbogen',sk_darkx:'Dunkel X',sk_nebula:'Nebel',sk_cosmos:'Kosmos',sk_void:'Leere',sk_supernova:'Supernova',
     tips:['LMB halten — Boost!','Feinde in deinen Schwanz lenken!','Spieler töten — Münzen!','Min. 10 Masse für Boost','A — Autopilot'],
   },
   fr: {
@@ -362,10 +438,10 @@ const LANGS = {
     killed:'MORT!', your_score:'Ton score', again:'Encore!', main_menu:'Menu Principal',
     top_records:'TOP RECORDS', top:'TOP', online:'En ligne',
     daily:'Quêtes du jour', updates:'Réinitialisé chaque jour',
-    all:'Tous', standard:'Standard', rare:'Rare', legendary:'Légendaire', back:'Retour',
-    task_done:'Quête accomplie!', kill_reward:'pièces pour kill!',
+    all:'Tous', standard:'Standard', rare:'Rare', legendary:'Légendaire',galactic:'Galactique', back:'Retour',
+    task_done:'Quête accomplie!',q_eat_food:'Manger 100 nourritures',q_kill:'Tuer 3 joueurs',q_reach_mass:'Atteindre 300 masse',q_survive:'Survivre 3 minutes',q_top3:'Atteindre top-3',q_kill5:'Tuer 5 joueurs',q_eat_300:'Manger 300 nourritures',q_reach_500:'Atteindre 500 masse', kill_reward:'pièces pour kill!',
     equipped:'Équipé',equip:'Équiper',need_coins:'Besoin de', coins:'pièces',
-    sk_green:'Vert',sk_red:'Rouge',sk_blue:'Bleu',sk_gold:'Or',sk_violet:'Violet',sk_pink:'Rose',sk_teal:'Cyan',sk_orange:'Orange',sk_fire:'Feu',sk_ice:'Glace',sk_neon:'Néon',sk_galaxy:'Galaxie',sk_dark:'Sombre',sk_goldx:'Or X',sk_rainbow:'Arc-en-ciel',sk_darkx:'Sombre X',
+    sk_green:'Vert',sk_red:'Rouge',sk_blue:'Bleu',sk_gold:'Or',sk_violet:'Violet',sk_pink:'Rose',sk_teal:'Cyan',sk_orange:'Orange',sk_fire:'Feu',sk_ice:'Glace',sk_neon:'Néon',sk_galaxy:'Galaxie',sk_dark:'Sombre',sk_goldx:'Or X',sk_rainbow:'Arc-en-ciel',sk_darkx:'Sombre X',sk_nebula:'Nébuleuse',sk_cosmos:'Cosmos',sk_void:'Vide',sk_supernova:'Supernova',
     tips:['Maintenir clic — boost!','Faites heurter les ennemis!','Tuez pour des pièces!','10+ masse pour booster','A — pilote automatique'],
   },
   es: {
@@ -376,10 +452,10 @@ const LANGS = {
     killed:'¡MUERTO!', your_score:'Tu puntuación', again:'¡Otra vez!', main_menu:'Menú Principal',
     top_records:'TOP RECORDS', top:'TOP', online:'En línea',
     daily:'Misiones diarias', updates:'Se reinician cada día',
-    all:'Todos', standard:'Estándar', rare:'Raro', legendary:'Legendario', back:'Volver',
-    task_done:'¡Misión completa!', kill_reward:'monedas por matar!',
+    all:'Todos', standard:'Estándar', rare:'Raro', legendary:'Legendario',galactic:'Galáctico', back:'Volver',
+    task_done:'¡Misión completa!',q_eat_food:'Come 100 comidas',q_kill:'Mata 3 jugadores',q_reach_mass:'Alcanza 300 masa',q_survive:'Sobrevive 3 minutos',q_top3:'Llega al top-3',q_kill5:'Mata 5 jugadores',q_eat_300:'Come 300 comidas',q_reach_500:'Alcanza 500 masa', kill_reward:'monedas por matar!',
     equipped:'Equipado',equip:'Equipar',need_coins:'Necesitas', coins:'monedas',
-    sk_green:'Verde',sk_red:'Rojo',sk_blue:'Azul',sk_gold:'Oro',sk_violet:'Violeta',sk_pink:'Rosa',sk_teal:'Cian',sk_orange:'Naranja',sk_fire:'Fuego',sk_ice:'Hielo',sk_neon:'Neón',sk_galaxy:'Galaxia',sk_dark:'Oscuro',sk_goldx:'Oro X',sk_rainbow:'Arcoíris',sk_darkx:'Oscuro X',
+    sk_green:'Verde',sk_red:'Rojo',sk_blue:'Azul',sk_gold:'Oro',sk_violet:'Violeta',sk_pink:'Rosa',sk_teal:'Cian',sk_orange:'Naranja',sk_fire:'Fuego',sk_ice:'Hielo',sk_neon:'Neón',sk_galaxy:'Galaxia',sk_dark:'Oscuro',sk_goldx:'Oro X',sk_rainbow:'Arcoíris',sk_darkx:'Oscuro X',sk_nebula:'Nebulosa',sk_cosmos:'Cosmos',sk_void:'Vacío',sk_supernova:'Supernova',
     tips:['Mantén clic — boost!','¡Haz que enemigos choquen!','¡Mata — gana monedas!','10+ masa para boost','A — autopiloto'],
   },
   pt: {
@@ -390,10 +466,10 @@ const LANGS = {
     killed:'MORTO!', your_score:'Sua pontuação', again:'De novo!', main_menu:'Menu Principal',
     top_records:'TOP RECORDES', top:'TOP', online:'Online',
     daily:'Missões diárias', updates:'Reinicia todo dia',
-    all:'Todos', standard:'Padrão', rare:'Raro', legendary:'Lendário', back:'Voltar',
-    task_done:'Missão completa!', kill_reward:'moedas por matar!',
+    all:'Todos', standard:'Padrão', rare:'Raro', legendary:'Lendário',galactic:'Galáctico', back:'Voltar',
+    task_done:'Missão completa!',q_eat_food:'Coma 100 comidas',q_kill:'Mate 3 jogadores',q_reach_mass:'Alcance 300 massa',q_survive:'Sobreviva 3 minutos',q_top3:'Alcance top-3',q_kill5:'Mate 5 jogadores',q_eat_300:'Coma 300 comidas',q_reach_500:'Alcance 500 massa', kill_reward:'moedas por matar!',
     equipped:'Equipado',equip:'Equipar',need_coins:'Precisa de', coins:'moedas',
-    sk_green:'Verde',sk_red:'Vermelho',sk_blue:'Azul',sk_gold:'Ouro',sk_violet:'Violeta',sk_pink:'Rosa',sk_teal:'Ciano',sk_orange:'Laranja',sk_fire:'Fogo',sk_ice:'Gelo',sk_neon:'Neon',sk_galaxy:'Galáxia',sk_dark:'Escuro',sk_goldx:'Ouro X',sk_rainbow:'Arco-íris',sk_darkx:'Escuro X',
+    sk_green:'Verde',sk_red:'Vermelho',sk_blue:'Azul',sk_gold:'Ouro',sk_violet:'Violeta',sk_pink:'Rosa',sk_teal:'Ciano',sk_orange:'Laranja',sk_fire:'Fogo',sk_ice:'Gelo',sk_neon:'Neon',sk_galaxy:'Galáxia',sk_dark:'Escuro',sk_goldx:'Ouro X',sk_rainbow:'Arco-íris',sk_darkx:'Escuro X',sk_nebula:'Nebulosa',sk_cosmos:'Cosmos',sk_void:'Vazio',sk_supernova:'Supernova',
     tips:['Segure clique — boost!','Faça inimigos baterem!','Mate — ganhe moedas!','10+ massa para boost','A — autopiloto'],
   },
   tr: {
@@ -404,10 +480,10 @@ const LANGS = {
     killed:'ÖLDÜN!', your_score:'Skorun', again:'Tekrar!', main_menu:'Ana Menü',
     top_records:'TOP REKORLAR', top:'TOP', online:'Çevrimiçi',
     daily:'Günlük Görevler', updates:'Her gün sıfırlanır',
-    all:'Hepsi', standard:'Standart', rare:'Nadir', legendary:'Efsanevi', back:'Geri',
-    task_done:'Görev tamamlandı!', kill_reward:'öldürme için para!',
+    all:'Hepsi', standard:'Standart', rare:'Nadir', legendary:'Efsanevi',galactic:'Galaktik', back:'Geri',
+    task_done:'Görev tamamlandı!',q_eat_food:'100 yiyecek ye',q_kill:'3 oyuncu öldür',q_reach_mass:'300 kütle kazan',q_survive:'3 dakika hayatta kal',q_top3:'Top-3 ol',q_kill5:'5 oyuncu öldür',q_eat_300:'300 yiyecek ye',q_reach_500:'500 kütle kazan', kill_reward:'öldürme için para!',
     equipped:'Giyildi',equip:'Giy',need_coins:'Gerekli', coins:'para',
-    sk_green:'Yeşil',sk_red:'Kırmızı',sk_blue:'Mavi',sk_gold:'Altın',sk_violet:'Mor',sk_pink:'Pembe',sk_teal:'Camgöbeği',sk_orange:'Turuncu',sk_fire:'Ateş',sk_ice:'Buz',sk_neon:'Neon',sk_galaxy:'Galaksi',sk_dark:'Karanlık',sk_goldx:'Altın X',sk_rainbow:'Gökkuşağı',sk_darkx:'Karanlık X',
+    sk_green:'Yeşil',sk_red:'Kırmızı',sk_blue:'Mavi',sk_gold:'Altın',sk_violet:'Mor',sk_pink:'Pembe',sk_teal:'Camgöbeği',sk_orange:'Turuncu',sk_fire:'Ateş',sk_ice:'Buz',sk_neon:'Neon',sk_galaxy:'Galaksi',sk_dark:'Karanlık',sk_goldx:'Altın X',sk_rainbow:'Gökkuşağı',sk_darkx:'Karanlık X',sk_nebula:'Bulutsu',sk_cosmos:'Kozmos',sk_void:'Boşluk',sk_supernova:'Süpernova',
     tips:['Sol tıkla tut — boost!','Düşmanları kuyruğuna çarp!','Öldür — para kazan!','Boost için 10+ kütle','A — otopilot'],
   },
   uk: {
@@ -418,10 +494,10 @@ const LANGS = {
     killed:'ВБИТИЙ!', your_score:'Твій результат', again:'Знову!', main_menu:'Головне меню',
     top_records:'ТОП РЕКОРДІВ', top:'ТОП', online:'Онлайн',
     daily:'Щоденні завдання', updates:'Оновлюються щодня',
-    all:'Всі', standard:'Стандартні', rare:'Рідкісні', legendary:'Легендарні', back:'Назад',
-    task_done:'Завдання виконано!', kill_reward:'монети за вбивство!',
+    all:'Всі', standard:'Стандартні', rare:'Рідкісні', legendary:'Легендарні',galactic:'Галактичні', back:'Назад',
+    task_done:'Завдання виконано!',q_eat_food:'Зїж 100 їжі',q_kill:'Вбий 3 гравців',q_reach_mass:'Набери 300 маси',q_survive:'Вижи 3 хвилини',q_top3:'Займи топ-3',q_kill5:'Вбий 5 гравців',q_eat_300:'Зїж 300 їжі',q_reach_500:'Набери 500 маси', kill_reward:'монети за вбивство!',
     equipped:'Надіто',equip:'Надіти',need_coins:'Потрібно', coins:'монет',
-    sk_green:'Зелений',sk_red:'Червоний',sk_blue:'Синій',sk_gold:'Золотий',sk_violet:'Фіолет',sk_pink:'Рожевий',sk_teal:'Бірюза',sk_orange:'Помаранч',sk_fire:'Вогонь',sk_ice:'Лід',sk_neon:'Неон',sk_galaxy:'Галактика',sk_dark:'Темрява',sk_goldx:'Золото X',sk_rainbow:'Веселка',sk_darkx:'Темний X',
+    sk_green:'Зелений',sk_red:'Червоний',sk_blue:'Синій',sk_gold:'Золотий',sk_violet:'Фіолет',sk_pink:'Рожевий',sk_teal:'Бірюза',sk_orange:'Помаранч',sk_fire:'Вогонь',sk_ice:'Лід',sk_neon:'Неон',sk_galaxy:'Галактика',sk_dark:'Темрява',sk_goldx:'Золото X',sk_rainbow:'Веселка',sk_darkx:'Темний X',sk_nebula:'Туманність',sk_cosmos:'Космос',sk_void:'Порожнеча',sk_supernova:'Наднова',
     tips:['Затисни ЛКМ — прискорення!','Змусь ворога врізатись!','Вбивай гравців — монети!','Мін. 10 маси для буста','A — автопілот'],
   },
 };
@@ -640,7 +716,9 @@ function connectWS(){
       }
       if(msg.type==='kill_reward'){
         essence=Math.min(9999,essence+msg.coins);syncEss();
-        showToast('💀 +'+msg.coins+' монеты за убийство!','#ff6b6b');
+        showToast('💀 +'+msg.coins+' '+t('kill_reward'),'#ff6b6b');
+        trackQuest('kill',1);
+        trackQuest('kill5',1);
       }
       if(msg.type==='coin_reward'){
         essence=Math.min(9999,essence+msg.coins);syncEss();
@@ -695,6 +773,7 @@ function runAutopilot(){
 }
 
 // ══════ HUD ══════
+let _lastInputSend=0;
 function updHUD(){
   if(ws&&ws.readyState===WebSocket.OPEN&&player&&running){
     if(!autopilotMode){
@@ -704,11 +783,16 @@ function updHUD(){
     } else {
       runAutopilot();
     }
-    ws.send(JSON.stringify({
-      type:'input',
-      angle:player.tAngle,
-      boost:player.boosting
-    }));
+    // Throttle: шлём не чаще 30 раз/сек (каждые 33мс = серверный тик)
+    const now=performance.now();
+    if(now-_lastInputSend>=33){
+      _lastInputSend=now;
+      ws.send(JSON.stringify({
+        type:'input',
+        angle:player.tAngle,
+        boost:player.boosting
+      }));
+    }
   }
 
   if(serverWorld){
@@ -813,6 +897,7 @@ function loop(ts){
 requestAnimationFrame(loop);
 
 // ══════ КНОПКИ ══════
+
 document.getElementById('playBtn').onclick=()=>{
   pname=document.getElementById('nameInput').value.trim()||'Player';
   connectWS();
@@ -851,7 +936,61 @@ function drawRobotIcon(){
   x.fillStyle='#00e5cc';x.fillRect(5,23,5,6);x.fillRect(26,23,5,6);x.fillRect(11,32,5,4);x.fillRect(20,32,5,4);
 }
 function toggleAutopilot(){autopilotMode=!autopilotMode;document.getElementById('apBtn').classList.toggle('active',autopilotMode);drawRobotIcon();}
-window.addEventListener('load',()=>{drawRobotIcon();applyLang();});
+function drawGear(){
+  const el=document.getElementById('gearCanvas');
+  if(!el)return;
+  const ctx=el.getContext('2d');
+  const W=28, cx=14, cy=14;
+  const teeth=8, ro=12, ri=8.5, rh=4.5;
+  ctx.clearRect(0,0,W,W);
+
+  // Внешнее свечение
+  const glow=ctx.createRadialGradient(cx,cy,rh,cx,cy,ro);
+  glow.addColorStop(0,'rgba(46,204,113,0.0)');
+  glow.addColorStop(1,'rgba(46,204,113,0.18)');
+  ctx.beginPath(); ctx.arc(cx,cy,ro+1,0,Math.PI*2);
+  ctx.fillStyle=glow; ctx.fill();
+
+  // Шестерёнка — тело с зубьями
+  ctx.beginPath();
+  for(let i=0;i<teeth;i++){
+    const a0=(i/teeth)*Math.PI*2 - Math.PI/2;
+    const a1=a0+0.22, a2=a0+Math.PI/teeth-0.22, a3=a0+Math.PI/teeth;
+    ctx.lineTo(cx+Math.cos(a0)*ri, cy+Math.sin(a0)*ri);
+    ctx.lineTo(cx+Math.cos(a1)*ro, cy+Math.sin(a1)*ro);
+    ctx.lineTo(cx+Math.cos(a2)*ro, cy+Math.sin(a2)*ro);
+    ctx.lineTo(cx+Math.cos(a3)*ri, cy+Math.sin(a3)*ri);
+  }
+  ctx.closePath();
+
+  // Градиент заливки
+  const grad=ctx.createLinearGradient(cx-ro,cy-ro,cx+ro,cy+ro);
+  grad.addColorStop(0,'#39ff80');
+  grad.addColorStop(0.5,'#2ecc71');
+  grad.addColorStop(1,'#1a8a4a');
+  ctx.fillStyle=grad;
+  ctx.fill();
+
+  // Тонкая обводка
+  ctx.strokeStyle='rgba(255,255,255,0.25)';
+  ctx.lineWidth=0.8;
+  ctx.stroke();
+
+  // Центральное отверстие
+  ctx.beginPath(); ctx.arc(cx,cy,rh,0,Math.PI*2);
+  ctx.fillStyle='#071a0e';
+  ctx.fill();
+  ctx.strokeStyle='rgba(46,204,113,0.5)';
+  ctx.lineWidth=1;
+  ctx.stroke();
+
+  // Блик
+  ctx.beginPath(); ctx.arc(cx-2.5,cy-2.5,2,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,0.22)';
+  ctx.fill();
+}
+
+window.addEventListener('load',()=>{drawRobotIcon();drawGear();applyLang();});
 // ══════ RECORDS ══════
 function loadRecords(){return JSON.parse(localStorage.getItem('dvx_records')||'[]');}
 function saveRecord(score){let recs=loadRecords();recs.push(score);recs.sort((a,b)=>b-a);recs=recs.slice(0,5);localStorage.setItem('dvx_records',JSON.stringify(recs));return{recs,rank:recs.indexOf(score)+1};}
@@ -899,11 +1038,14 @@ updateXPBar();
 
 // ══════ QUESTS ══════
 const QUEST_DEFS=[
-  {id:'eat_food',name:'Съешь 100 еды',goal:100,reward:273,icon:'🍎'},
-  {id:'reach_mass',name:'Набери 500 массы',goal:500,reward:289,icon:'📈'},
-  {id:'survive_time',name:'Выживи 3 минуты',goal:180,reward:304,icon:'⏱'},
-  {id:'top3',name:'Займи топ-3 в раунде',goal:1,reward:347,icon:'🏆'},
-  {id:'eat_500',name:'Съешь 500 еды',goal:500,reward:412,icon:'🍎'},
+  {id:'eat_food',  key:'q_eat_food',   goal:100, reward:150, icon:'🍎'},
+  {id:'kill',      key:'q_kill',        goal:3,   reward:300, icon:'💀'},
+  {id:'reach_mass',key:'q_reach_mass',  goal:300, reward:200, icon:'📈'},
+  {id:'survive_time',key:'q_survive',   goal:180, reward:250, icon:'⏱'},
+  {id:'top3',      key:'q_top3',        goal:1,   reward:400, icon:'🏆'},
+  {id:'kill5',     key:'q_kill5',       goal:5,   reward:500, icon:'⚔️'},
+  {id:'eat_300',   key:'q_eat_300',     goal:300, reward:350, icon:'🍎'},
+  {id:'reach_500', key:'q_reach_500',   goal:500, reward:450, icon:'📈'},
 ];
 function getTodayKey(){return'dvx_q_'+new Date().toDateString();}
 function loadQuests(){const k=getTodayKey(),s=localStorage.getItem(k);if(s)return JSON.parse(s);const q=[...QUEST_DEFS].sort(()=>Math.random()-.5).slice(0,3).map(q=>({...q,progress:0,done:false}));localStorage.setItem(k,JSON.stringify(q));return q;}
@@ -915,7 +1057,7 @@ function trackQuest(id,amount){
   for(const q of dailyQuests){
     if(q.id===id&&!q.done){
       q.progress=Math.min(q.goal,q.progress+amount);
-      if(q.progress>=q.goal){q.done=true;showToast(q.icon+' Задание выполнено! +'+q.reward+'🪙','#f9ca24');essence=Math.min(9999,essence+q.reward);syncEss();addXP(q.reward);}
+      if(q.progress>=q.goal){q.done=true;showToast(q.icon+' '+t('task_done')+' +'+q.reward+'🪙','#f9ca24');essence=Math.min(9999,essence+q.reward);syncEss();addXP(q.reward);}
       ch=true;
     }
   }
@@ -923,7 +1065,7 @@ function trackQuest(id,amount){
 }
 function renderQuests(){
   const list=document.getElementById('questsList');if(!list)return;
-  list.innerHTML=dailyQuests.map(q=>`<div class="quest-item"><div class="quest-name">${q.icon} ${q.name}</div><div class="quest-bar-bg"><div class="quest-bar-fill" style="width:${Math.min(100,(q.progress/q.goal)*100)}%"></div></div><div class="quest-prog"><span>${q.progress}/${q.goal}</span><span class="${q.done?'quest-done':''}">${q.done?'✅ +'+q.reward+'🪙':'🪙 '+q.reward}</span></div></div>`).join('');
+  list.innerHTML=dailyQuests.map(q=>`<div class="quest-item"><div class="quest-name">${q.icon} ${t(q.key)}</div><div class="quest-bar-bg"><div class="quest-bar-fill" style="width:${Math.min(100,(q.progress/q.goal)*100)}%"></div></div><div class="quest-prog"><span>${q.progress}/${q.goal}</span><span class="${q.done?'quest-done':''}">${q.done?'✅ +'+q.reward+'🪙':'🪙 '+q.reward}</span></div></div>`).join('');
   const badge=document.getElementById('questsBadge');if(badge){const d=dailyQuests.filter(q=>q.done).length;if(d>0){badge.style.display='flex';badge.textContent=d;}else badge.style.display='none';}
 }
 renderQuests();
