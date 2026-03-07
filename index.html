@@ -19,14 +19,21 @@ body { background:#0d2b15; overflow:hidden; font-family:'Nunito',sans-serif; use
   display:flex;
   opacity:0;
   pointer-events:none;
-  transition: opacity 0.38s cubic-bezier(0.4,0,0.2,1), transform 0.38s cubic-bezier(0.4,0,0.2,1);
+  transition: opacity 0.38s cubic-bezier(0.4,0,0.2,1),
+              transform 0.38s cubic-bezier(0.4,0,0.2,1),
+              visibility 0s linear 0.38s;
   transform: translateY(18px) scale(0.985);
   will-change: opacity, transform;
+  visibility: hidden;
 }
 .screen.active {
   opacity:1;
   pointer-events:all;
   transform: translateY(0px) scale(1);
+  visibility: visible;
+  transition: opacity 0.38s cubic-bezier(0.4,0,0.2,1),
+              transform 0.38s cubic-bezier(0.4,0,0.2,1),
+              visibility 0s linear 0s;
 }
 #menuScreen { flex-direction:column; align-items:center; justify-content:flex-start; background:radial-gradient(ellipse 100% 80% at 50% 0%, #1e5e30 0%, #0a1f10 60%, #050e08 100%); }
 .top-bar { width:100%; display:flex; justify-content:center; align-items:flex-start; padding:80px 24px 0; position:relative; }
@@ -768,7 +775,6 @@ function switchScreen(toId, onReady){
   const current=document.querySelector('.screen.active');
   if(current===next){if(onReady)onReady();return;}
   if(_transitioning){
-    // Форсируем мгновенно если уже идёт переход
     all.forEach(s=>{s.classList.remove('active');s.style.cssText='';});
     if(onReady)onReady();
     next.classList.add('active');
@@ -777,19 +783,21 @@ function switchScreen(toId, onReady){
   _transitioning=true;
   // Анимация ухода текущего
   if(current){
-    current.style.transition='opacity 0.22s ease, transform 0.22s ease';
+    current.style.transition='opacity 0.22s ease, transform 0.22s ease, visibility 0s linear 0.22s';
     current.style.opacity='0';
     current.style.transform='translateY(-12px) scale(0.984)';
   }
   setTimeout(()=>{
+    // Убираем active у всех — visibility:hidden сработает через CSS transition delay
     all.forEach(s=>{s.classList.remove('active');s.style.cssText='';});
     if(onReady)onReady();
-    // Стартовое состояние входящего экрана
+    // Входящий: сразу visible, но opacity=0 → плавно в 1
+    next.style.visibility='visible';
     next.style.opacity='0';
     next.style.transform='translateY(22px) scale(0.984)';
     next.style.transition='none';
     next.classList.add('active');
-    next.getBoundingClientRect(); // форсируем reflow
+    next.getBoundingClientRect();
     next.style.transition='opacity 0.36s cubic-bezier(0.34,1.1,0.64,1), transform 0.36s cubic-bezier(0.34,1.1,0.64,1)';
     next.style.opacity='1';
     next.style.transform='translateY(0) scale(1)';
@@ -1232,6 +1240,7 @@ function drawMM(){
 // ══════ DRAW ══════
 function drawBackground(cx,cy){
   ctx.fillStyle='#0d2b15';ctx.fillRect(0,0,W,H);
+  if(!running)return; // на меню — просто тёмный фон, без сетки и рамки
   ctx.strokeStyle='rgba(46,204,113,0.055)';ctx.lineWidth=1;
   for(let x=Math.floor(cx/CELL)*CELL;x<cx+W+CELL;x+=CELL){ctx.beginPath();ctx.moveTo(x-cx,0);ctx.lineTo(x-cx,H);ctx.stroke();}
   for(let y=Math.floor(cy/CELL)*CELL;y<cy+H+CELL;y+=CELL){ctx.beginPath();ctx.moveTo(0,y-cy);ctx.lineTo(W,y-cy);ctx.stroke();}
@@ -1663,25 +1672,14 @@ window.addEventListener('load', initStaticCoins);
 
 // ══════ RIPPLE EFFECT ══════
 function spawnRipple(el, e){
-  if(running) return; // не в игре
+  if(running) return;
   const rect = el.getBoundingClientRect();
   const x = (e.clientX ?? rect.left + rect.width/2) - rect.left;
   const y = (e.clientY ?? rect.top + rect.height/2) - rect.top;
-  const size = Math.max(rect.width, rect.height) * 2.2;
+  const size = Math.max(rect.width, rect.height) * 2.4;
   const circle = document.createElement('span');
   circle.className = 'ripple-circle';
-  // Цвет ripple зависит от фона кнопки
-  const bg = getComputedStyle(el).background;
-  let color = 'rgba(255,255,255,0.35)';
-  if(bg.includes('a29bfe')||bg.includes('6c5ce7')) color='rgba(162,155,254,0.45)';
-  else if(bg.includes('ff9f43')||bg.includes('e67e22')) color='rgba(255,159,67,0.45)';
-  else if(bg.includes('4af078')||bg.includes('20c44a')) color='rgba(57,255,20,0.35)';
-  else if(bg.includes('2ecc71')) color='rgba(46,204,113,0.4)';
-  circle.style.cssText = `
-    width:${size}px; height:${size}px;
-    left:${x - size/2}px; top:${y - size/2}px;
-    background:${color};
-  `;
+  circle.style.cssText = `width:${size}px;height:${size}px;left:${x-size/2}px;top:${y-size/2}px;background:rgba(255,255,255,0.28);`;
   el.appendChild(circle);
   circle.addEventListener('animationend', ()=>circle.remove(), {once:true});
 }
