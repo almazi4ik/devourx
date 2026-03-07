@@ -37,7 +37,6 @@ canvas { display:block; position:fixed; inset:0; }
 .btn-music:hover{background:rgba(255,255,255,0.13); color:#fff;}
 .btn-music.off{color:rgba(255,255,255,0.3); border-color:rgba(255,255,255,0.1);}
 
-/* ═══ ЭКРАН ВЫБОРА РЕЖИМА ═══ */
 #modeScreen {
   flex-direction:column; align-items:center; justify-content:center;
   background:radial-gradient(ellipse 100% 80% at 50% 0%, #1e5e30 0%, #0a1f10 60%, #050e08 100%);
@@ -84,7 +83,6 @@ canvas { display:block; position:fixed; inset:0; }
 }
 .mode-badge-bot  { background:rgba(249,202,36,0.15); color:#f9ca24; border:1px solid rgba(249,202,36,0.4); }
 .mode-badge-live { background:rgba(46,204,113,0.15); color:#2ecc71; border:1px solid rgba(46,204,113,0.4); }
-/* пульсирующая точка LIVE */
 .live-dot { display:inline-block; width:7px; height:7px; background:#2ecc71; border-radius:50%; margin-right:4px; animation:livepulse 1.2s infinite; vertical-align:middle; }
 @keyframes livepulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(0.7)}}
 .mode-back {
@@ -94,7 +92,6 @@ canvas { display:block; position:fixed; inset:0; }
 }
 .mode-back:hover { border-color:rgba(255,255,255,0.35); color:#fff; }
 
-/* ═══ ШЕСТЕРЁНКА И ЯЗЫКИ ═══ */
 #gearBtn { position:fixed; bottom:20px; left:20px; width:48px; height:48px; background:rgba(0,0,0,0.55); border:2px solid rgba(255,255,255,0.2); border-radius:50%; cursor:pointer; z-index:200; display:flex; align-items:center; justify-content:center; transition:transform .3s, border-color .2s; font-size:22px; }
 #gearBtn:hover { border-color:#2ecc71; transform:rotate(60deg); }
 #langPanel { position:fixed; bottom:78px; left:20px; background:rgba(8,18,12,0.97); border:2px solid rgba(46,204,113,0.3); border-radius:20px; padding:14px; z-index:200; display:none; flex-direction:column; gap:6px; min-width:180px; }
@@ -104,7 +101,6 @@ canvas { display:block; position:fixed; inset:0; }
 .lang-row.active { background:rgba(46,204,113,0.18); border:1px solid rgba(46,204,113,0.35); }
 .lang-name { font-family:'Nunito',sans-serif; font-weight:800; font-size:14px; color:#d4f5e9; }
 
-/* ═══ ЭКРАН ЗАГРУЗКИ ═══ */
 #loadingScreen { flex-direction:column; align-items:center; justify-content:center; background:radial-gradient(ellipse 100% 80% at 50% 0%, #1e5e30 0%, #0a1f10 60%, #050e08 100%); gap:28px; }
 .load-logo { font-family:'Fredoka One',cursive; font-size:72px; line-height:1; filter:drop-shadow(0 0 40px #39ff1488); }
 .load-logo .ld{color:#ff4e4e}.load-logo .le{color:#ff9f43}.load-logo .lv{color:#f9ca24}.load-logo .lo{color:#2ecc71}.load-logo .lu{color:#00e5cc}.load-logo .lr{color:#a29bfe}.load-logo .lx{color:#ff6b9d}
@@ -324,7 +320,6 @@ canvas { display:block; position:fixed; inset:0; }
 <div id="onlineCounter">Онлайн: <span id="onlineNum">0</span></div>
 <div class="coins-fixed"><span style="font-size:18px;">🪙</span><span class="ess-cnt" id="essCnt" style="font-family:'Fredoka One',cursive;font-size:20px;color:#f9ca24;">0</span></div>
 
-<!-- ШЕСТЕРЁНКА -->
 <button id="gearBtn">⚙️</button>
 <div id="langPanel">
   <div class="lp-title">🌐 ЯЗЫК</div>
@@ -472,7 +467,35 @@ const WORLD=4000,CELL=22;
 let serverWorld=null,player=null,running=false;
 let camX=0,camY=0,boosting=false,pname='Player';
 let autopilotMode=false;
-let gameMode='online'; // 'online' | 'offline'
+let gameMode='online';
+
+// ══════ ИНТЕРПОЛЯЦИЯ (фикс моргания змеек в онлайне) ══════
+// Хранит предыдущий снапшот для плавного перехода между кадрами
+let _prevWorld=null;
+let _worldRecvTime=0;
+const INTERP_DURATION=33; // мс — совпадает с тиком сервера
+
+// Возвращает интерполированные сегменты между двумя снапшотами
+function interpSegs(prevSegs, nextSegs, t){
+  if(!prevSegs||prevSegs.length!==nextSegs.length) return nextSegs;
+  const out=[];
+  const len=nextSegs.length;
+  for(let i=0;i<len;i++){
+    out.push({
+      x: prevSegs[i].x + (nextSegs[i].x - prevSegs[i].x)*t,
+      y: prevSegs[i].y + (nextSegs[i].y - prevSegs[i].y)*t,
+    });
+  }
+  return out;
+}
+
+// Строит карту сегментов по имени игрока из снапшота
+function buildSegsMap(world){
+  const map={};
+  if(!world||!world.players) return map;
+  for(const p of world.players) map[p.name]=p.segs;
+  return map;
+}
 
 // ══════ OFFLINE БОТЫ ══════
 const OFFLINE_BOTS_COUNT=14;
@@ -565,12 +588,10 @@ function offlineBotAI(bot){
   if(bot._thinkTimer>0)return;
   bot._thinkTimer=8+Math.floor(Math.random()*16);
   const h=bot.segs[0];
-  // Стены
   const margin=180;
   if(h.x<margin||h.x>WORLD-margin||h.y<margin||h.y>WORLD-margin){
     bot.tAngle=Math.atan2(WORLD/2-h.y,WORLD/2-h.x)+(Math.random()-.5)*0.5;return;
   }
-  // Опасность
   let danger=false;
   const allSnakes=[offlineState.player,...offlineState.bots.filter(b=>b!==bot&&b.alive)];
   for(const other of allSnakes){
@@ -582,7 +603,6 @@ function offlineBotAI(bot){
     if(danger)break;
   }
   if(danger)return;
-  // Еда
   let best=Infinity,tgt=null;
   for(let i=0;i<offlineState.foods.length;i+=2){
     const f=offlineState.foods[i],dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;
@@ -642,7 +662,6 @@ function offlineTick(){
     }
     return;
   }
-  // Управление игроком
   if(!autopilotMode){
     me.tAngle=Math.atan2(my-H/2,mx-W/2);
     me.boosting=boosting&&me.score>MIN_LEN;
@@ -655,12 +674,9 @@ function offlineTick(){
   if(me.boosting&&me.length>MIN_LEN&&Math.random()<0.05){me.length=Math.max(MIN_LEN,me.length-1);me.score=Math.max(MIN_LEN,me.score-1);}
   offlineUpdateSnake(me,0.18);
   offlineEatFood(me);
-  // Камера
   if(me.segs.length>0){camX+=(me.segs[0].x-W/2-camX)*0.12;camY+=(me.segs[0].y-H/2-camY)*0.12;}
-  // Выживание
   const now=performance.now();
   if(now-lastSurviveTick>=1000){surviveTimer++;lastSurviveTick=now;trackQuest('survive_time',1);}
-  // Боты
   for(const bot of offlineState.bots){
     if(!bot.alive)continue;
     offlineBotAI(bot);
@@ -670,7 +686,6 @@ function offlineTick(){
   }
   offlineCheckCollisions();
   offlineRespawnBots();
-  // Строим serverWorld
   const allPlayers=[me,...offlineState.bots].filter(p=>p.alive).map(p=>({name:p.name,skinId:p.skinId,score:p.score,segs:p.segs.slice(0,750),boosting:p.boosting,isMe:p.isMe}));
   const lb=[...allPlayers].sort((a,b)=>b.score-a.score).slice(0,10).map(p=>({name:p.name,score:p.score,isMe:p.isMe}));
   serverWorld={players:allPlayers,foods:offlineState.foods,leaderboard:lb};
@@ -679,7 +694,7 @@ function offlineTick(){
 function startOffline(){
   gameMode='offline';
   if(offlineTickInterval){clearInterval(offlineTickInterval);offlineTickInterval=null;}
-  serverWorld=null;
+  serverWorld=null;_prevWorld=null;
   const{spawnX,spawnY}=initOffline();
   camX=spawnX-W/2;camY=spawnY-H/2;
   player=offlineState.player;
@@ -704,7 +719,7 @@ let _connectTimeout=null,_loadInterval=null;
 
 function connectWS(){
   if(wsConnecting)return;
-  wsConnecting=true;gameMode='online';serverWorld=null;
+  wsConnecting=true;gameMode='online';serverWorld=null;_prevWorld=null;
   if(ws){try{ws.close();}catch(e){}ws=null;}
   showLoading(t('connecting'));
   let loadPct=0;
@@ -743,6 +758,13 @@ function connectWS(){
         },300);
       }
       if(msg.type==='world'){
+        // ── ФИКС МОРГАНИЯ: сохраняем предыдущий мир и время получения ──
+        _prevWorld = serverWorld ? {
+          players: serverWorld.players,
+          _segsMap: buildSegsMap(serverWorld)
+        } : null;
+        _worldRecvTime = performance.now();
+        // ────────────────────────────────────────────────────────────────
         serverWorld=msg;
         if(msg.playerCount){document.getElementById('onlineNum').textContent=msg.playerCount;}
         if(serverWorld.players){
@@ -772,7 +794,7 @@ function connectWS(){
     }catch(err){console.warn('WS msg error',err);}
   };
   ws.onerror=()=>{clearTimeout(_connectTimeout);clearInterval(_loadInterval);wsConnecting=false;setLoadStatus(t('conn_err'),100);document.getElementById('loadBarFill').style.background='#e74c3c';setTimeout(()=>showMenu(),3000);};
-  ws.onclose=()=>{wsConnecting=false;ws=null;serverWorld=null;if(running&&gameMode==='online'){running=false;document.getElementById('hud').style.display='none';showMenu();}};
+  ws.onclose=()=>{wsConnecting=false;ws=null;serverWorld=null;_prevWorld=null;if(running&&gameMode==='online'){running=false;document.getElementById('hud').style.display='none';showMenu();}};
 }
 
 // ══════ INPUT ══════
@@ -843,8 +865,22 @@ function drawFoodList(fl,cx,cy){
     ctx.beginPath();ctx.arc(fx-pr*.3,fy-pr*.3,pr*.27,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.28)';ctx.fill();
   }
 }
-function drawServerSnake(p,cx,cy){
-  const segs=p.segs;if(!segs||segs.length<2)return;
+
+// ══════ DRAW SNAKE (с интерполяцией для онлайна) ══════
+function drawServerSnake(p, cx, cy){
+  // Для онлайн-режима применяем интерполяцию между кадрами — это устраняет моргание
+  let segs = p.segs;
+  if(gameMode === 'online' && _prevWorld && _prevWorld._segsMap){
+    const prevSegs = _prevWorld._segsMap[p.name];
+    if(prevSegs && prevSegs.length === segs.length){
+      // t от 0 до 1: насколько мы продвинулись к новому кадру
+      const elapsed = performance.now() - _worldRecvTime;
+      const tt = Math.min(elapsed / INTERP_DURATION, 1);
+      segs = interpSegs(prevSegs, segs, tt);
+    }
+  }
+
+  if(!segs||segs.length<2)return;
   const hd0=segs[0],hsx=hd0.x-cx,hsy=hd0.y-cy;
   if(hsx<-500||hsx>W+500||hsy<-500||hsy>H+500)return;
   const sk=SKINS_DATA[p.skinId%SKINS_DATA.length]||SKINS_DATA[0];
@@ -871,6 +907,7 @@ function drawServerSnake(p,cx,cy){
   ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillText(p.name,hx+1,hy-r-8+1);
   ctx.fillStyle=p.isMe?'#f9ca24':'#fff';ctx.fillText(p.name,hx,hy-r-8);
 }
+
 function draw(cx,cy){
   drawBackground(cx,cy);
   if(serverWorld){drawFoodList(serverWorld.foods||[],cx,cy);for(const p of(serverWorld.players||[]))drawServerSnake(p,cx,cy);}
@@ -904,14 +941,14 @@ document.getElementById('restartBtn').onclick=()=>{
   document.getElementById('deathScreen').classList.remove('active');
   if(gameMode==='offline'){startOffline();}
   else{
-    if(ws&&ws.readyState===WebSocket.OPEN){running=false;serverWorld=null;showLoading(t('respawn'));ws.send(JSON.stringify({type:'respawn'}));}
+    if(ws&&ws.readyState===WebSocket.OPEN){running=false;serverWorld=null;_prevWorld=null;showLoading(t('respawn'));ws.send(JSON.stringify({type:'respawn'}));}
     else connectWS();
   }
 };
 document.getElementById('menuBackBtn').onclick=()=>{
   if(offlineTickInterval){clearInterval(offlineTickInterval);offlineTickInterval=null;}
   if(ws){try{ws.close();}catch(e){}ws=null;}
-  serverWorld=null;running=false;offlineState=null;showMenu();
+  serverWorld=null;_prevWorld=null;running=false;offlineState=null;showMenu();
 };
 document.getElementById('nameInput').addEventListener('keydown',e=>{if(e.key==='Enter'){pname=document.getElementById('nameInput').value.trim()||'Player';showModeSelect();}});
 
