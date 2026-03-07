@@ -35,14 +35,14 @@ body { background:#0d2b15; overflow:hidden; font-family:'Nunito',sans-serif; use
               transform 0.38s cubic-bezier(0.4,0,0.2,1),
               visibility 0s linear 0s;
 }
-#menuScreen { flex-direction:column; align-items:center; justify-content:flex-start; background:radial-gradient(ellipse 100% 80% at 50% 0%, #1e5e30 0%, #0a1f10 60%, #050e08 100%); }
-.top-bar { width:100%; display:flex; justify-content:center; align-items:flex-start; padding:80px 24px 0; position:relative; }
+#menuScreen { flex-direction:column; align-items:center; justify-content:flex-start; background:transparent; }
+.top-bar { width:100%; display:flex; justify-content:center; align-items:flex-start; padding:80px 24px 0; position:relative; z-index:1; }
 .logo-wrap { display:flex; flex-direction:column; align-items:center; pointer-events:none; }
 .logo { font-family:'Fredoka One',cursive; font-size:88px; line-height:1; letter-spacing:2px; animation:lp 3s ease-in-out infinite; filter:drop-shadow(0 0 35px #39ff1455) drop-shadow(0 6px 0 #07200d); }
 .logo .ld{color:#ff4e4e}.logo .le{color:#ff9f43}.logo .lv{color:#f9ca24}.logo .lo{color:#2ecc71}.logo .lu{color:#00e5cc}.logo .lr{color:#a29bfe}.logo .lx{color:#ff6b9d}.logo .lio{color:#fff;font-size:54px;vertical-align:middle}
 @keyframes lp{0%,100%{filter:drop-shadow(0 0 30px #39ff1455) drop-shadow(0 6px 0 #07200d)}50%{filter:drop-shadow(0 0 60px #39ff14aa) drop-shadow(0 6px 0 #07200d)}}
 .tip { color:#a8d8b8; font-size:14px; font-weight:700; margin-top:6px; opacity:.8; min-height:20px; }
-.menu-center { display:flex; flex-direction:column; align-items:center; gap:11px; margin-top:80px; width:420px; }
+.menu-center { display:flex; flex-direction:column; align-items:center; gap:11px; margin-top:80px; width:420px; position:relative; z-index:1; }
 .coins-fixed { position:fixed; top:14px; right:14px; display:flex; align-items:center; gap:6px; background:rgba(0,0,0,0.55); border:2px solid rgba(249,202,36,0.5); border-radius:50px; padding:4px 14px 4px 4px; z-index:999; }
 .name-row { display:flex; gap:8px; width:100%; }
 .name-input { flex:1; background:rgba(255,255,255,0.93); border:none; border-radius:50px; padding:13px 24px; font-size:20px; font-family:'Nunito',sans-serif; font-weight:800; color:#1a4a25; outline:none; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,0.3); }
@@ -847,6 +847,102 @@ let W,H;
 function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
 resize();window.addEventListener('resize',resize);
 
+// ══════ ЧАСТИЦЫ МЕНЮ ══════
+// ══════ ЧАСТИЦЫ МЕНЮ ══════
+// используем основной game canvas (ctx, W, H)
+
+const PARTICLE_SHAPES=['leaf','leaf','leaf','leaf','leaf','star'];
+const PARTICLE_COLORS=[
+  'rgba(46,204,113,VAL)','rgba(57,255,20,VAL)','rgba(39,174,96,VAL)',
+  'rgba(0,229,204,VAL)','rgba(249,202,36,VAL)','rgba(162,155,254,VAL)',
+  'rgba(168,230,192,VAL)'
+];
+const PARTICLE_COUNT=38;
+let particles=[];
+
+function mkParticle(fromTop){
+  const x=Math.random()*W;
+  const y=fromTop?(-20-Math.random()*60):(Math.random()*H);
+  const size=5+Math.random()*13;
+  const colorTpl=PARTICLE_COLORS[Math.floor(Math.random()*PARTICLE_COLORS.length)];
+  const alpha=(0.15+Math.random()*0.35).toFixed(2);
+  const color=colorTpl.replace('VAL',alpha);
+  const shape=PARTICLE_SHAPES[Math.floor(Math.random()*PARTICLE_SHAPES.length)];
+  const speed=0.4+Math.random()*0.9;
+  const drift=(Math.random()-0.5)*0.5;
+  const spin=(Math.random()-0.5)*0.025;
+  const wobbleSpeed=0.008+Math.random()*0.018;
+  const wobbleAmp=0.5+Math.random()*1.2;
+  return{x,y,size,color,shape,speed,drift,spin,wobbleSpeed,wobbleAmp,
+    angle:Math.random()*Math.PI*2,wobblePhase:Math.random()*Math.PI*2};
+}
+
+function initParticles(){
+  particles=[];
+  for(let i=0;i<PARTICLE_COUNT;i++) particles.push(mkParticle(false));
+}
+
+function drawLeaf(ctx,x,y,size,angle){
+  ctx.save();ctx.translate(x,y);ctx.rotate(angle);
+  ctx.beginPath();
+  ctx.moveTo(0,-size);
+  ctx.bezierCurveTo(size*0.8,-size*0.5, size*0.8,size*0.5, 0,size);
+  ctx.bezierCurveTo(-size*0.8,size*0.5, -size*0.8,-size*0.5, 0,-size);
+  ctx.fill();
+  // жилка
+  ctx.beginPath();ctx.moveTo(0,-size*0.8);ctx.lineTo(0,size*0.8);
+  ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=0.7;ctx.stroke();
+  ctx.restore();
+}
+
+function drawStar(ctx,x,y,size,angle){
+  ctx.save();ctx.translate(x,y);ctx.rotate(angle);
+  ctx.beginPath();
+  for(let i=0;i<5;i++){
+    const a=i*Math.PI*2/5-Math.PI/2;
+    const b=a+Math.PI/5;
+    i===0?ctx.moveTo(Math.cos(a)*size,Math.sin(a)*size):ctx.lineTo(Math.cos(a)*size,Math.sin(a)*size);
+    ctx.lineTo(Math.cos(b)*size*0.4,Math.sin(b)*size*0.4);
+  }
+  ctx.closePath();ctx.fill();ctx.restore();
+}
+
+function drawSpark(ctx,x,y,size,angle){
+  ctx.save();ctx.translate(x,y);ctx.rotate(angle);
+  for(let i=0;i<4;i++){
+    const a=i*Math.PI/2;
+    ctx.beginPath();ctx.moveTo(0,0);
+    ctx.lineTo(Math.cos(a)*size,Math.sin(a)*size);
+    ctx.strokeStyle=ctx.fillStyle;ctx.lineWidth=size*0.35;
+    ctx.lineCap='round';ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function updateParticles(){
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];
+    p.wobblePhase+=p.wobbleSpeed;
+    p.x+=p.drift+Math.sin(p.wobblePhase)*p.wobbleAmp;
+    p.y+=p.speed;
+    p.angle+=p.spin;
+    if(p.y>H+30) particles.splice(i,1,mkParticle(true));
+  }
+}
+
+function drawParticles(){
+  if(running)return;
+  for(const p of particles){
+    ctx.fillStyle=p.color;
+    ctx.globalAlpha=1;
+    if(p.shape==='leaf')      drawLeaf(ctx,p.x,p.y,p.size,p.angle);
+    else if(p.shape==='star') drawStar(ctx,p.x,p.y,p.size,p.angle);
+  }
+  ctx.globalAlpha=1;
+}
+
+initParticles();
+
 const WORLD=4000,CELL=22;
 let serverWorld=null,player=null,running=false;
 let camX=0,camY=0,boosting=false,pname='Player';
@@ -1305,6 +1401,8 @@ function loop(ts){
   const dt=Math.min((ts-lastT)/16,3);lastT=ts;
   if(running)updHUD();
   draw(camX,camY);
+  updateParticles();
+  drawParticles();
   if(running)drawMM();
   requestAnimationFrame(loop);
 }
