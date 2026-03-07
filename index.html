@@ -13,9 +13,21 @@
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body { background:#0d2b15; overflow:hidden; font-family:'Nunito',sans-serif; user-select:none; }
-canvas { display:block; position:fixed; inset:0; }
-.screen { position:fixed; inset:0; z-index:50; display:none; }
-.screen.active { display:flex; }
+#gameCanvas { display:block; position:fixed; inset:0; }
+.screen {
+  position:fixed; inset:0; z-index:50;
+  display:flex;
+  opacity:0;
+  pointer-events:none;
+  transition: opacity 0.38s cubic-bezier(0.4,0,0.2,1), transform 0.38s cubic-bezier(0.4,0,0.2,1);
+  transform: translateY(18px) scale(0.985);
+  will-change: opacity, transform;
+}
+.screen.active {
+  opacity:1;
+  pointer-events:all;
+  transform: translateY(0px) scale(1);
+}
 #menuScreen { flex-direction:column; align-items:center; justify-content:flex-start; background:radial-gradient(ellipse 100% 80% at 50% 0%, #1e5e30 0%, #0a1f10 60%, #050e08 100%); }
 .top-bar { width:100%; display:flex; justify-content:center; align-items:flex-start; padding:80px 24px 0; position:relative; }
 .logo-wrap { display:flex; flex-direction:column; align-items:center; pointer-events:none; }
@@ -24,7 +36,7 @@ canvas { display:block; position:fixed; inset:0; }
 @keyframes lp{0%,100%{filter:drop-shadow(0 0 30px #39ff1455) drop-shadow(0 6px 0 #07200d)}50%{filter:drop-shadow(0 0 60px #39ff14aa) drop-shadow(0 6px 0 #07200d)}}
 .tip { color:#a8d8b8; font-size:14px; font-weight:700; margin-top:6px; opacity:.8; min-height:20px; }
 .menu-center { display:flex; flex-direction:column; align-items:center; gap:11px; margin-top:80px; width:420px; }
-.coins-fixed { position:fixed; top:14px; right:14px; display:flex; align-items:center; gap:8px; background:rgba(0,0,0,0.55); border:2px solid rgba(249,202,36,0.5); border-radius:50px; padding:6px 16px 6px 10px; z-index:999; }
+.coins-fixed { position:fixed; top:14px; right:14px; display:flex; align-items:center; gap:6px; background:rgba(0,0,0,0.55); border:2px solid rgba(249,202,36,0.5); border-radius:50px; padding:4px 14px 4px 4px; z-index:999; }
 .name-row { display:flex; gap:8px; width:100%; }
 .name-input { flex:1; background:rgba(255,255,255,0.93); border:none; border-radius:50px; padding:13px 24px; font-size:20px; font-family:'Nunito',sans-serif; font-weight:800; color:#1a4a25; outline:none; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,0.3); }
 .btn-play { background:linear-gradient(180deg,#4af078 0%,#20c44a 45%,#178a34 100%); border:none; border-radius:60px; color:#fff; font-family:'Fredoka One',cursive; font-size:34px; letter-spacing:3px; padding:17px 0; width:100%; cursor:pointer; box-shadow:0 6px 0 #0e5a22,0 10px 28px rgba(46,204,113,0.4); transition:transform .1s; text-shadow:0 2px 4px rgba(0,0,0,0.25); }
@@ -35,7 +47,24 @@ canvas { display:block; position:fixed; inset:0; }
 .btn-quests-menu:hover{transform:translateY(-2px)}
 
 /* ═══ ACHIEVEMENTS PANEL ═══ */
-#achPanel { position:fixed; bottom:150px; left:50%; transform:translateX(-50%); background:rgba(10,10,22,0.97); border:2px solid rgba(162,155,254,0.4); border-radius:20px; padding:16px; width:320px; z-index:100; display:none; flex-direction:column; gap:8px; pointer-events:all !important; max-height:70vh; overflow-y:auto; }
+#achPanel {
+  position:fixed; bottom:150px; left:50%;
+  background:rgba(10,10,22,0.97); border:2px solid rgba(162,155,254,0.4);
+  border-radius:20px; padding:16px; width:320px; z-index:100;
+  display:flex; flex-direction:column; gap:8px;
+  pointer-events:none;
+  max-height:70vh; overflow-y:auto;
+  opacity:0;
+  transform:translateX(-50%) translateY(18px) scale(0.96);
+  transition: opacity 0.32s cubic-bezier(0.34,1.1,0.64,1),
+              transform 0.32s cubic-bezier(0.34,1.1,0.64,1);
+  will-change: opacity, transform;
+}
+#achPanel.open {
+  opacity:1;
+  pointer-events:all;
+  transform:translateX(-50%) translateY(0) scale(1);
+}
 #achPanel .ach-title { font-family:'Fredoka One',cursive; font-size:20px; color:#a29bfe; text-align:center; margin-bottom:4px; }
 .ach-item { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:10px 12px; display:flex; align-items:center; gap:10px; transition:border-color .2s; }
 .ach-item.done { border-color:rgba(249,202,36,0.4); background:rgba(249,202,36,0.06); }
@@ -45,7 +74,7 @@ canvas { display:block; position:fixed; inset:0; }
 .ach-desc { font-size:11px; color:rgba(168,230,192,0.5); margin-top:1px; }
 .ach-bar-bg { background:rgba(255,255,255,0.08); border-radius:10px; height:5px; margin-top:5px; }
 .ach-bar-fill { height:100%; border-radius:10px; background:linear-gradient(90deg,#a29bfe,#6c5ce7); transition:width .4s; }
-.ach-reward { font-size:11px; font-weight:800; color:#f9ca24; white-space:nowrap; }
+.ach-reward { font-size:11px; font-weight:800; color:#f9ca24; white-space:nowrap; display:flex; align-items:center; gap:3px; }
 .ach-check { font-size:18px; }
 
 /* ═══ XP LEVEL BADGE в лидерборде ═══ */
@@ -111,7 +140,39 @@ canvas { display:block; position:fixed; inset:0; }
 
 #gearBtn { position:fixed; bottom:20px; left:20px; width:48px; height:48px; background:rgba(0,0,0,0.55); border:2px solid rgba(255,255,255,0.2); border-radius:50%; cursor:pointer; z-index:200; display:flex; align-items:center; justify-content:center; transition:transform .3s, border-color .2s; font-size:22px; }
 #gearBtn:hover { border-color:#2ecc71; transform:rotate(60deg); }
-#langPanel { position:fixed; bottom:78px; left:20px; background:rgba(8,18,12,0.97); border:2px solid rgba(46,204,113,0.3); border-radius:20px; padding:14px; z-index:200; display:none; flex-direction:column; gap:6px; min-width:180px; }
+#langPanel {
+  position:fixed; bottom:78px; left:20px;
+  background:rgba(8,18,12,0.97); border:2px solid rgba(46,204,113,0.3);
+  border-radius:20px; padding:14px; z-index:200;
+  display:flex; flex-direction:column; gap:6px; min-width:180px;
+  opacity:0;
+  pointer-events:none;
+  transform:translateY(12px) scale(0.96);
+  transform-origin: bottom left;
+  transition: opacity 0.28s cubic-bezier(0.34,1.1,0.64,1),
+              transform 0.28s cubic-bezier(0.34,1.1,0.64,1);
+  will-change: opacity, transform;
+}
+#langPanel.open {
+  opacity:1;
+  pointer-events:all;
+  transform:translateY(0) scale(1);
+}
+
+/* ═══ RIPPLE EFFECT ═══ */
+.ripple-host { position:relative; overflow:hidden; }
+@keyframes rippleAnim {
+  0%   { transform:scale(0); opacity:0.55; }
+  60%  { transform:scale(1); opacity:0.18; }
+  100% { transform:scale(1); opacity:0; }
+}
+.ripple-circle {
+  position:absolute;
+  border-radius:50%;
+  pointer-events:none;
+  animation: rippleAnim 0.62s cubic-bezier(0.4,0,0.2,1) forwards;
+  will-change: transform, opacity;
+}
 #langPanel .lp-title { font-family:'Fredoka One',cursive; font-size:15px; color:#2ecc71; letter-spacing:2px; margin-bottom:4px; text-align:center; }
 .lang-row { display:flex; align-items:center; gap:10px; padding:7px 12px; border-radius:12px; cursor:pointer; transition:background .15s; }
 .lang-row:hover { background:rgba(46,204,113,0.12); }
@@ -143,11 +204,13 @@ canvas { display:block; position:fixed; inset:0; }
 .skin-card.locked{filter:brightness(0.45)}
 .skin-preview { width:58px; height:58px; border-radius:50%; box-shadow:0 4px 14px rgba(0,0,0,0.5); }
 .sk-name { font-size:12px; font-weight:800; text-align:center; }
-.sk-cost { background:rgba(249,202,36,0.18); border:1px solid rgba(249,202,36,0.35); border-radius:20px; padding:3px 10px; font-size:12px; font-weight:800; color:#f9ca24; }
+.sk-cost { background:rgba(249,202,36,0.18); border:1px solid rgba(249,202,36,0.35); border-radius:20px; padding:3px 8px 3px 6px; font-size:12px; font-weight:800; color:#f9ca24; display:flex; align-items:center; gap:4px; }
 .sk-equip { font-size:11px; font-weight:800; color:#2ecc71; letter-spacing:1px; text-transform:uppercase; }
 .lock-ico { position:absolute; top:9px; right:9px; font-size:15px; }
 .rarity-bar { position:absolute; bottom:0; left:0; right:0; height:3px; border-radius:0 0 16px 16px; }
-.essence-badge { background:#1a4a25; border:3px solid #2ecc71; border-radius:50px; padding:6px 16px 6px 10px; display:flex; align-items:center; gap:8px; }
+@keyframes skinShimmer { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.25)} }
+.skin-card.selected .skin-preview { transform:scale(1.08); transition:transform .2s; }
+.essence-badge { background:#1a4a25; border:3px solid #2ecc71; border-radius:50px; padding:6px 14px 6px 10px; display:flex; align-items:center; gap:6px; }
 .ess-cnt { font-family:'Fredoka One',cursive; font-size:22px; color:#2ecc71; }
 #hud { position:fixed; inset:0; z-index:10; pointer-events:none; display:none; }
 .leaderboard { position:absolute; top:16px; right:16px; background:rgba(0,0,0,0.6); backdrop-filter:blur(8px); border:1px solid rgba(46,204,113,0.2); border-radius:16px; padding:12px 16px; min-width:180px; }
@@ -157,6 +220,7 @@ canvas { display:block; position:fixed; inset:0; }
 .lb-rank{color:rgba(255,255,255,0.3);width:18px;font-size:11px}
 .lb-name{flex:1;padding:0 5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:88px}
 .lb-score{color:#2ecc71;font-family:'Fredoka One',cursive}
+.lb-sep{border-top:1px dashed rgba(255,255,255,0.1);margin:4px 0;}
 .hud-bottom { position:absolute; bottom:20px; left:50%; transform:translateX(-50%); display:flex; gap:10px; }
 .hud-stat { background:rgba(0,0,0,0.55); backdrop-filter:blur(6px); border:1px solid rgba(46,204,113,0.18); border-radius:12px; padding:7px 16px; text-align:center; }
 .hud-lbl { color:rgba(168,230,192,0.6); font-size:10px; font-weight:800; letter-spacing:2px; text-transform:uppercase; }
@@ -177,7 +241,6 @@ canvas { display:block; position:fixed; inset:0; }
 #xpBarBox .xp-nums { font-size:10px; font-weight:800; color:#6aa8e0; margin-top:2px; text-align:right; }
 #lvlUpBanner { position:fixed; top:30%; left:50%; transform:translateX(-50%) scale(0); z-index:80; background:linear-gradient(135deg,#6c5ce7,#a29bfe); border-radius:24px; padding:18px 44px; text-align:center; pointer-events:none; transition:transform .25s cubic-bezier(.175,.885,.32,1.275), opacity .3s; opacity:0; }
 #lvlUpBanner .lup-title { font-family:'Fredoka One',cursive; font-size:38px; color:#fff; }
-/* achBtn стили заменили questsBtn */
 .quest-item { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:10px 12px; }
 .quest-name { font-size:13px; font-weight:800; color:#e8f5e9; margin-bottom:5px; }
 .quest-bar-bg { background:rgba(255,255,255,0.1); border-radius:10px; height:6px; }
@@ -210,8 +273,6 @@ canvas { display:block; position:fixed; inset:0; }
 #onlineCounter { position:fixed; top:22px; left:50%; transform:translateX(-50%); color:rgba(255,255,255,0.7); font-family:'Nunito',sans-serif; font-weight:800; font-size:14px; z-index:200; pointer-events:none; letter-spacing:1px; }
 #onlineCounter span { color:#fff; font-weight:900; }
 .top-panel-title { font-family:'Fredoka One',cursive; font-size:20px; text-align:center; background:linear-gradient(90deg,#f9ca24,#ff9f43); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:6px; }
-
-
 </style>
 </head>
 <body>
@@ -230,7 +291,7 @@ canvas { display:block; position:fixed; inset:0; }
     </div>
     <button class="btn-play" id="playBtn" data-i18n="play">PLAY</button>
     <button class="btn-skins" id="skinsMenuBtn" data-i18n="skins">SKINS</button>
-    <button class="btn-quests-menu" id="achMenuBtn">🏆 ДОСТИЖЕНИЯ</button>
+    <button class="btn-quests-menu" id="achMenuBtn" data-i18n="achievements">ДОСТИЖЕНИЯ</button>
     <button class="btn-music" id="musicMenuBtn">🔊 МУЗЫКА: ВКЛ</button>
   </div>
 </div>
@@ -272,7 +333,7 @@ canvas { display:block; position:fixed; inset:0; }
   <div class="sk-header">
     <div class="sk-title" id="skTitle" data-i18n="skins">Skins</div>
     <div style="display:flex;align-items:center;gap:14px">
-      <div class="essence-badge"><span class="ess-cnt" id="essCnt2">0</span> 🪙</div>
+      <div class="essence-badge"><canvas id="coinSkinsCanvas" width="36" height="36" style="width:36px;height:36px;display:block;flex-shrink:0;"></canvas><span class="ess-cnt" id="essCnt2" style="font-family:'Fredoka One',cursive;font-size:20px;color:#2ecc71;">0</span></div>
       <button class="back-btn" id="skinsBack" data-i18n="back">Back</button>
     </div>
   </div>
@@ -329,11 +390,11 @@ canvas { display:block; position:fixed; inset:0; }
 </div>
 
 <div id="lvlUpBanner"><div class="lup-title" id="lupTitle">УРОВЕНЬ 2!</div></div>
-<div id="achBtn" style="display:none;"><span style="font-family:'Fredoka One',cursive;font-size:14px;color:#a29bfe;">🏆 ДОСТИЖЕНИЯ</span><span id="achBadge" style="background:#e74c3c;border-radius:50%;width:18px;height:18px;font-size:11px;font-weight:900;color:#fff;display:none;align-items:center;justify-content:center;"></span></div>
-<div id="achPanel"><div class="ach-title">🏆 ДОСТИЖЕНИЯ</div><div id="achList"></div></div>
+<div id="achBtn" style="display:none;"><span style="font-family:'Fredoka One',cursive;font-size:14px;color:#a29bfe;" id="achBtnLabel">ДОСТИЖЕНИЯ</span><span id="achBadge" style="background:#e74c3c;border-radius:50%;width:18px;height:18px;font-size:11px;font-weight:900;color:#fff;display:none;align-items:center;justify-content:center;"></span></div>
+<div id="achPanel"><div class="ach-title" id="achPanelTitle">ДОСТИЖЕНИЯ</div><div id="achList"></div></div>
 <div id="toastWrap"></div>
 <div id="onlineCounter">Онлайн: <span id="onlineNum">0</span></div>
-<div class="coins-fixed"><span style="font-size:18px;">🪙</span><span class="ess-cnt" id="essCnt" style="font-family:'Fredoka One',cursive;font-size:20px;color:#f9ca24;">0</span></div>
+<div class="coins-fixed"><canvas id="coinTopCanvas" width="36" height="36" style="width:36px;height:36px;display:block;flex-shrink:0;"></canvas><span class="ess-cnt" id="essCnt" style="font-family:'Fredoka One',cursive;font-size:20px;color:#f9ca24;">0</span></div>
 
 <button id="gearBtn">⚙️</button>
 <div id="langPanel">
@@ -345,34 +406,50 @@ canvas { display:block; position:fixed; inset:0; }
 <script>
 // ══════ SKINS ══════
 const SKINS_DATA=[
-  {id:0,key:'sk_green',h:'#27ae60',b:['#2ecc71','#27ae60'],rarity:'standard',cost:0,owned:true},
-  {id:1,key:'sk_red',h:'#c0392b',b:['#e74c3c','#c0392b'],rarity:'standard',cost:0,owned:true},
-  {id:2,key:'sk_blue',h:'#1a6fa8',b:['#3498db','#1a6fa8'],rarity:'standard',cost:0,owned:true},
-  {id:3,key:'sk_gold',h:'#c9a007',b:['#f9ca24','#c9a007'],rarity:'rare',cost:50,owned:false},
-  {id:4,key:'sk_violet',h:'#6c3483',b:['#a29bfe','#6c3483'],rarity:'rare',cost:80,owned:false},
-  {id:5,key:'sk_pink',h:'#a93226',b:['#ff6b9d','#a93226'],rarity:'rare',cost:100,owned:false},
-  {id:6,key:'sk_teal',h:'#0e8578',b:['#00e5cc','#0e8578'],rarity:'rare',cost:120,owned:false},
-  {id:7,key:'sk_orange',h:'#ca6f1e',b:['#ff9f43','#ca6f1e'],rarity:'rare',cost:100,owned:false},
-  {id:8,key:'sk_fire',h:'#7b241c',b:['#ff4e4e','#7b241c'],rarity:'legendary',cost:400,owned:false},
-  {id:9,key:'sk_ice',h:'#1a5276',b:['#85c1e9','#1a5276'],rarity:'legendary',cost:450,owned:false},
-  {id:10,key:'sk_neon',h:'#0b5345',b:['#39ff14','#0b5345'],rarity:'legendary',cost:500,owned:false},
-  {id:11,key:'sk_galaxy',h:'#4a235a',b:['#d7bde2','#4a235a'],rarity:'legendary',cost:600,owned:false},
-  {id:12,key:'sk_dark',h:'#1c1c2e',b:['#40407a','#1c1c2e'],rarity:'legendary',cost:700,owned:false},
-  {id:13,key:'sk_goldx',h:'#7d6608',b:['#ffd700','#7d6608'],rarity:'legendary',cost:900,owned:false},
-  {id:14,key:'sk_rainbow',h:'#922b21',b:['#f9ca24','#1abc9c'],rarity:'legendary',cost:1200,owned:false},
-  {id:15,key:'sk_darkx',h:'#0a0a0a',b:['#2c2c2c','#0a0a0a'],rarity:'legendary',cost:2000,owned:false},
+  {id:0, key:'sk_green',   h:'#27ae60',b:['#2ecc71','#27ae60'],   rarity:'standard', cost:0,    owned:true},
+  {id:1, key:'sk_red',     h:'#c0392b',b:['#e74c3c','#c0392b'],   rarity:'standard', cost:0,    owned:true},
+  {id:2, key:'sk_blue',    h:'#1a6fa8',b:['#3498db','#1a6fa8'],   rarity:'standard', cost:0,    owned:true},
+  {id:3, key:'sk_gold',    h:'#c9a007',b:['#f9ca24','#c9a007'],   rarity:'rare',     cost:50,   owned:false},
+  {id:4, key:'sk_violet',  h:'#6c3483',b:['#a29bfe','#6c3483'],   rarity:'rare',     cost:80,   owned:false},
+  {id:5, key:'sk_pink',    h:'#a93226',b:['#ff6b9d','#a93226'],   rarity:'rare',     cost:100,  owned:false},
+  {id:6, key:'sk_teal',    h:'#0e8578',b:['#00e5cc','#0e8578'],   rarity:'rare',     cost:120,  owned:false},
+  {id:7, key:'sk_orange',  h:'#ca6f1e',b:['#ff9f43','#ca6f1e'],   rarity:'rare',     cost:100,  owned:false},
+  {id:8, key:'sk_fire',    h:'#7b241c',b:['#ff4e4e','#7b241c'],   rarity:'legendary',cost:400,  owned:false},
+  {id:9, key:'sk_ice',     h:'#1a5276',b:['#85c1e9','#1a5276'],   rarity:'legendary',cost:450,  owned:false},
+  {id:10,key:'sk_neon',    h:'#0b5345',b:['#39ff14','#0b5345'],   rarity:'legendary',cost:500,  owned:false},
+  {id:11,key:'sk_galaxy',  h:'#4a235a',b:['#d7bde2','#4a235a'],   rarity:'legendary',cost:600,  owned:false},
+  {id:12,key:'sk_dark',    h:'#1c1c2e',b:['#40407a','#1c1c2e'],   rarity:'legendary',cost:700,  owned:false},
+  {id:13,key:'sk_goldx',   h:'#7d6608',b:['#ffd700','#7d6608'],   rarity:'legendary',cost:900,  owned:false},
+  {id:14,key:'sk_rainbow', h:'#922b21',b:['#f9ca24','#1abc9c'],   rarity:'legendary',cost:1200, owned:false},
+  {id:15,key:'sk_darkx',   h:'#0a0a0a',b:['#2c2c2c','#0a0a0a'],   rarity:'legendary',cost:2000, owned:false},
+  {id:16,key:'sk_lava',    h:'#7f1d00',b:['#ff4500','#b22222'],   rarity:'rare',     cost:140,  owned:false},
+  {id:17,key:'sk_mint',    h:'#065f46',b:['#6ee7b7','#065f46'],   rarity:'standard', cost:0,    owned:true},
+  {id:18,key:'sk_coral',   h:'#9b1c1c',b:['#f87171','#fb923c'],   rarity:'rare',     cost:130,  owned:false},
+  {id:19,key:'sk_cobalt',  h:'#1e3a5f',b:['#60a5fa','#1e3a5f'],   rarity:'rare',     cost:110,  owned:false},
+  {id:20,key:'sk_lime',    h:'#166534',b:['#a3e635','#166534'],   rarity:'rare',     cost:90,   owned:false},
+  {id:21,key:'sk_rose',    h:'#881337',b:['#fda4af','#881337'],   rarity:'rare',     cost:150,  owned:false},
+  {id:22,key:'sk_cyber',   h:'#0c0c1a',b:['#00f5ff','#7b00ff'],   rarity:'legendary',cost:550,  owned:false},
+  {id:23,key:'sk_sunset',  h:'#7c2d12',b:['#fdba74','#f43f5e'],   rarity:'legendary',cost:480,  owned:false},
+  {id:24,key:'sk_forest',  h:'#14532d',b:['#4ade80','#15803d'],   rarity:'standard', cost:0,    owned:true},
+  {id:25,key:'sk_storm',   h:'#1e1b4b',b:['#818cf8','#312e81'],   rarity:'legendary',cost:650,  owned:false},
+  {id:26,key:'sk_sand',    h:'#78350f',b:['#fde68a','#d97706'],   rarity:'rare',     cost:120,  owned:false},
+  {id:27,key:'sk_venom',   h:'#14532d',b:['#84cc16','#1a0a00'],   rarity:'legendary',cost:750,  owned:false},
+  {id:28,key:'sk_candy',   h:'#831843',b:['#f9a8d4','#a855f7'],   rarity:'legendary',cost:800,  owned:false},
+  {id:29,key:'sk_obsidian',h:'#09090b',b:['#52525b','#18181b'],   rarity:'legendary',cost:850,  owned:false},
 ];
 const RARITY_C={standard:'#a8d8b8',rare:'#a29bfe',legendary:'#f9ca24'};
 
 (function loadSavedSkins(){
+  SKINS_DATA.forEach(s=>{ if(s.rarity==='standard') s.owned=true; });
   const saved=JSON.parse(localStorage.getItem('dvx_skins')||'null');
-  if(saved){saved.forEach(s=>{const skin=SKINS_DATA.find(x=>x.id===s.id);if(skin)skin.owned=s.owned;});}
+  if(saved){saved.forEach(s=>{const skin=SKINS_DATA.find(x=>x.id===s.id);if(skin){skin.owned=s.owned;if(skin.rarity==='standard')skin.owned=true;}});}
 })();
 
 let selSkin=(()=>{const s=localStorage.getItem('dvx_selSkin');return s!==null?parseInt(s):0;})();
 let essence=parseInt(localStorage.getItem('dvx_coins')||'18'),curCat='all';
 const MIN_LEN=10,MAX_BODY=750;
 let musicEnabled=localStorage.getItem('dvx_music')!=='off';
+
 // ══════ XP СИСТЕМА ══════
 function buildLevels(){
   const lvls=[{xp:0}];
@@ -386,11 +463,7 @@ function buildLevels(){
 }
 const LEVELS=buildLevels();
 let playerXP=parseInt(localStorage.getItem('dvx_xp')||'0');
-function getLevel(xp){
-  let lv=0;
-  for(let i=0;i<LEVELS.length;i++){if(LEVELS[i]&&xp>=LEVELS[i].xp)lv=i;else break;}
-  return lv;
-}
+function getLevel(xp){let lv=0;for(let i=0;i<LEVELS.length;i++){if(LEVELS[i]&&xp>=LEVELS[i].xp)lv=i;else break;}return lv;}
 function getStartMass(){return MIN_LEN+getLevel(playerXP)*2;}
 function addXP(amount){playerXP=Math.min(playerXP+amount,99999);localStorage.setItem('dvx_xp',playerXP);updateXPBar();}
 function updateXPBar(){
@@ -407,8 +480,11 @@ function updateXPBar(){
 }
 updateXPBar();
 
-
-function syncEss(){localStorage.setItem('dvx_coins',essence);document.getElementById('essCnt').textContent=essence;document.getElementById('essCnt2').textContent=essence;}
+function syncEss(){
+  localStorage.setItem('dvx_coins',essence);
+  const e1=document.getElementById('essCnt');if(e1)e1.textContent=essence;
+  const e2=document.getElementById('essCnt2');if(e2)e2.textContent=essence;
+}
 function saveSkins(){localStorage.setItem('dvx_skins',JSON.stringify(SKINS_DATA.map(s=>({id:s.id,owned:s.owned}))));localStorage.setItem('dvx_selSkin',selSkin);}
 syncEss();
 
@@ -419,9 +495,11 @@ function renderSkins(){
     const locked=!s.owned,card=document.createElement('div');
     card.className='skin-card'+(s.id===selSkin?' selected':'')+(locked?' locked':'');
     const rc=RARITY_C[s.rarity];
-    card.innerHTML=`${locked?'<span class="lock-ico">🔒</span>':''}<div class="skin-preview" style="background:linear-gradient(135deg,${s.b[0]},${s.b[1]})"></div><div class="sk-name" style="color:${rc}">${t(s.key)}</div>${locked?`<div class="sk-cost">🪙 ${s.cost}</div>`:(s.id===selSkin?`<div class="sk-equip">${t('equipped')}</div>`:`<div class="sk-equip" style="color:#888">${t('equip')}</div>`)}<div class="rarity-bar" style="background:${rc}55"></div>`;
+    const glowStyle=s.rarity==='legendary'?`box-shadow:0 0 18px ${s.b[0]}66,0 0 6px ${s.b[0]}44`:'';
+    const animStyle=s.rarity==='legendary'?'animation:skinShimmer 2s ease-in-out infinite':'';
+    card.innerHTML=`${locked?'<span class="lock-ico">🔒</span>':''}<div class="skin-preview" style="background:linear-gradient(135deg,${s.b[0]},${s.b[1]});${glowStyle};${animStyle}"></div><div class="sk-name" style="color:${rc}">${t(s.key)}</div>${locked?`<div class="sk-cost">${coinHTML(22)} ${s.cost}</div>`:(s.id===selSkin?`<div class="sk-equip">${t('equipped')}</div>`:`<div class="sk-equip" style="color:#888">${t('equip')}</div>`)}<div class="rarity-bar" style="background:${rc}55"></div>`;
     card.onclick=()=>{
-      if(locked){if(essence>=s.cost){essence-=s.cost;s.owned=true;selSkin=s.id;syncEss();saveSkins();renderSkins();}else alert('Нужно '+s.cost+' монет');return;}
+      if(locked){if(essence>=s.cost){essence-=s.cost;s.owned=true;selSkin=s.id;syncEss();saveSkins();renderSkins();}else alert(t('need_coins')+' '+s.cost+' '+t('coins'));return;}
       selSkin=s.id;saveSkins();renderSkins();
     };
     grid.appendChild(card);
@@ -435,14 +513,198 @@ document.getElementById('skCats').addEventListener('click',e=>{
 
 // ══════ ЯЗЫКИ ══════
 const LANGS = {
-  ru:{code:'ru',name:'Русский',play:'ИГРАТЬ',skins:'СКИНЫ',quests:'ЗАДАНИЯ',music_on:'🔊 МУЗЫКА: ВКЛ',music_off:'🔇 МУЗЫКА: ВЫКЛ',connecting:'Подключение',auth:'Авторизация',ready:'Готово!',no_server:'Нет связи с сервером. Попробуй позже.',conn_err:'Ошибка подключения',respawn:'Респавн',mass:'Масса',place:'Место',autopilot:'АВТОПИЛОТ',killed:'УБИТ!',your_score:'Твой результат',again:'Снова!',main_menu:'Главное меню',top_records:'ТОП РЕКОРДОВ',top:'ТОП',online:'Онлайн',daily:'Ежедневные задания',updates:'Обновляются каждый день',all:'Все',standard:'Стандартные',rare:'Редкие',legendary:'Легендарные',back:'Назад',task_done:'Задание выполнено!',kill_reward:'монеты за убийство!',equipped:'Надет',equip:'Надеть',need_coins:'Нужно',coins:'монет',choose_mode:'ВЫБЕРИ РЕЖИМ',offline:'ОФЛАЙН',online_btn:'ОНЛАЙН',offline_desc:'Играй против ботов без интернета',online_desc:'Сражайся с реальными игроками',bots:'БОТЫ',live:'LIVE',sk_green:'Зелёный',sk_red:'Красный',sk_blue:'Синий',sk_gold:'Золотой',sk_violet:'Фиолет',sk_pink:'Розовый',sk_teal:'Бирюза',sk_orange:'Оранжевый',sk_fire:'Огонь',sk_ice:'Лёд',sk_neon:'Неон',sk_galaxy:'Галактика',sk_dark:'Тьма',sk_goldx:'Золото X',sk_rainbow:'Радуга',sk_darkx:'Тёмный X',tips:['Зажми ЛКМ — ускорение!','Заставь врага врезаться в хвост!','Убивай игроков — монеты!','Минимум 10 массы для ускорения','A — автопилот']},
-  en:{code:'en',name:'English',play:'PLAY',skins:'SKINS',quests:'QUESTS',music_on:'🔊 MUSIC: ON',music_off:'🔇 MUSIC: OFF',connecting:'Connecting',auth:'Authorizing',ready:'Ready!',no_server:'No server connection. Try later.',conn_err:'Connection error',respawn:'Respawning',mass:'Mass',place:'Rank',autopilot:'AUTOPILOT',killed:'DEAD!',your_score:'Your score',again:'Again!',main_menu:'Main Menu',top_records:'TOP RECORDS',top:'TOP',online:'Online',daily:'Daily Quests',updates:'Reset every day',all:'All',standard:'Standard',rare:'Rare',legendary:'Legendary',back:'Back',task_done:'Quest complete!',kill_reward:'coins for kill!',equipped:'Equipped',equip:'Equip',need_coins:'Need',coins:'coins',choose_mode:'CHOOSE MODE',offline:'OFFLINE',online_btn:'ONLINE',offline_desc:'Play against bots, no internet needed',online_desc:'Fight against real players',bots:'BOTS',live:'LIVE',sk_green:'Green',sk_red:'Red',sk_blue:'Blue',sk_gold:'Gold',sk_violet:'Violet',sk_pink:'Pink',sk_teal:'Teal',sk_orange:'Orange',sk_fire:'Fire',sk_ice:'Ice',sk_neon:'Neon',sk_galaxy:'Galaxy',sk_dark:'Dark',sk_goldx:'Gold X',sk_rainbow:'Rainbow',sk_darkx:'Dark X',tips:['Hold LMB — speed boost!','Make enemies hit your tail!','Kill players — earn coins!','Need 10+ mass to boost','A — autopilot']},
-  de:{code:'de',name:'Deutsch',play:'SPIELEN',skins:'SKINS',quests:'AUFGABEN',music_on:'🔊 MUSIK: AN',music_off:'🔇 MUSIK: AUS',connecting:'Verbinden',auth:'Autorisierung',ready:'Fertig!',no_server:'Keine Verbindung. Später versuchen.',conn_err:'Verbindungsfehler',respawn:'Respawn',mass:'Masse',place:'Rang',autopilot:'AUTOPILOT',killed:'TOT!',your_score:'Dein Ergebnis',again:'Nochmal!',main_menu:'Hauptmenü',top_records:'TOP REKORDE',top:'TOP',online:'Online',daily:'Tägliche Aufgaben',updates:'Täglich zurückgesetzt',all:'Alle',standard:'Standard',rare:'Selten',legendary:'Legendär',back:'Zurück',task_done:'Aufgabe erledigt!',kill_reward:'Münzen für Kill!',equipped:'Ausgerüstet',equip:'Ausrüsten',need_coins:'Brauche',coins:'Münzen',choose_mode:'MODUS WÄHLEN',offline:'OFFLINE',online_btn:'ONLINE',offline_desc:'Spiele gegen Bots, kein Internet nötig',online_desc:'Kämpfe gegen echte Spieler',bots:'BOTS',live:'LIVE',sk_green:'Grün',sk_red:'Rot',sk_blue:'Blau',sk_gold:'Gold',sk_violet:'Violett',sk_pink:'Rosa',sk_teal:'Türkis',sk_orange:'Orange',sk_fire:'Feuer',sk_ice:'Eis',sk_neon:'Neon',sk_galaxy:'Galaxie',sk_dark:'Dunkel',sk_goldx:'Gold X',sk_rainbow:'Regenbogen',sk_darkx:'Dunkel X',tips:['LMB halten — Boost!','Feinde in deinen Schwanz lenken!','Spieler töten — Münzen!','Min. 10 Masse für Boost','A — Autopilot']},
-  fr:{code:'fr',name:'Français',play:'JOUER',skins:'SKINS',quests:'QUÊTES',music_on:'🔊 MUSIQUE: ON',music_off:'🔇 MUSIQUE: OFF',connecting:'Connexion',auth:'Autorisation',ready:'Prêt!',no_server:'Pas de connexion. Réessayez.',conn_err:'Erreur de connexion',respawn:'Réapparition',mass:'Masse',place:'Rang',autopilot:'PILOTE AUTO',killed:'MORT!',your_score:'Ton score',again:'Encore!',main_menu:'Menu Principal',top_records:'TOP RECORDS',top:'TOP',online:'En ligne',daily:'Quêtes du jour',updates:'Réinitialisé chaque jour',all:'Tous',standard:'Standard',rare:'Rare',legendary:'Légendaire',back:'Retour',task_done:'Quête accomplie!',kill_reward:'pièces pour kill!',equipped:'Équipé',equip:'Équiper',need_coins:'Besoin de',coins:'pièces',choose_mode:'CHOISIR LE MODE',offline:'HORS LIGNE',online_btn:'EN LIGNE',offline_desc:'Joue contre des bots sans internet',online_desc:'Combats de vrais joueurs',bots:'BOTS',live:'LIVE',sk_green:'Vert',sk_red:'Rouge',sk_blue:'Bleu',sk_gold:'Or',sk_violet:'Violet',sk_pink:'Rose',sk_teal:'Cyan',sk_orange:'Orange',sk_fire:'Feu',sk_ice:'Glace',sk_neon:'Néon',sk_galaxy:'Galaxie',sk_dark:'Sombre',sk_goldx:'Or X',sk_rainbow:'Arc-en-ciel',sk_darkx:'Sombre X',tips:['Maintenir clic — boost!','Faites heurter les ennemis!','Tuez pour des pièces!','10+ masse pour booster','A — pilote automatique']},
-  es:{code:'es',name:'Español',play:'JUGAR',skins:'SKINS',quests:'MISIONES',music_on:'🔊 MÚSICA: ON',music_off:'🔇 MÚSICA: OFF',connecting:'Conectando',auth:'Autorizando',ready:'¡Listo!',no_server:'Sin conexión. Intenta más tarde.',conn_err:'Error de conexión',respawn:'Reapareciendo',mass:'Masa',place:'Rango',autopilot:'AUTOPILOTO',killed:'¡MUERTO!',your_score:'Tu puntuación',again:'¡Otra vez!',main_menu:'Menú Principal',top_records:'TOP RECORDS',top:'TOP',online:'En línea',daily:'Misiones diarias',updates:'Se reinician cada día',all:'Todos',standard:'Estándar',rare:'Raro',legendary:'Legendario',back:'Volver',task_done:'¡Misión completa!',kill_reward:'monedas por matar!',equipped:'Equipado',equip:'Equipar',need_coins:'Necesitas',coins:'monedas',choose_mode:'ELIGE MODO',offline:'SIN CONEXIÓN',online_btn:'EN LÍNEA',offline_desc:'Juega contra bots sin internet',online_desc:'Lucha contra jugadores reales',bots:'BOTS',live:'LIVE',sk_green:'Verde',sk_red:'Rojo',sk_blue:'Azul',sk_gold:'Oro',sk_violet:'Violeta',sk_pink:'Rosa',sk_teal:'Cian',sk_orange:'Naranja',sk_fire:'Fuego',sk_ice:'Hielo',sk_neon:'Neón',sk_galaxy:'Galaxia',sk_dark:'Oscuro',sk_goldx:'Oro X',sk_rainbow:'Arcoíris',sk_darkx:'Oscuro X',tips:['Mantén clic — boost!','¡Haz que enemigos choquen!','¡Mata — gana monedas!','10+ masa para boost','A — autopiloto']},
-  pt:{code:'pt',name:'Português',play:'JOGAR',skins:'SKINS',quests:'MISSÕES',music_on:'🔊 MÚSICA: ON',music_off:'🔇 MÚSICA: OFF',connecting:'Conectando',auth:'Autorizando',ready:'Pronto!',no_server:'Sem conexão. Tente mais tarde.',conn_err:'Erro de conexão',respawn:'Renascendo',mass:'Massa',place:'Rank',autopilot:'AUTOPILOTO',killed:'MORTO!',your_score:'Sua pontuação',again:'De novo!',main_menu:'Menu Principal',top_records:'TOP RECORDES',top:'TOP',online:'Online',daily:'Missões diárias',updates:'Reinicia todo dia',all:'Todos',standard:'Padrão',rare:'Raro',legendary:'Lendário',back:'Voltar',task_done:'Missão completa!',kill_reward:'moedas por matar!',equipped:'Equipado',equip:'Equipar',need_coins:'Precisa de',coins:'moedas',choose_mode:'ESCOLHER MODO',offline:'OFFLINE',online_btn:'ONLINE',offline_desc:'Jogue contra bots sem internet',online_desc:'Lute contra jogadores reais',bots:'BOTS',live:'LIVE',sk_green:'Verde',sk_red:'Vermelho',sk_blue:'Azul',sk_gold:'Ouro',sk_violet:'Violeta',sk_pink:'Rosa',sk_teal:'Ciano',sk_orange:'Laranja',sk_fire:'Fogo',sk_ice:'Gelo',sk_neon:'Neon',sk_galaxy:'Galáxia',sk_dark:'Escuro',sk_goldx:'Ouro X',sk_rainbow:'Arco-íris',sk_darkx:'Escuro X',tips:['Segure clique — boost!','Faça inimigos baterem!','Mate — ganhe moedas!','10+ massa para boost','A — autopiloto']},
-  tr:{code:'tr',name:'Türkçe',play:'OYNA',skins:'SKİNLER',quests:'GÖREVLER',music_on:'🔊 MÜZİK: AÇIK',music_off:'🔇 MÜZİK: KAPALI',connecting:'Bağlanıyor',auth:'Yetkilendirme',ready:'Hazır!',no_server:'Bağlantı yok. Sonra dene.',conn_err:'Bağlantı hatası',respawn:'Yeniden doğuyor',mass:'Kütle',place:'Sıra',autopilot:'OTOPİLOT',killed:'ÖLDÜN!',your_score:'Skorun',again:'Tekrar!',main_menu:'Ana Menü',top_records:'TOP REKORLAR',top:'TOP',online:'Çevrimiçi',daily:'Günlük Görevler',updates:'Her gün sıfırlanır',all:'Hepsi',standard:'Standart',rare:'Nadir',legendary:'Efsanevi',back:'Geri',task_done:'Görev tamamlandı!',kill_reward:'öldürme için para!',equipped:'Giyildi',equip:'Giy',need_coins:'Gerekli',coins:'para',choose_mode:'MOD SEÇ',offline:'ÇEVRİMDIŞI',online_btn:'ÇEVRİMİÇİ',offline_desc:'İnternetsiz botlara karşı oyna',online_desc:'Gerçek oyunculara karşı savaş',bots:'BOTLAR',live:'LIVE',sk_green:'Yeşil',sk_red:'Kırmızı',sk_blue:'Mavi',sk_gold:'Altın',sk_violet:'Mor',sk_pink:'Pembe',sk_teal:'Camgöbeği',sk_orange:'Turuncu',sk_fire:'Ateş',sk_ice:'Buz',sk_neon:'Neon',sk_galaxy:'Galaksi',sk_dark:'Karanlık',sk_goldx:'Altın X',sk_rainbow:'Gökkuşağı',sk_darkx:'Karanlık X',tips:['Sol tıkla tut — boost!','Düşmanları kuyruğuna çarp!','Öldür — para kazan!','Boost için 10+ kütle','A — otopilot']},
-  uk:{code:'uk',name:'Українська',play:'ГРАТИ',skins:'СКІНИ',quests:'ЗАВДАННЯ',music_on:'🔊 МУЗИКА: УВК',music_off:'🔇 МУЗИКА: ВИКЛ',connecting:'Підключення',auth:'Авторизація',ready:'Готово!',no_server:'Немає зв\'язку. Спробуй пізніше.',conn_err:'Помилка підключення',respawn:'Відродження',mass:'Маса',place:'Місце',autopilot:'АВТОПІЛОТ',killed:'ВБИТИЙ!',your_score:'Твій результат',again:'Знову!',main_menu:'Головне меню',top_records:'ТОП РЕКОРДІВ',top:'ТОП',online:'Онлайн',daily:'Щоденні завдання',updates:'Оновлюються щодня',all:'Всі',standard:'Стандартні',rare:'Рідкісні',legendary:'Легендарні',back:'Назад',task_done:'Завдання виконано!',kill_reward:'монети за вбивство!',equipped:'Надіто',equip:'Надіти',need_coins:'Потрібно',coins:'монет',choose_mode:'ОБЕРИ РЕЖИМ',offline:'ОФЛАЙН',online_btn:'ОНЛАЙН',offline_desc:'Грай проти ботів без інтернету',online_desc:'Змагайся з реальними гравцями',bots:'БОТИ',live:'LIVE',sk_green:'Зелений',sk_red:'Червоний',sk_blue:'Синій',sk_gold:'Золотий',sk_violet:'Фіолет',sk_pink:'Рожевий',sk_teal:'Бірюза',sk_orange:'Помаранч',sk_fire:'Вогонь',sk_ice:'Лід',sk_neon:'Неон',sk_galaxy:'Галактика',sk_dark:'Темрява',sk_goldx:'Золото X',sk_rainbow:'Веселка',sk_darkx:'Темний X',tips:['Затисни ЛКМ — прискорення!','Змусь ворога врізатись!','Вбивай гравців — монети!','Мін. 10 маси для буста','A — автопілот']},
+  ru:{code:'ru',name:'Русский',
+    play:'ИГРАТЬ',skins:'СКИНЫ',achievements:'ДОСТИЖЕНИЯ',
+    music_on:'🔊 МУЗЫКА: ВКЛ',music_off:'🔇 МУЗЫКА: ВЫКЛ',
+    connecting:'Подключение',auth:'Авторизация',ready:'Готово!',
+    no_server:'Нет связи с сервером. Попробуй позже.',conn_err:'Ошибка подключения',
+    respawn:'Респавн',mass:'Масса',place:'Место',autopilot:'АВТОПИЛОТ',
+    killed:'УБИТ!',your_score:'Твой результат',again:'Снова!',main_menu:'Главное меню',
+    top_records:'ТОП РЕКОРДОВ',top:'ТОП',online:'Онлайн',
+    all:'Все',standard:'Стандартные',rare:'Редкие',legendary:'Легендарные',back:'Назад',
+    task_done:'Задание выполнено!',kill_reward:'монеты за убийство!',
+    equipped:'Надет',equip:'Надеть',need_coins:'Нужно',coins:'монет',
+    choose_mode:'ВЫБЕРИ РЕЖИМ',offline:'ОФЛАЙН',online_btn:'ОНЛАЙН',
+    offline_desc:'Играй против ботов без интернета',online_desc:'Сражайся с реальными игроками',
+    bots:'БОТЫ',live:'LIVE',
+    sk_green:'Зелёный',sk_red:'Красный',sk_blue:'Синий',sk_gold:'Золотой',
+    sk_violet:'Фиолет',sk_pink:'Розовый',sk_teal:'Бирюза',sk_orange:'Оранжевый',
+    sk_fire:'Огонь',sk_ice:'Лёд',sk_neon:'Неон',sk_galaxy:'Галактика',
+    sk_dark:'Тьма',sk_goldx:'Золото X',sk_rainbow:'Радуга',sk_darkx:'Тёмный X',
+    sk_lava:'Лава',sk_mint:'Мята',sk_coral:'Коралл',sk_cobalt:'Кобальт',
+    sk_lime:'Лайм',sk_rose:'Розовый X',sk_cyber:'Кибер',sk_sunset:'Закат',
+    sk_forest:'Лес',sk_storm:'Буря',sk_sand:'Песок',sk_venom:'Яд',
+    sk_candy:'Конфетка',sk_obsidian:'Обсидиан',
+    tips:['Зажми ЛКМ — ускорение!','Заставь врага врезаться в хвост!','Убивай игроков — монеты!','Минимум 10 массы для ускорения','A — автопилот']
+  },
+  en:{code:'en',name:'English',
+    play:'PLAY',skins:'SKINS',achievements:'ACHIEVEMENTS',
+    music_on:'🔊 MUSIC: ON',music_off:'🔇 MUSIC: OFF',
+    connecting:'Connecting',auth:'Authorizing',ready:'Ready!',
+    no_server:'No server connection. Try later.',conn_err:'Connection error',
+    respawn:'Respawning',mass:'Mass',place:'Rank',autopilot:'AUTOPILOT',
+    killed:'DEAD!',your_score:'Your score',again:'Again!',main_menu:'Main Menu',
+    top_records:'TOP RECORDS',top:'TOP',online:'Online',
+    all:'All',standard:'Standard',rare:'Rare',legendary:'Legendary',back:'Back',
+    task_done:'Quest complete!',kill_reward:'coins for kill!',
+    equipped:'Equipped',equip:'Equip',need_coins:'Need',coins:'coins',
+    choose_mode:'CHOOSE MODE',offline:'OFFLINE',online_btn:'ONLINE',
+    offline_desc:'Play against bots, no internet needed',online_desc:'Fight against real players',
+    bots:'BOTS',live:'LIVE',
+    sk_green:'Green',sk_red:'Red',sk_blue:'Blue',sk_gold:'Gold',
+    sk_violet:'Violet',sk_pink:'Pink',sk_teal:'Teal',sk_orange:'Orange',
+    sk_fire:'Fire',sk_ice:'Ice',sk_neon:'Neon',sk_galaxy:'Galaxy',
+    sk_dark:'Dark',sk_goldx:'Gold X',sk_rainbow:'Rainbow',sk_darkx:'Dark X',
+    sk_lava:'Lava',sk_mint:'Mint',sk_coral:'Coral',sk_cobalt:'Cobalt',
+    sk_lime:'Lime',sk_rose:'Rose',sk_cyber:'Cyber',sk_sunset:'Sunset',
+    sk_forest:'Forest',sk_storm:'Storm',sk_sand:'Sand',sk_venom:'Venom',
+    sk_candy:'Candy',sk_obsidian:'Obsidian',
+    tips:['Hold LMB — speed boost!','Make enemies hit your tail!','Kill players — earn coins!','Need 10+ mass to boost','A — autopilot']
+  },
+  de:{code:'de',name:'Deutsch',
+    play:'SPIELEN',skins:'SKINS',achievements:'ERFOLGE',
+    music_on:'🔊 MUSIK: AN',music_off:'🔇 MUSIK: AUS',
+    connecting:'Verbinden',auth:'Autorisierung',ready:'Fertig!',
+    no_server:'Keine Verbindung. Später versuchen.',conn_err:'Verbindungsfehler',
+    respawn:'Respawn',mass:'Masse',place:'Rang',autopilot:'AUTOPILOT',
+    killed:'TOT!',your_score:'Dein Ergebnis',again:'Nochmal!',main_menu:'Hauptmenu',
+    top_records:'TOP REKORDE',top:'TOP',online:'Online',
+    all:'Alle',standard:'Standard',rare:'Selten',legendary:'Legendar',back:'Zuruck',
+    task_done:'Aufgabe erledigt!',kill_reward:'Munzen fur Kill!',
+    equipped:'Ausgerustet',equip:'Ausrusten',need_coins:'Brauche',coins:'Munzen',
+    choose_mode:'MODUS WAHLEN',offline:'OFFLINE',online_btn:'ONLINE',
+    offline_desc:'Spiele gegen Bots, kein Internet notig',online_desc:'Kampfe gegen echte Spieler',
+    bots:'BOTS',live:'LIVE',
+    sk_green:'Grun',sk_red:'Rot',sk_blue:'Blau',sk_gold:'Gold',
+    sk_violet:'Violett',sk_pink:'Rosa',sk_teal:'Turkis',sk_orange:'Orange',
+    sk_fire:'Feuer',sk_ice:'Eis',sk_neon:'Neon',sk_galaxy:'Galaxie',
+    sk_dark:'Dunkel',sk_goldx:'Gold X',sk_rainbow:'Regenbogen',sk_darkx:'Dunkel X',
+    sk_lava:'Lava',sk_mint:'Minze',sk_coral:'Koralle',sk_cobalt:'Kobalt',
+    sk_lime:'Limette',sk_rose:'Rose',sk_cyber:'Cyber',sk_sunset:'Sonnenuntergang',
+    sk_forest:'Wald',sk_storm:'Sturm',sk_sand:'Sand',sk_venom:'Gift',
+    sk_candy:'Sussigkeit',sk_obsidian:'Obsidian',
+    tips:['LMB halten — Boost!','Feinde in deinen Schwanz lenken!','Spieler toten — Munzen!','Min. 10 Masse fur Boost','A — Autopilot']
+  },
+  fr:{code:'fr',name:'Français',
+    play:'JOUER',skins:'SKINS',achievements:'SUCCES',
+    music_on:'🔊 MUSIQUE: ON',music_off:'🔇 MUSIQUE: OFF',
+    connecting:'Connexion',auth:'Autorisation',ready:'Pret!',
+    no_server:'Pas de connexion. Reessayez.',conn_err:'Erreur de connexion',
+    respawn:'Reapparition',mass:'Masse',place:'Rang',autopilot:'PILOTE AUTO',
+    killed:'MORT!',your_score:'Ton score',again:'Encore!',main_menu:'Menu Principal',
+    top_records:'TOP RECORDS',top:'TOP',online:'En ligne',
+    all:'Tous',standard:'Standard',rare:'Rare',legendary:'Legendaire',back:'Retour',
+    task_done:'Quete accomplie!',kill_reward:'pieces pour kill!',
+    equipped:'Equipe',equip:'Equiper',need_coins:'Besoin de',coins:'pieces',
+    choose_mode:'CHOISIR LE MODE',offline:'HORS LIGNE',online_btn:'EN LIGNE',
+    offline_desc:'Joue contre des bots sans internet',online_desc:'Combats de vrais joueurs',
+    bots:'BOTS',live:'LIVE',
+    sk_green:'Vert',sk_red:'Rouge',sk_blue:'Bleu',sk_gold:'Or',
+    sk_violet:'Violet',sk_pink:'Rose',sk_teal:'Cyan',sk_orange:'Orange',
+    sk_fire:'Feu',sk_ice:'Glace',sk_neon:'Neon',sk_galaxy:'Galaxie',
+    sk_dark:'Sombre',sk_goldx:'Or X',sk_rainbow:'Arc-en-ciel',sk_darkx:'Sombre X',
+    sk_lava:'Lave',sk_mint:'Menthe',sk_coral:'Corail',sk_cobalt:'Cobalt',
+    sk_lime:'Citron',sk_rose:'Rose',sk_cyber:'Cyber',sk_sunset:'Coucher de soleil',
+    sk_forest:'Foret',sk_storm:'Tempete',sk_sand:'Sable',sk_venom:'Venin',
+    sk_candy:'Bonbon',sk_obsidian:'Obsidienne',
+    tips:['Maintenir clic — boost!','Faites heurter les ennemis!','Tuez pour des pieces!','10+ masse pour booster','A — pilote automatique']
+  },
+  es:{code:'es',name:'Español',
+    play:'JUGAR',skins:'SKINS',achievements:'LOGROS',
+    music_on:'🔊 MUSICA: ON',music_off:'🔇 MUSICA: OFF',
+    connecting:'Conectando',auth:'Autorizando',ready:'Listo!',
+    no_server:'Sin conexion. Intenta mas tarde.',conn_err:'Error de conexion',
+    respawn:'Reapareciendo',mass:'Masa',place:'Rango',autopilot:'AUTOPILOTO',
+    killed:'MUERTO!',your_score:'Tu puntuacion',again:'Otra vez!',main_menu:'Menu Principal',
+    top_records:'TOP RECORDS',top:'TOP',online:'En linea',
+    all:'Todos',standard:'Estandar',rare:'Raro',legendary:'Legendario',back:'Volver',
+    task_done:'Mision completa!',kill_reward:'monedas por matar!',
+    equipped:'Equipado',equip:'Equipar',need_coins:'Necesitas',coins:'monedas',
+    choose_mode:'ELIGE MODO',offline:'SIN CONEXION',online_btn:'EN LINEA',
+    offline_desc:'Juega contra bots sin internet',online_desc:'Lucha contra jugadores reales',
+    bots:'BOTS',live:'LIVE',
+    sk_green:'Verde',sk_red:'Rojo',sk_blue:'Azul',sk_gold:'Oro',
+    sk_violet:'Violeta',sk_pink:'Rosa',sk_teal:'Cian',sk_orange:'Naranja',
+    sk_fire:'Fuego',sk_ice:'Hielo',sk_neon:'Neon',sk_galaxy:'Galaxia',
+    sk_dark:'Oscuro',sk_goldx:'Oro X',sk_rainbow:'Arcoiris',sk_darkx:'Oscuro X',
+    sk_lava:'Lava',sk_mint:'Menta',sk_coral:'Coral',sk_cobalt:'Cobalto',
+    sk_lime:'Lima',sk_rose:'Rosa',sk_cyber:'Cyber',sk_sunset:'Atardecer',
+    sk_forest:'Bosque',sk_storm:'Tormenta',sk_sand:'Arena',sk_venom:'Veneno',
+    sk_candy:'Caramelo',sk_obsidian:'Obsidiana',
+    tips:['Mantener clic — boost!','Haz que enemigos choquen!','Mata — gana monedas!','10+ masa para boost','A — autopiloto']
+  },
+  pt:{code:'pt',name:'Português',
+    play:'JOGAR',skins:'SKINS',achievements:'CONQUISTAS',
+    music_on:'🔊 MUSICA: ON',music_off:'🔇 MUSICA: OFF',
+    connecting:'Conectando',auth:'Autorizando',ready:'Pronto!',
+    no_server:'Sem conexao. Tente mais tarde.',conn_err:'Erro de conexao',
+    respawn:'Renascendo',mass:'Massa',place:'Rank',autopilot:'AUTOPILOTO',
+    killed:'MORTO!',your_score:'Sua pontuacao',again:'De novo!',main_menu:'Menu Principal',
+    top_records:'TOP RECORDES',top:'TOP',online:'Online',
+    all:'Todos',standard:'Padrao',rare:'Raro',legendary:'Lendario',back:'Voltar',
+    task_done:'Missao completa!',kill_reward:'moedas por matar!',
+    equipped:'Equipado',equip:'Equipar',need_coins:'Precisa de',coins:'moedas',
+    choose_mode:'ESCOLHER MODO',offline:'OFFLINE',online_btn:'ONLINE',
+    offline_desc:'Jogue contra bots sem internet',online_desc:'Lute contra jogadores reais',
+    bots:'BOTS',live:'LIVE',
+    sk_green:'Verde',sk_red:'Vermelho',sk_blue:'Azul',sk_gold:'Ouro',
+    sk_violet:'Violeta',sk_pink:'Rosa',sk_teal:'Ciano',sk_orange:'Laranja',
+    sk_fire:'Fogo',sk_ice:'Gelo',sk_neon:'Neon',sk_galaxy:'Galaxia',
+    sk_dark:'Escuro',sk_goldx:'Ouro X',sk_rainbow:'Arco-iris',sk_darkx:'Escuro X',
+    sk_lava:'Lava',sk_mint:'Hortela',sk_coral:'Coral',sk_cobalt:'Cobalto',
+    sk_lime:'Lima',sk_rose:'Rosa',sk_cyber:'Cyber',sk_sunset:'Por do sol',
+    sk_forest:'Floresta',sk_storm:'Tempestade',sk_sand:'Areia',sk_venom:'Veneno',
+    sk_candy:'Doce',sk_obsidian:'Obsidiana',
+    tips:['Segure clique — boost!','Faca inimigos baterem!','Mate — ganhe moedas!','10+ massa para boost','A — autopiloto']
+  },
+  tr:{code:'tr',name:'Türkçe',
+    play:'OYNA',skins:'SKINLER',achievements:'BASARIMLAR',
+    music_on:'🔊 MUZIK: ACIK',music_off:'🔇 MUZIK: KAPALI',
+    connecting:'Baglanıyor',auth:'Yetkilendirme',ready:'Hazir!',
+    no_server:'Baglanti yok. Sonra dene.',conn_err:'Baglanti hatasi',
+    respawn:'Yeniden doguyor',mass:'Kutle',place:'Sıra',autopilot:'OTOPILOT',
+    killed:'OLDUN!',your_score:'Skorun',again:'Tekrar!',main_menu:'Ana Menu',
+    top_records:'TOP REKORLAR',top:'TOP',online:'Cevrimici',
+    all:'Hepsi',standard:'Standart',rare:'Nadir',legendary:'Efsanevi',back:'Geri',
+    task_done:'Gorev tamamlandı!',kill_reward:'oldurme icin para!',
+    equipped:'Giyildi',equip:'Giy',need_coins:'Gerekli',coins:'para',
+    choose_mode:'MOD SEC',offline:'CEVRIMDISI',online_btn:'CEVRIMICI',
+    offline_desc:'Internetsiz botlara karsi oyna',online_desc:'Gercek oyunculara karsi savas',
+    bots:'BOTLAR',live:'LIVE',
+    sk_green:'Yesil',sk_red:'Kirmizi',sk_blue:'Mavi',sk_gold:'Altin',
+    sk_violet:'Mor',sk_pink:'Pembe',sk_teal:'Camgobegi',sk_orange:'Turuncu',
+    sk_fire:'Ates',sk_ice:'Buz',sk_neon:'Neon',sk_galaxy:'Galaksi',
+    sk_dark:'Karanlik',sk_goldx:'Altin X',sk_rainbow:'Gokkusagi',sk_darkx:'Karanlik X',
+    sk_lava:'Lav',sk_mint:'Nane',sk_coral:'Mercan',sk_cobalt:'Kobalt',
+    sk_lime:'Limon',sk_rose:'Gul',sk_cyber:'Siber',sk_sunset:'Gun batimi',
+    sk_forest:'Orman',sk_storm:'Firtina',sk_sand:'Kum',sk_venom:'Zehir',
+    sk_candy:'Seker',sk_obsidian:'Obsidyen',
+    tips:['Sol tikla tut — boost!','Dusmanlari kuyruğuna carp!','Oldur — para kazan!','Boost icin 10+ kutle','A — otopilot']
+  },
+  uk:{code:'uk',name:'Українська',
+    play:'ГРАТИ',skins:'СКІНИ',achievements:'ДОСЯГНЕННЯ',
+    music_on:'🔊 МУЗИКА: УВК',music_off:'🔇 МУЗИКА: ВИКЛ',
+    connecting:'Підключення',auth:'Авторизація',ready:'Готово!',
+    no_server:"Немає зв'язку. Спробуй пізніше.",conn_err:'Помилка підключення',
+    respawn:'Відродження',mass:'Маса',place:'Місце',autopilot:'АВТОПІЛОТ',
+    killed:'ВБИТИЙ!',your_score:'Твій результат',again:'Знову!',main_menu:'Головне меню',
+    top_records:'ТОП РЕКОРДІВ',top:'ТОП',online:'Онлайн',
+    all:'Всі',standard:'Стандартні',rare:'Рідкісні',legendary:'Легендарні',back:'Назад',
+    task_done:'Завдання виконано!',kill_reward:'монети за вбивство!',
+    equipped:'Надіто',equip:'Надіти',need_coins:'Потрібно',coins:'монет',
+    choose_mode:'ОБЕРИ РЕЖИМ',offline:'ОФЛАЙН',online_btn:'ОНЛАЙН',
+    offline_desc:'Грай проти ботів без інтернету',online_desc:'Змагайся з реальними гравцями',
+    bots:'БОТИ',live:'LIVE',
+    sk_green:'Зелений',sk_red:'Червоний',sk_blue:'Синій',sk_gold:'Золотий',
+    sk_violet:'Фіолет',sk_pink:'Рожевий',sk_teal:'Бірюза',sk_orange:'Помаранч',
+    sk_fire:'Вогонь',sk_ice:'Лід',sk_neon:'Неон',sk_galaxy:'Галактика',
+    sk_dark:'Темрява',sk_goldx:'Золото X',sk_rainbow:'Веселка',sk_darkx:'Темний X',
+    sk_lava:'Лава',sk_mint:'М\'ята',sk_coral:'Корал',sk_cobalt:'Кобальт',
+    sk_lime:'Лайм',sk_rose:'Рожевий X',sk_cyber:'Кібер',sk_sunset:'Захід',
+    sk_forest:'Ліс',sk_storm:'Буря',sk_sand:'Пісок',sk_venom:'Отрута',
+    sk_candy:'Цукерка',sk_obsidian:'Обсидіан',
+    tips:['Затисни ЛКМ — прискорення!','Змусь ворога врізатись!','Вбивай гравців — монети!','Мін. 10 маси для буста','A — автопілот']
+  },
 };
 const LANG_FLAGS={ru:'🇷🇺',en:'🇺🇸',de:'🇩🇪',fr:'🇫🇷',es:'🇪🇸',pt:'🇧🇷',tr:'🇹🇷',uk:'🇺🇦'};
 
@@ -452,8 +714,16 @@ function t(key){return(LANGS[curLang]||LANGS.en)[key]||LANGS.en[key]||key;}
 function applyLang(){
   const L=LANGS[curLang]||LANGS.en;
   document.querySelectorAll('[data-i18n]').forEach(el=>{const key=el.dataset.i18n;if(L[key])el.textContent=L[key];});
-  const mb=document.getElementById('musicMenuBtn');if(mb)mb.textContent=musicEnabled?L.music_on:L.music_off;
-  const oc=document.getElementById('onlineCounter');if(oc)oc.innerHTML=L.online+': <span id="onlineNum">0</span>';
+  const achMenuBtn=document.getElementById('achMenuBtn');
+  if(achMenuBtn)achMenuBtn.textContent=L.achievements||'ACHIEVEMENTS';
+  const achBtnLabel=document.getElementById('achBtnLabel');
+  if(achBtnLabel)achBtnLabel.textContent=L.achievements||'ACHIEVEMENTS';
+  const achPanelTitle=document.getElementById('achPanelTitle');
+  if(achPanelTitle)achPanelTitle.textContent=L.achievements||'ACHIEVEMENTS';
+  const mb=document.getElementById('musicMenuBtn');
+  if(mb){mb.textContent=musicEnabled?L.music_on:L.music_off;if(!musicEnabled)mb.classList.add('off');else mb.classList.remove('off');}
+  const oc=document.getElementById('onlineCounter');
+  if(oc)oc.innerHTML=(L.online||'Online')+': <span id="onlineNum">0</span>';
   TIPS.length=0;L.tips.forEach(tip=>TIPS.push(tip));
   renderLangPanel();
 }
@@ -462,37 +732,93 @@ function renderLangPanel(){
   Object.values(LANGS).forEach(lang=>{
     const row=document.createElement('div');row.className='lang-row'+(lang.code===curLang?' active':'');
     row.innerHTML=`<span style="font-size:20px">${LANG_FLAGS[lang.code]}</span><span class="lang-name">${lang.name}</span>`;
-    row.onclick=()=>{curLang=lang.code;localStorage.setItem('dvx_lang',curLang);applyLang();langOpen=false;document.getElementById('langPanel').style.display='none';};
+    row.onclick=()=>{curLang=lang.code;localStorage.setItem('dvx_lang',curLang);applyLang();langOpen=false;document.getElementById('langPanel').classList.remove('open');};
     list.appendChild(row);
   });
 }
 let langOpen=false;
-document.getElementById('gearBtn').addEventListener('click',e=>{e.stopPropagation();langOpen=!langOpen;document.getElementById('langPanel').style.display=langOpen?'flex':'none';if(langOpen)renderLangPanel();});
-document.addEventListener('click',e=>{if(langOpen&&!document.getElementById('langPanel').contains(e.target)&&e.target!==document.getElementById('gearBtn')){langOpen=false;document.getElementById('langPanel').style.display='none';}});
+document.getElementById('gearBtn').addEventListener('click',e=>{
+  e.stopPropagation();
+  langOpen=!langOpen;
+  const panel=document.getElementById('langPanel');
+  panel.classList.toggle('open', langOpen);
+  if(langOpen) renderLangPanel();
+});
+document.addEventListener('click',e=>{
+  if(langOpen&&!document.getElementById('langPanel').contains(e.target)&&e.target!==document.getElementById('gearBtn')){
+    langOpen=false;
+    document.getElementById('langPanel').classList.remove('open');
+  }
+});
 
 const TIPS=[];
-let tipI=0;setInterval(()=>{tipI=(tipI+1)%TIPS.length;document.getElementById('tipEl').textContent=TIPS[tipI];},4000);
+let tipI=0;
+setInterval(()=>{
+  if(!TIPS.length)return;
+  tipI=(tipI+1)%TIPS.length;
+  const el=document.getElementById('tipEl');
+  if(el)el.textContent=TIPS[tipI];
+},4000);
 
 // ══════ SCREENS ══════
+let _transitioning=false;
+function switchScreen(toId, onReady){
+  const all=document.querySelectorAll('.screen');
+  const next=document.getElementById(toId);
+  const current=document.querySelector('.screen.active');
+  if(current===next){if(onReady)onReady();return;}
+  if(_transitioning){
+    // Форсируем мгновенно если уже идёт переход
+    all.forEach(s=>{s.classList.remove('active');s.style.cssText='';});
+    if(onReady)onReady();
+    next.classList.add('active');
+    return;
+  }
+  _transitioning=true;
+  // Анимация ухода текущего
+  if(current){
+    current.style.transition='opacity 0.22s ease, transform 0.22s ease';
+    current.style.opacity='0';
+    current.style.transform='translateY(-12px) scale(0.984)';
+  }
+  setTimeout(()=>{
+    all.forEach(s=>{s.classList.remove('active');s.style.cssText='';});
+    if(onReady)onReady();
+    // Стартовое состояние входящего экрана
+    next.style.opacity='0';
+    next.style.transform='translateY(22px) scale(0.984)';
+    next.style.transition='none';
+    next.classList.add('active');
+    next.getBoundingClientRect(); // форсируем reflow
+    next.style.transition='opacity 0.36s cubic-bezier(0.34,1.1,0.64,1), transform 0.36s cubic-bezier(0.34,1.1,0.64,1)';
+    next.style.opacity='1';
+    next.style.transform='translateY(0) scale(1)';
+    setTimeout(()=>{next.style.cssText='';_transitioning=false;}, 380);
+  }, current ? 200 : 0);
+}
+
 function showMenu(){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById('menuScreen').classList.add('active');
-  document.getElementById('hud').style.display='none';
-  document.getElementById('xpBarWrap').style.display='block';
-  document.getElementById('achBtn').style.display='none';
-  document.getElementById('gearBtn').style.display='flex';
-  showJoystick(false);updateXPBar();
+  switchScreen('menuScreen', ()=>{
+    document.getElementById('hud').style.display='none';
+    document.getElementById('xpBarWrap').style.display='block';
+    document.getElementById('achBtn').style.display='none';
+    document.getElementById('gearBtn').style.display='flex';
+    document.querySelector('.coins-fixed').style.display='flex';
+    showJoystick(false);updateXPBar();
+  });
 }
 function showModeSelect(){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById('modeScreen').classList.add('active');
+  switchScreen('modeScreen');
 }
-function showSkins(){renderSkins();document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('skinsScreen').classList.add('active');}
+function showSkins(){
+  renderSkins();
+  switchScreen('skinsScreen', ()=>{
+    document.querySelector('.coins-fixed').style.display='none';
+  });
+}
 function showLoading(status){
   if(!status)status=t('connecting');
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById('loadingScreen').classList.add('active');
-  setLoadStatus(status,0);
+  switchScreen('loadingScreen', ()=>{ setLoadStatus(status,0); });
 }
 function setLoadStatus(text,pct){
   const el=document.getElementById('loadStatusText');if(el)el.textContent=text;
@@ -519,31 +845,20 @@ let camX=0,camY=0,boosting=false,pname='Player';
 let autopilotMode=false;
 let gameMode='online';
 
-// ══════ ИНТЕРПОЛЯЦИЯ (фикс моргания змеек в онлайне) ══════
-// Хранит предыдущий снапшот для плавного перехода между кадрами
+// ══════ ИНТЕРПОЛЯЦИЯ ══════
 let _prevWorld=null;
 let _worldRecvTime=0;
-const INTERP_DURATION=33; // мс — совпадает с тиком сервера
+const INTERP_DURATION=33;
 
-// Возвращает интерполированные сегменты между двумя снапшотами
-function interpSegs(prevSegs, nextSegs, t){
-  if(!prevSegs||prevSegs.length!==nextSegs.length) return nextSegs;
-  const out=[];
-  const len=nextSegs.length;
-  for(let i=0;i<len;i++){
-    out.push({
-      x: prevSegs[i].x + (nextSegs[i].x - prevSegs[i].x)*t,
-      y: prevSegs[i].y + (nextSegs[i].y - prevSegs[i].y)*t,
-    });
-  }
+function interpSegs(prevSegs,nextSegs,t){
+  if(!prevSegs||prevSegs.length!==nextSegs.length)return nextSegs;
+  const out=[];const len=nextSegs.length;
+  for(let i=0;i<len;i++){out.push({x:prevSegs[i].x+(nextSegs[i].x-prevSegs[i].x)*t,y:prevSegs[i].y+(nextSegs[i].y-prevSegs[i].y)*t});}
   return out;
 }
-
-// Строит карту сегментов по имени игрока из снапшота
 function buildSegsMap(world){
-  const map={};
-  if(!world||!world.players) return map;
-  for(const p of world.players) map[p.name]=p.segs;
+  const map={};if(!world||!world.players)return map;
+  for(const p of world.players)map[p.name]=p.segs;
   return map;
 }
 
@@ -672,12 +987,12 @@ function offlineCheckCollisions(){
       if(!other.alive||other===sn)continue;
       for(let i=2;i<other.segs.length;i++){
         const s=other.segs[i],dx=h.x-s.x,dy=h.y-s.y;
-        const otherR=offlineGetR(other.score)*0.55; // только радиус тела, не головы
+        const otherR=offlineGetR(other.score)*0.55;
         if(dx*dx+dy*dy<(r*0.85+otherR)**2){
           offlineKill(sn);
           if(!sn.isMe&&other.isMe){
             essence=Math.min(9999,essence+3);syncEss();
-            showToast('💀 +3 монеты за убийство!','#ff6b6b');
+            showToast('💀 +3 '+t('kill_reward'),'#ff6b6b');
             trackAch('kills',1);
           }
           break;
@@ -708,9 +1023,7 @@ function offlineTick(){
       const score=me.score||0;
       document.getElementById('deathScore').textContent=t('mass')+': '+score;
       document.getElementById('hud').style.display='none';
-      document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-      document.getElementById('deathScreen').classList.add('active');
-      renderRecords(score);trackAch('mass',score);trackAch('survive',surviveTimer);
+      switchScreen('deathScreen',()=>{renderRecords(score);trackAch('mass',score);trackAch('survive',surviveTimer);});
     }
     return;
   }
@@ -750,12 +1063,14 @@ function startOffline(){
   const{spawnX,spawnY}=initOffline();
   camX=spawnX-W/2;camY=spawnY-H/2;
   player=offlineState.player;
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  // Плавно скрываем текущий экран и запускаем игру
+  const _curScr=document.querySelector('.screen.active');
+  if(_curScr){_curScr.style.transition='opacity 0.3s ease';_curScr.style.opacity='0';setTimeout(()=>{document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});},280);}
   document.getElementById('gearBtn').style.display='none';
   document.getElementById('hud').style.display='block';
   document.getElementById('xpBarWrap').style.display='none';
   document.getElementById('achBtn').style.display='none';
-  document.getElementById('achPanel').style.display='none';
+  document.getElementById('achPanel').classList.remove('open'); achOpen=false;
   achOpen=false;autopilotMode=false;
   document.getElementById('apBtn').classList.remove('active');
   running=true;surviveTimer=0;lastSurviveTick=performance.now();
@@ -796,28 +1111,25 @@ function connectWS(){
         pname=document.getElementById('nameInput').value.trim()||'Player';
         player={segs:[{x:msg.spawnX||WORLD/2,y:msg.spawnY||WORLD/2}],tAngle:0,angle:0,score:MIN_LEN,boosting:false,alive:true};
         camX=(msg.spawnX||WORLD/2)-W/2;camY=(msg.spawnY||WORLD/2)-H/2;
+        const _curScrOnline=document.querySelector('.screen.active');
+        if(_curScrOnline){_curScrOnline.style.transition='opacity 0.3s ease';_curScrOnline.style.opacity='0';}
         setTimeout(()=>{
-          document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+          document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});
           document.getElementById('gearBtn').style.display='none';
           document.getElementById('hud').style.display='block';
           document.getElementById('xpBarWrap').style.display='none';
           document.getElementById('achBtn').style.display='none';
-          document.getElementById('achPanel').style.display='none';
-          questsOpen=false;autopilotMode=false;
+          document.getElementById('achPanel').classList.remove('open'); achOpen=false;
+          achOpen=false;autopilotMode=false;
           document.getElementById('apBtn').classList.remove('active');
           running=true;surviveTimer=0;lastSurviveTick=performance.now();
           _xpFoodCounter=0;_prevScore=MIN_LEN;_foodCoinCounter=0;
           if(isMobile())showJoystick(true);
-        },300);
+        },320);
       }
       if(msg.type==='world'){
-        // ── ФИКС МОРГАНИЯ: сохраняем предыдущий мир и время получения ──
-        _prevWorld = serverWorld ? {
-          players: serverWorld.players,
-          _segsMap: buildSegsMap(serverWorld)
-        } : null;
-        _worldRecvTime = performance.now();
-        // ────────────────────────────────────────────────────────────────
+        _prevWorld=serverWorld?{players:serverWorld.players,_segsMap:buildSegsMap(serverWorld)}:null;
+        _worldRecvTime=performance.now();
         serverWorld=msg;
         if(msg.playerCount){document.getElementById('onlineNum').textContent=msg.playerCount;}
         if(serverWorld.players){
@@ -838,11 +1150,10 @@ function connectWS(){
         const score=msg.score||0;
         document.getElementById('deathScore').textContent=t('mass')+': '+score;
         document.getElementById('hud').style.display='none';
-        document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-        document.getElementById('deathScreen').classList.add('active');
-        running=false;renderRecords(score);trackQuest('reach_mass',score);
+        running=false;
+        switchScreen('deathScreen',()=>{renderRecords(score);trackQuest('reach_mass',score);});
       }
-      if(msg.type==='kill_reward'){essence=Math.min(9999,essence+msg.coins);syncEss();showToast('💀 +'+msg.coins+' монеты за убийство!','#ff6b6b');}
+      if(msg.type==='kill_reward'){essence=Math.min(9999,essence+msg.coins);syncEss();showToast('💀 +'+msg.coins+' '+t('kill_reward'),'#ff6b6b');}
       if(msg.type==='coin_reward'){essence=Math.min(9999,essence+msg.coins);syncEss();}
     }catch(err){console.warn('WS msg error',err);}
   };
@@ -884,17 +1195,31 @@ function updHUD(){
   }
   if(serverWorld){
     if(serverWorld.leaderboard){
-      let h='';serverWorld.leaderboard.forEach((s,i)=>{
+      // ФИX 2: показываем игрока за пределами топ-10
+      let h='';
+      let meInTop=false;
+      serverWorld.leaderboard.forEach((s,i)=>{
         const lv=s.isMe?(getLevel(playerXP)+1):Math.min(50,Math.max(1,Math.floor(s.score/80)+1));
+        if(s.isMe)meInTop=true;
         h+=`<div class="lb-row${s.isMe?' me':''}"><span class="lb-rank">${i+1}</span><span class="lb-lvl">${lv}</span><span class="lb-name">${s.name}</span><span class="lb-score">${s.score}</span></div>`;
       });
+      // Если игрок не попал в топ — показать его отдельно с реальной позицией
+      if(!meInTop&&serverWorld.players){
+        const me=serverWorld.players.find(p=>p.isMe);
+        if(me){
+          const allSorted=[...serverWorld.players].filter(p=>p.score!==undefined).sort((a,b)=>b.score-a.score);
+          const myPos=allSorted.findIndex(p=>p.isMe)+1;
+          const lv=getLevel(playerXP)+1;
+          h+=`<div class="lb-sep"></div><div class="lb-row me"><span class="lb-rank">${myPos||'?'}</span><span class="lb-lvl">${lv}</span><span class="lb-name">${me.name}</span><span class="lb-score">${me.score}</span></div>`;
+        }
+      }
       document.getElementById('lbList').innerHTML=h;
     }
     const me=serverWorld.players?serverWorld.players.find(p=>p.isMe):null;
     const myScore=me?me.score:(player?player.score:0);
     const myRank=serverWorld.leaderboard?(serverWorld.leaderboard.findIndex(s=>s.isMe)+1||'?'):'?';
     document.getElementById('hudLen').textContent=myScore;
-    document.getElementById('hudRank').textContent='#'+myRank;
+    document.getElementById('hudRank').textContent=myRank==='?'?'#?':'#'+myRank;
     if(me&&gameMode==='online'){const r=serverWorld.leaderboard?serverWorld.leaderboard.findIndex(s=>s.isMe)+1:99;if(r>=1&&r<=3&&serverWorld.leaderboard&&serverWorld.leaderboard.length>=4)trackQuest('top3',1);}
   }
 }
@@ -922,20 +1247,16 @@ function drawFoodList(fl,cx,cy){
   }
 }
 
-// ══════ DRAW SNAKE (с интерполяцией для онлайна) ══════
-function drawServerSnake(p, cx, cy){
-  // Для онлайн-режима применяем интерполяцию между кадрами — это устраняет моргание
-  let segs = p.segs;
-  if(gameMode === 'online' && _prevWorld && _prevWorld._segsMap){
-    const prevSegs = _prevWorld._segsMap[p.name];
-    if(prevSegs && prevSegs.length === segs.length){
-      // t от 0 до 1: насколько мы продвинулись к новому кадру
-      const elapsed = performance.now() - _worldRecvTime;
-      const tt = Math.min(elapsed / INTERP_DURATION, 1);
-      segs = interpSegs(prevSegs, segs, tt);
+function drawServerSnake(p,cx,cy){
+  let segs=p.segs;
+  if(gameMode==='online'&&_prevWorld&&_prevWorld._segsMap){
+    const prevSegs=_prevWorld._segsMap[p.name];
+    if(prevSegs&&prevSegs.length===segs.length){
+      const elapsed=performance.now()-_worldRecvTime;
+      const tt=Math.min(elapsed/INTERP_DURATION,1);
+      segs=interpSegs(prevSegs,segs,tt);
     }
   }
-
   if(!segs||segs.length<2)return;
   const hd0=segs[0],hsx=hd0.x-cx,hsy=hd0.y-cy;
   if(hsx<-500||hsx>W+500||hsy<-500||hsy>H+500)return;
@@ -994,7 +1315,7 @@ document.getElementById('onlineBtn').onclick=()=>{
   connectWS();
 };
 document.getElementById('restartBtn').onclick=()=>{
-  document.getElementById('deathScreen').classList.remove('active');
+  // deathScreen уйдёт через switchScreen ниже
   if(gameMode==='offline'){startOffline();}
   else{
     if(ws&&ws.readyState===WebSocket.OPEN){running=false;serverWorld=null;_prevWorld=null;showLoading(t('respawn'));ws.send(JSON.stringify({type:'respawn'}));}
@@ -1004,6 +1325,7 @@ document.getElementById('restartBtn').onclick=()=>{
 document.getElementById('menuBackBtn').onclick=()=>{
   if(offlineTickInterval){clearInterval(offlineTickInterval);offlineTickInterval=null;}
   if(ws){try{ws.close();}catch(e){}ws=null;}
+  wsConnecting=false;
   serverWorld=null;_prevWorld=null;running=false;offlineState=null;showMenu();
 };
 document.getElementById('nameInput').addEventListener('keydown',e=>{if(e.key==='Enter'){pname=document.getElementById('nameInput').value.trim()||'Player';showModeSelect();}});
@@ -1019,15 +1341,24 @@ function drawRobotIcon(){
   x.fillStyle='#00e5cc';x.fillRect(5,23,5,6);x.fillRect(26,23,5,6);x.fillRect(11,32,5,4);x.fillRect(20,32,5,4);
 }
 function toggleAutopilot(){autopilotMode=!autopilotMode;document.getElementById('apBtn').classList.toggle('active',autopilotMode);drawRobotIcon();}
-window.addEventListener('load',()=>{drawRobotIcon();applyLang();});
+// load handled below
 
 // ══════ RECORDS ══════
 function loadRecords(){return JSON.parse(localStorage.getItem('dvx_records')||'[]');}
-function saveRecord(score){let recs=loadRecords();recs.push(score);recs.sort((a,b)=>b-a);recs=recs.slice(0,5);localStorage.setItem('dvx_records',JSON.stringify(recs));return{recs,rank:recs.indexOf(score)+1};}
+function saveRecord(score){
+  let recs=loadRecords();
+  recs.push(score);
+  recs.sort((a,b)=>b-a);
+  recs=recs.slice(0,5);
+  localStorage.setItem('dvx_records',JSON.stringify(recs));
+  let rank=-1;
+  for(let i=recs.length-1;i>=0;i--){if(recs[i]===score){rank=i;break;}}
+  return{recs,rank};
+}
 function renderRecords(score){
   const{recs,rank}=saveRecord(score);
   const medals=['🥇','🥈','🥉','',''];
-  document.getElementById('recList').innerHTML=recs.map((s,i)=>`<div class="rec-row${i===rank-1&&s===score?' new':''}"><span class="rec-pos">${i+1}</span><span class="rec-score">${s}</span>${i===rank-1&&s===score?'<span style="font-size:11px;color:#f9ca24;font-weight:900">← ТЫ</span>':''}<span class="rec-medal">${medals[i]||''}</span></div>`).join('');
+  document.getElementById('recList').innerHTML=recs.map((s,i)=>`<div class="rec-row${i===rank?' new':''}"><span class="rec-pos">${i+1}</span><span class="rec-score">${s}</span>${i===rank?'<span style="font-size:11px;color:#f9ca24;font-weight:900"> &#8592; YOU</span>':''}<span class="rec-medal">${medals[i]||''}</span></div>`).join('');
 }
 
 // ══════ JOYSTICK ══════
@@ -1051,37 +1382,28 @@ canvas.addEventListener('touchmove',e=>{e.preventDefault();mx=e.touches[0].clien
 canvas.addEventListener('touchstart',()=>boosting=true,{passive:true});
 canvas.addEventListener('touchend',()=>boosting=false,{passive:true});
 
-// ══════ XP ══════
-// Уровни до 1000 — каждый уровень даёт +2 к стартовой массе
-// XP система перенесена наверх
-
 // ══════ ДОСТИЖЕНИЯ ══════
-const ACH_DEFS = [
-  // Убийства
-  {id:'kill_1',   icon:'⚔️', name:'Первая кровь',      desc:'Убей 1 змею',         type:'kills', goal:1,    reward:50,   xp:20},
-  {id:'kill_10',  icon:'💀', name:'Убийца',             desc:'Убей 10 змей',        type:'kills', goal:10,   reward:200,  xp:100},
-  {id:'kill_50',  icon:'☠️', name:'Мясник',             desc:'Убей 50 змей',        type:'kills', goal:50,   reward:800,  xp:500},
-  {id:'kill_100', icon:'👑', name:'Повелитель смерти',  desc:'Убей 100 змей',       type:'kills', goal:100,  reward:2000, xp:1500},
-  {id:'kill_500', icon:'🔱', name:'Бог войны',          desc:'Убей 500 змей',       type:'kills', goal:500,  reward:8000, xp:8000},
-  // Масса
-  {id:'mass_100', icon:'🌱', name:'Росток',             desc:'Набери 100 массы',    type:'mass',  goal:100,  reward:30,   xp:15},
-  {id:'mass_500', icon:'🐍', name:'Змея',               desc:'Набери 500 массы',    type:'mass',  goal:500,  reward:150,  xp:80},
-  {id:'mass_1000',icon:'🐲', name:'Дракон',             desc:'Набери 1000 массы',   type:'mass',  goal:1000, reward:500,  xp:300},
-  {id:'mass_5000',icon:'🌊', name:'Левиафан',           desc:'Набери 5000 массы',   type:'mass',  goal:5000, reward:2000, xp:2000},
-  // Игры
-  {id:'games_1',  icon:'🎮', name:'Первый шаг',         desc:'Сыграй 1 игру',       type:'games', goal:1,    reward:20,   xp:10},
-  {id:'games_10', icon:'🎯', name:'Постоянный игрок',   desc:'Сыграй 10 игр',       type:'games', goal:10,   reward:100,  xp:50},
-  {id:'games_50', icon:'🏅', name:'Ветеран',            desc:'Сыграй 50 игр',       type:'games', goal:50,   reward:500,  xp:300},
-  {id:'games_100',icon:'🥇', name:'Профессионал',       desc:'Сыграй 100 игр',      type:'games', goal:100,  reward:1500, xp:1000},
-  {id:'games_500',icon:'🏆', name:'Легенда',            desc:'Сыграй 500 игр',      type:'games', goal:500,  reward:5000, xp:5000},
-  // Выживание
-  {id:'surv_60',  icon:'⏱', name:'Минута',             desc:'Выживи 1 минуту',     type:'survive',goal:60,  reward:40,   xp:20},
-  {id:'surv_300', icon:'⏳', name:'Терпеливый',         desc:'Выживи 5 минут',      type:'survive',goal:300, reward:200,  xp:150},
-  {id:'surv_600', icon:'🕐', name:'Долгожитель',        desc:'Выживи 10 минут',     type:'survive',goal:600, reward:600,  xp:500},
-  // Еда
-  {id:'eat_100',  icon:'🍎', name:'Перекус',            desc:'Съешь 100 еды',       type:'eat',   goal:100,  reward:50,   xp:25},
-  {id:'eat_1000', icon:'🍕', name:'Обжора',             desc:'Съешь 1000 еды',      type:'eat',   goal:1000, reward:300,  xp:200},
-  {id:'eat_10000',icon:'🍖', name:'Пожиратель',         desc:'Съешь 10000 еды',     type:'eat',   goal:10000,reward:2000, xp:2000},
+const ACH_DEFS=[
+  {id:'kill_1',   icon:'⚔️',name:'First Blood',      desc:'Kill 1 snake',         type:'kills', goal:1,    reward:50,   xp:20},
+  {id:'kill_10',  icon:'💀',name:'Killer',            desc:'Kill 10 snakes',       type:'kills', goal:10,   reward:200,  xp:100},
+  {id:'kill_50',  icon:'☠️',name:'Butcher',           desc:'Kill 50 snakes',       type:'kills', goal:50,   reward:800,  xp:500},
+  {id:'kill_100', icon:'👑',name:'Death Lord',        desc:'Kill 100 snakes',      type:'kills', goal:100,  reward:2000, xp:1500},
+  {id:'kill_500', icon:'🔱',name:'War God',           desc:'Kill 500 snakes',      type:'kills', goal:500,  reward:8000, xp:8000},
+  {id:'mass_100', icon:'🌱',name:'Sprout',            desc:'Reach 100 mass',       type:'mass',  goal:100,  reward:30,   xp:15},
+  {id:'mass_500', icon:'🐍',name:'Snake',             desc:'Reach 500 mass',       type:'mass',  goal:500,  reward:150,  xp:80},
+  {id:'mass_1000',icon:'🐲',name:'Dragon',            desc:'Reach 1000 mass',      type:'mass',  goal:1000, reward:500,  xp:300},
+  {id:'mass_5000',icon:'🌊',name:'Leviathan',         desc:'Reach 5000 mass',      type:'mass',  goal:5000, reward:2000, xp:2000},
+  {id:'games_1',  icon:'🎮',name:'First Step',        desc:'Play 1 game',          type:'games', goal:1,    reward:20,   xp:10},
+  {id:'games_10', icon:'🎯',name:'Regular Player',    desc:'Play 10 games',        type:'games', goal:10,   reward:100,  xp:50},
+  {id:'games_50', icon:'🏅',name:'Veteran',           desc:'Play 50 games',        type:'games', goal:50,   reward:500,  xp:300},
+  {id:'games_100',icon:'🥇',name:'Professional',      desc:'Play 100 games',       type:'games', goal:100,  reward:1500, xp:1000},
+  {id:'games_500',icon:'🏆',name:'Legend',            desc:'Play 500 games',       type:'games', goal:500,  reward:5000, xp:5000},
+  {id:'surv_60',  icon:'⏱', name:'One Minute',       desc:'Survive 1 minute',     type:'survive',goal:60,  reward:40,   xp:20},
+  {id:'surv_300', icon:'⏳',name:'Patient',           desc:'Survive 5 minutes',    type:'survive',goal:300, reward:200,  xp:150},
+  {id:'surv_600', icon:'🕐',name:'Long-liver',        desc:'Survive 10 minutes',   type:'survive',goal:600, reward:600,  xp:500},
+  {id:'eat_100',  icon:'🍎',name:'Snack',             desc:'Eat 100 food',         type:'eat',   goal:100,  reward:50,   xp:25},
+  {id:'eat_1000', icon:'🍕',name:'Glutton',           desc:'Eat 1000 food',        type:'eat',   goal:1000, reward:300,  xp:200},
+  {id:'eat_10000',icon:'🍖',name:'Devourer',          desc:'Eat 10000 food',       type:'eat',   goal:10000,reward:2000, xp:2000},
 ];
 
 function loadAch(){
@@ -1089,13 +1411,11 @@ function loadAch(){
   return ACH_DEFS.map(a=>({...a,progress:saved[a.id]?.progress||0,done:saved[a.id]?.done||false}));
 }
 function saveAch(){
-  const obj={};
-  achievements.forEach(a=>{obj[a.id]={progress:a.progress,done:a.done};});
+  const obj={};achievements.forEach(a=>{obj[a.id]={progress:a.progress,done:a.done};});
   localStorage.setItem('dvx_ach',JSON.stringify(obj));
 }
 let achievements=loadAch();
 
-// Статистика для достижений
 let achStats={kills:0,maxMass:0,games:0,survive:0,eat:0};
 function loadAchStats(){
   const s=JSON.parse(localStorage.getItem('dvx_achstats')||'{}');
@@ -1108,20 +1428,20 @@ loadAchStats();
 function trackAch(type,amount){
   if(!amount||amount<=0)return;
   let changed=false;
-  if(type==='kills')  {achStats.kills+=amount;}
+  if(type==='kills')  achStats.kills+=amount;
   if(type==='mass')   {if(amount>achStats.maxMass)achStats.maxMass=amount;}
-  if(type==='games')  {achStats.games+=amount;}
-  if(type==='survive'){achStats.survive+=amount;}
-  if(type==='eat')    {achStats.eat+=amount;}
+  if(type==='games')  achStats.games+=amount;
+  if(type==='survive')achStats.survive+=amount;
+  if(type==='eat')    achStats.eat+=amount;
   saveAchStats();
   for(const a of achievements){
     if(a.done)continue;
-    const val = achStats[a.type]||0;
-    const newProg = Math.min(a.goal, val);
+    const val=achStats[a.type]||0;
+    const newProg=Math.min(a.goal,val);
     if(newProg!==a.progress){a.progress=newProg;changed=true;}
     if(a.progress>=a.goal&&!a.done){
       a.done=true;changed=true;
-      showToast(a.icon+' '+a.name+'! +'+a.reward+'🪙 +'+a.xp+'XP','#a29bfe');
+      showToast(a.icon+' '+a.name+'! +'+a.reward+' coins +'+a.xp+' XP','#a29bfe');
       essence=Math.min(9999,essence+a.reward);syncEss();
       addXP(a.xp);
     }
@@ -1129,20 +1449,18 @@ function trackAch(type,amount){
   if(changed){saveAch();renderAch();}
 }
 
-// trackQuest теперь вызывает trackAch для совместимости
 function trackQuest(id,amount){
-  if(id==='eat_food')   trackAch('eat',amount);
-  if(id==='reach_mass') trackAch('mass',amount);
+  if(id==='eat_food')    trackAch('eat',amount);
+  if(id==='reach_mass')  trackAch('mass',amount);
   if(id==='survive_time')trackAch('survive',amount);
-  if(id==='top3')       {}
-  if(id==='kills')      trackAch('kills',amount);
+  if(id==='kills')       trackAch('kills',amount);
 }
 
 function renderAch(){
   const list=document.getElementById('achList');if(!list)return;
   const sorted=[...achievements].sort((a,b)=>{
     if(a.done&&!b.done)return 1;if(!a.done&&b.done)return -1;
-    return (b.progress/b.goal)-(a.progress/a.goal);
+    return(b.progress/b.goal)-(a.progress/a.goal);
   });
   list.innerHTML=sorted.map(a=>{
     const pct=Math.min(100,Math.round((a.progress/a.goal)*100));
@@ -1155,12 +1473,11 @@ function renderAch(){
       </div>
       <div>
         ${a.done
-          ?'<div class="ach-check">✅</div>'
-          :`<div class="ach-reward">🪙${a.reward}</div><div style="font-size:10px;color:rgba(162,155,254,0.6);text-align:right">${a.progress}/${a.goal}</div>`}
+          ?'<div class="ach-check">&#9989;</div>'
+          :`<div class="ach-reward">${coinHTML(18)}${a.reward}</div><div style="font-size:10px;color:rgba(162,155,254,0.6);text-align:right">${a.progress}/${a.goal}</div>`}
       </div>
     </div>`;
   }).join('');
-  // Бейдж
   const badge=document.getElementById('achBadge');
   if(badge){
     const newDone=achievements.filter(a=>a.done).length;
@@ -1172,16 +1489,22 @@ function renderAch(){
 renderAch();
 
 let achOpen=false;
-function toggleAch(){achOpen=!achOpen;document.getElementById('achPanel').style.display=achOpen?'flex':'none';if(achOpen)renderAch();}
+function toggleAch(){
+  achOpen=!achOpen;
+  const panel=document.getElementById('achPanel');
+  panel.classList.toggle('open', achOpen);
+  if(achOpen) renderAch();
+}
 document.getElementById('achBtn').addEventListener('click',e=>{e.stopPropagation();toggleAch();});
 document.getElementById('achMenuBtn').addEventListener('click',e=>{e.stopPropagation();toggleAch();});
 document.addEventListener('click',e=>{
   if(achOpen&&!document.getElementById('achPanel').contains(e.target)
     &&!document.getElementById('achBtn').contains(e.target)
     &&e.target!==document.getElementById('achMenuBtn')){
-    achOpen=false;document.getElementById('achPanel').style.display='none';
+    achOpen=false;document.getElementById('achPanel').classList.remove('open');
   }
 });
+
 let surviveTimer=0,lastSurviveTick=0,_xpFoodCounter=0,_foodCoinCounter=0,_prevScore=MIN_LEN;
 
 // ══════ МУЗЫКА ══════
@@ -1214,21 +1537,182 @@ function startMusic(){if(!musicEnabled)return;if(!_audioStarted)initMusic();else
 function stopMusic(){if(audioCtx&&audioCtx.state==='running')audioCtx.suspend();}
 function toggleMusic(){
   musicEnabled=!musicEnabled;localStorage.setItem('dvx_music',musicEnabled?'on':'off');
+  const L=LANGS[curLang]||LANGS.en;
   const btn=document.getElementById('musicMenuBtn');
-  if(musicEnabled){btn.textContent='🔊 МУЗЫКА: ВКЛ';btn.classList.remove('off');startMusic();}
-  else{btn.textContent='🔇 МУЗЫКА: ВЫКЛ';btn.classList.add('off');stopMusic();}
+  if(musicEnabled){btn.textContent=L.music_on;btn.classList.remove('off');startMusic();}
+  else{btn.textContent=L.music_off;btn.classList.add('off');stopMusic();}
 }
 document.getElementById('musicMenuBtn').onclick=toggleMusic;
 document.addEventListener('click',()=>{if(musicEnabled)startMusic();},{once:true});
-(()=>{const btn=document.getElementById('musicMenuBtn');if(!musicEnabled){btn.textContent='🔇 МУЗЫКА: ВЫКЛ';btn.classList.add('off');}})();
+(()=>{const btn=document.getElementById('musicMenuBtn');if(!musicEnabled){btn.classList.add('off');}})();
+
+// ══════ CANVAS МОНЕТА ══════
+function drawCoin(ctx, x, y, r, phase) {
+  const scaleX = Math.cos(phase * Math.PI * 2);
+  const isBack = scaleX < 0;
+  const absX = Math.max(Math.abs(scaleX), 0.04);
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.clip();
+
+  ctx.translate(x, y);
+
+  const glow = ctx.createRadialGradient(0, 0, r * 0.5, 0, 0, r * 1.35);
+  glow.addColorStop(0,   'rgba(255,210,0,0.35)');
+  glow.addColorStop(0.6, 'rgba(255,160,0,0.15)');
+  glow.addColorStop(1,   'rgba(255,100,0,0.0)');
+  ctx.beginPath(); ctx.arc(0, 0, r * 1.35, 0, Math.PI*2);
+  ctx.fillStyle = glow; ctx.fill();
+
+  ctx.scale(absX, 1);
+
+  const body = ctx.createLinearGradient(-r, -r*0.8, r*0.5, r*0.8);
+  if (!isBack) {
+    body.addColorStop(0,    '#fff5b0');
+    body.addColorStop(0.18, '#ffd700');
+    body.addColorStop(0.55, '#c8800a');
+    body.addColorStop(0.82, '#f0b800');
+    body.addColorStop(1,    '#a86000');
+  } else {
+    body.addColorStop(0,   '#c8900a');
+    body.addColorStop(0.5, '#e6a000');
+    body.addColorStop(1,   '#7a4800');
+  }
+  ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI*2);
+  ctx.fillStyle = body; ctx.fill();
+
+  ctx.beginPath(); ctx.arc(0, 0, r * 0.96, 0, Math.PI*2);
+  ctx.strokeStyle = isBack ? '#8a5800' : '#ffe066';
+  ctx.lineWidth = r * 0.12;
+  ctx.stroke();
+
+  ctx.beginPath(); ctx.arc(0, 0, r * 0.68, 0, Math.PI*2);
+  ctx.strokeStyle = isBack ? 'rgba(80,40,0,0.4)' : 'rgba(255,235,80,0.5)';
+  ctx.lineWidth = r * 0.07;
+  ctx.stroke();
+
+  if (!isBack) {
+    ctx.fillStyle = '#7a4000';
+    ctx.font = `900 ${Math.round(r * 0.82)}px Fredoka One,cursive`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('✦', 0, r * 0.05);
+
+    const shine = ctx.createRadialGradient(-r*0.25, -r*0.35, 0, -r*0.1, -r*0.1, r*0.6);
+    shine.addColorStop(0,   'rgba(255,255,255,0.55)');
+    shine.addColorStop(0.5, 'rgba(255,255,255,0.15)');
+    shine.addColorStop(1,   'rgba(255,255,255,0)');
+    ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI*2);
+    ctx.fillStyle = shine; ctx.fill();
+  } else {
+    ctx.fillStyle = 'rgba(100,55,0,0.65)';
+    ctx.font = `900 ${Math.round(r * 0.7)}px Fredoka One,cursive`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('D', 0, r * 0.04);
+  }
+
+  ctx.restore();
+}
+
+const _coinInstances = [];
+let _coinAnimId = null;
+
+function makeCoinCanvas(canvas) {
+  if (_coinInstances.find(c => c.canvas === canvas)) return;
+  const half = canvas.width / 2;
+  const r = half * 0.82;
+  const inst = { canvas, x: half, y: half, r, phase: Math.random()*2, speed: 0.007 + Math.random()*0.005 };
+  _coinInstances.push(inst);
+  if (!_coinAnimId) _animateCoins();
+}
+
+function _animateCoins() {
+  _coinAnimId = requestAnimationFrame(_animateCoins);
+  for (let i = _coinInstances.length - 1; i >= 0; i--) {
+    const inst = _coinInstances[i];
+    if (!inst.canvas.isConnected) { _coinInstances.splice(i, 1); continue; }
+    const c = inst.canvas.getContext('2d');
+    c.clearRect(0, 0, inst.canvas.width, inst.canvas.height);
+    inst.phase += inst.speed;
+    drawCoin(c, inst.x, inst.y, inst.r, inst.phase);
+  }
+}
+
+function initStaticCoins() {
+  const top = document.getElementById('coinTopCanvas');
+  if (top) makeCoinCanvas(top);
+  const sk = document.getElementById('coinSkinsCanvas');
+  if (sk) makeCoinCanvas(sk);
+}
+
+function coinHTML(cssSize) {
+  const id = 'dvxc_' + (Math.random()*1e9|0);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const el = document.getElementById(id);
+      if (el) makeCoinCanvas(el);
+    });
+  });
+  return `<canvas id="${id}" width="${cssSize}" height="${cssSize}" style="width:${cssSize}px;height:${cssSize}px;display:inline-block;vertical-align:middle;flex-shrink:0;"></canvas>`;
+}
+
+window.addEventListener('load', initStaticCoins);
+
+// ══════ RIPPLE EFFECT ══════
+function spawnRipple(el, e){
+  if(running) return; // не в игре
+  const rect = el.getBoundingClientRect();
+  const x = (e.clientX ?? rect.left + rect.width/2) - rect.left;
+  const y = (e.clientY ?? rect.top + rect.height/2) - rect.top;
+  const size = Math.max(rect.width, rect.height) * 2.2;
+  const circle = document.createElement('span');
+  circle.className = 'ripple-circle';
+  // Цвет ripple зависит от фона кнопки
+  const bg = getComputedStyle(el).background;
+  let color = 'rgba(255,255,255,0.35)';
+  if(bg.includes('a29bfe')||bg.includes('6c5ce7')) color='rgba(162,155,254,0.45)';
+  else if(bg.includes('ff9f43')||bg.includes('e67e22')) color='rgba(255,159,67,0.45)';
+  else if(bg.includes('4af078')||bg.includes('20c44a')) color='rgba(57,255,20,0.35)';
+  else if(bg.includes('2ecc71')) color='rgba(46,204,113,0.4)';
+  circle.style.cssText = `
+    width:${size}px; height:${size}px;
+    left:${x - size/2}px; top:${y - size/2}px;
+    background:${color};
+  `;
+  el.appendChild(circle);
+  circle.addEventListener('animationend', ()=>circle.remove(), {once:true});
+}
+
+function initRipples(){
+  // Применяем ко всем кнопкам и кликабельным элементам вне игры
+  const sel = '.btn-play,.btn-skins,.btn-quests-menu,.btn-music,.back-btn,.mode-card,.mode-back,.btn-restart,.btn-back-menu,.cat-btn,.lang-row,.skin-card,#achMenuBtn,#gearBtn,#skinsMenuBtn,#skinsBack,#modeBackBtn,#menuBackBtn,#restartBtn';
+  document.querySelectorAll(sel).forEach(el=>{
+    if(el.dataset.ripple) return;
+    el.dataset.ripple='1';
+    el.classList.add('ripple-host');
+    el.addEventListener('pointerdown', e=>spawnRipple(el,e), {passive:true});
+  });
+  // Делегирование для динамически создаваемых skin-card
+  document.getElementById('skinsGrid').addEventListener('pointerdown', e=>{
+    const card = e.target.closest('.skin-card');
+    if(card && !running) spawnRipple(card, e);
+  }, {passive:true});
+  document.getElementById('langList').addEventListener('pointerdown', e=>{
+    const row = e.target.closest('.lang-row');
+    if(row && !running) spawnRipple(row, e);
+  }, {passive:true});
+}
+
+window.addEventListener('load', ()=>{ drawRobotIcon(); applyLang(); initRipples(); });
 
 function showToast(msg,color='#fff'){
   const w=document.getElementById('toastWrap'),tt=document.createElement('div');
   tt.className='toast';tt.textContent=msg;tt.style.borderColor=color;tt.style.color=color;
   w.appendChild(tt);setTimeout(()=>tt.remove(),2300);
 }
-
-
 </script>
 </body>
 </html>
