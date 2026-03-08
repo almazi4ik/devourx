@@ -1090,18 +1090,6 @@ function addSeasonXP(amount){
   }
 }
 
-function checkSeasonRewards(){
-  for(const r of SEASON_REWARDS){
-    if(r.lvl<=seasonLevel&&!seasonClaimed.includes(r.lvl)){
-      seasonClaimed.push(r.lvl);
-      localStorage.setItem('dvx_seasonclaimed',JSON.stringify(seasonClaimed));
-      if(r.type==='coins'){essence=Math.min(9999,essence+r.amount);syncEss();showToast('🐍 +'+r.amount+' монет!','#f9ca24');}
-      else if(r.type==='xp'){addXP(r.amount);showToast('🐍 +'+r.amount+' XP!','#a29bfe');}
-      else if(r.type==='skin'){const sk=SKINS_DATA.find(s=>s.id===r.skinId);if(sk){sk.owned=true;saveSkins();showToast('🐍 Скин '+t(sk.key)+' разблокирован!','#00e5cc');}}
-    }
-  }
-}
-
 function renderSeasonRewards(){
   const pct=((seasonXP%SEASON_XP_PER_LEVEL)/SEASON_XP_PER_LEVEL)*100;
   const bar=document.getElementById('seasonProgressBar');if(bar)bar.style.width=pct+'%';
