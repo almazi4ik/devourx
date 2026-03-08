@@ -1790,7 +1790,7 @@ function connectWS(){
   ws.onopen=()=>{
     clearInterval(_loadInterval);document.getElementById('loadBarFill').style.width='92%';setLoadStatus(t('auth'));
     const name=document.getElementById('nameInput').value.trim()||'Player';
-    ws.send(JSON.stringify({type:'join',name,skinId:selSkin}));
+    ws.send(JSON.stringify({type:'join',name,skinId:selSkin,skinColor:SKINS_DATA[selSkin].b[0]}));
   };
   ws.onmessage=(e)=>{
     try{
