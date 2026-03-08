@@ -1773,6 +1773,7 @@ function offlineCheckCollisions(){
           if(!sn.isMe&&other.isMe){
             essence=Math.min(9999,essence+3);syncEss();
             showToast('💀 +3 '+t('kill_reward'),'#ff6b6b');
+            addSeasonXP(25);
             trackAch('kills',1);
           }
           break;
