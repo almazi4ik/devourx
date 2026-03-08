@@ -1928,6 +1928,7 @@ function connectWS(){
         switchScreen('deathScreen',()=>{renderRecords(score);trackQuest('reach_mass',score);});
       }
       if(msg.type==='kill_reward'){essence=Math.min(9999,essence+msg.coins);syncEss();showToast('💀 +'+msg.coins+' '+t('kill_reward'),'#ff6b6b');}
+      addSeasonXP(25);
       if(msg.type==='coin_reward'){essence=Math.min(9999,essence+msg.coins);syncEss();}
     }catch(err){console.warn('WS msg error',err);}
   };
