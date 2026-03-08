@@ -1913,8 +1913,17 @@ function updHUD(){
 }
 
 function drawMM(){
-  mctx.clearRect(0,0,108,108);const sc=108/WORLD;
-  if(serverWorld){for(const p of(serverWorld.players||[])){if(!p.segs||!p.segs.length)continue;const h=p.segs[0];mctx.beginPath();mctx.arc(h.x*sc,h.y*sc,p.isMe?4:3,0,Math.PI*2);mctx.fillStyle=p.isMe?'#f9ca24':'#00e5cc';mctx.fill();}}
+  mctx.clearRect(0,0,108,108);
+  const sc=108/WORLD;
+  const heads=(serverWorld&&serverWorld.allHeads)||
+              (serverWorld&&serverWorld.players||[]).map(p=>({x:p.segs&&p.segs[0]&&p.segs[0].x,y:p.segs&&p.segs[0]&&p.segs[0].y,isMe:p.isMe}));
+  for(const h of heads){
+    if(h.x==null)continue;
+    mctx.beginPath();
+    mctx.arc(h.x*sc,h.y*sc,h.isMe?5:3,0,Math.PI*2);
+    mctx.fillStyle=h.isMe?'#ff4e4e':'#888888';
+    mctx.fill();
+  }
 }
 
 // ══════ DRAW BACKGROUND ══════
