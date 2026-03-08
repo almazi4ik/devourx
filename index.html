@@ -1713,6 +1713,7 @@ function offlineEatFood(sn){
         if(xg>0){_xpFoodCounter-=xg*5;addXP(xg);}
       }
       offlineState.foods[i]=mkOfflineFood();
+      if(sn.isMe) addSeasonXP(5);
     }
   }
 }
