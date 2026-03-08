@@ -416,7 +416,6 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
     <button class="btn-play" id="playBtn" data-i18n="play">PLAY</button>
     <button class="btn-skins" id="skinsMenuBtn" data-i18n="skins">SKINS</button>
     <button class="btn-quests-menu" id="achMenuBtn" data-i18n="achievements">ДОСТИЖЕНИЯ</button>
-<button class="btn-quests-menu" id="seasonBtn" style="background:linear-gradient(180deg,#00e5cc 0%,#0097a7 100%);box-shadow:0 5px 0 #006978;margin-top:0">🐍 СЕЗОН 1</button>
     <button class="btn-music" id="musicMenuBtn">🔊 МУЗЫКА: ВКЛ</button>
   </div>
 </div>
@@ -463,8 +462,7 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
     </div>
   </div>
   <div class="sk-cats" id="skCats">
-<button class="cat-btn active" data-cat="all" data-i18n="all">All</button>
-<button class="cat-btn" data-cat="season">🐍 СЕЗОН 1</button>
+    <button class="cat-btn active" data-cat="all" data-i18n="all">All</button>
     <button class="cat-btn" data-cat="standard" data-i18n="standard">Standard</button>
     <button class="cat-btn" data-cat="rare" data-i18n="rare">Rare</button>
     <button class="cat-btn" data-cat="legendary" data-i18n="legendary">Legendary</button>
@@ -488,24 +486,7 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
 
 <div id="joystickWrap"><div id="joystickBase"><div id="joystickKnob"></div></div></div>
 <div id="boostBtn">BOOST</div>
-<div id="seasonScreen" class="screen">
-  <div style="width:100%;height:100%;background:linear-gradient(160deg,#001a1a,#002a2a);display:flex;flex-direction:column;align-items:center;padding:20px;overflow-y:auto">
-    <div style="font-family:'Fredoka One',cursive;font-size:48px;color:#00e5cc;margin:20px 0 4px;filter:drop-shadow(0 0 20px #00e5cc88)">🐍 СЕЗОН 1</div>
-    <div style="font-family:'Fredoka One',cursive;font-size:18px;color:rgba(0,229,204,0.6);letter-spacing:3px;margin-bottom:20px">ЗМЕИНЫЙ СЕЗОН</div>
-    <div style="background:rgba(0,229,204,0.1);border:2px solid rgba(0,229,204,0.3);border-radius:20px;padding:14px 24px;margin-bottom:24px;width:min(90vw,500px)">
-      <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#00e5cc;letter-spacing:2px;margin-bottom:8px">ТВОЙ ПРОГРЕСС</div>
-      <div style="background:rgba(0,0,0,0.4);border-radius:10px;height:14px;overflow:hidden;border:1px solid rgba(0,229,204,0.3)">
-        <div id="seasonProgressBar" style="height:100%;background:linear-gradient(90deg,#00e5cc,#4af078);border-radius:10px;transition:width .4s;width:0%"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-top:6px">
-        <span id="seasonLvlText" style="font-family:'Fredoka One',cursive;font-size:16px;color:#fff">Уровень 1</span>
-        <span id="seasonXpText" style="font-size:12px;font-weight:800;color:rgba(0,229,204,0.6)">0/100 XP</span>
-      </div>
-    </div>
-    <div id="seasonRewardsList" style="display:flex;flex-direction:column;gap:10px;width:min(90vw,500px);padding-bottom:20px"></div>
-    <button onclick="showMenu()" style="margin-top:10px;background:transparent;border:2px solid rgba(0,229,204,0.4);border-radius:50px;color:#00e5cc;font-family:'Fredoka One',cursive;font-size:18px;padding:12px 40px;cursor:pointer">← НАЗАД</button>
-  </div>
-</div>
+
 <!-- СМЕРТЬ -->
 <div id="deathScreen" class="screen">
   <div class="death-title" data-i18n="killed">DEAD!</div>
@@ -625,10 +606,8 @@ const SKINS_DATA=[
   {id:27,key:'sk_venom',   h:'#14532d',b:['#84cc16','#1a0a00'],   rarity:'legendary',cost:750,  owned:false},
   {id:28,key:'sk_candy',   h:'#831843',b:['#f9a8d4','#a855f7'],   rarity:'legendary',cost:800,  owned:false},
   {id:29,key:'sk_obsidian',h:'#09090b',b:['#52525b','#18181b'],   rarity:'legendary',cost:850,  owned:false},
-  {id:30,key:'sk_legend',  h:'#1a1a6e',b:['#f9ca24','#3498db'],   rarity:'season', cost:0, owned:false, season:1, seasonLevel:25},
-{id:31,key:'sk_pro',     h:'#7f0000',b:['#ff4500','#ff8c00'],   rarity:'season', cost:0, owned:false, season:1, seasonLevel:50},
 ];
-const RARITY_C={standard:'#a8d8b8',rare:'#a29bfe',legendary:'#f9ca24',season:'#00e5cc'};
+const RARITY_C={standard:'#a8d8b8',rare:'#a29bfe',legendary:'#f9ca24'};
 
 (function loadSavedSkins(){
   SKINS_DATA.forEach(s=>{ if(s.rarity==='standard') s.owned=true; });
@@ -698,28 +677,16 @@ syncEss();
 
 function renderSkins(){
   const grid=document.getElementById('skinsGrid');grid.innerHTML='';
-  const list=curCat==='all'?SKINS_DATA:SKINS_DATA.filter(s=>s.rarity===curCat||s.rarity==='season'&&curCat==='season');
+  const list=curCat==='all'?SKINS_DATA:SKINS_DATA.filter(s=>s.rarity===curCat);
   list.forEach(s=>{
     const locked=!s.owned,card=document.createElement('div');
     card.className='skin-card'+(s.id===selSkin?' selected':'')+(locked?' locked':'');
     const rc=RARITY_C[s.rarity];
     const glowStyle=s.rarity==='legendary'?`box-shadow:0 0 18px ${s.b[0]}66,0 0 6px ${s.b[0]}44`:'';
     const animStyle=s.rarity==='legendary'?'animation:skinShimmer 2s ease-in-out infinite':'';
-    const isSeason=s.rarity==='season';
-const seasonLocked=isSeason&&!s.owned;
-const seasonText=isSeason&&seasonLocked?`<div class="sk-equip" style="color:#00e5cc">🐍 СЕЗОН ${s.season} • УР.${s.seasonLevel}</div>`:'';
-card.innerHTML=`${locked&&!isSeason?'<span class="lock-ico">🔒</span>':''}<div class="skin-preview" style="background:linear-gradient(135deg,${s.b[0]},${s.b[1]});${glowStyle};${animStyle}"></div><div class="sk-name" style="color:${rc}">${t(s.key)}</div>${isSeason?seasonText:(locked?`<div class="sk-cost">${coinHTML(22)} ${s.cost}</div>`:(s.id===selSkin?`<div class="sk-equip">${t('equipped')}</div>`:`<div class="sk-equip" style="color:#888">${t('equip')}</div>`))}<div class="rarity-bar" style="background:${rc}55"></div>`;
+    card.innerHTML=`${locked?'<span class="lock-ico">🔒</span>':''}<div class="skin-preview" style="background:linear-gradient(135deg,${s.b[0]},${s.b[1]});${glowStyle};${animStyle}"></div><div class="sk-name" style="color:${rc}">${t(s.key)}</div>${locked?`<div class="sk-cost">${coinHTML(22)} ${s.cost}</div>`:(s.id===selSkin?`<div class="sk-equip">${t('equipped')}</div>`:`<div class="sk-equip" style="color:#888">${t('equip')}</div>`)}<div class="rarity-bar" style="background:${rc}55"></div>`;
     card.onclick=()=>{
-      if(s.rarity==='season'){
-  if(!s.owned){alert(`🐍 Сезон ${s.season} • Уровень ${s.seasonLevel}\nИграй и прокачивай боевой пропуск!`);return;}
-  selSkin=s.id;saveSkins();renderSkins();
-  return;
-}
-```
-
-И ещё найди через **Ctrl+F**:
-```
-if(locked){if(essence>=s.cost){essence-=s.cost;s.owned=true;selSkin=s.id;syncEss();saveSkins();renderSkins();}else alert(t('need_coins')+' '+s.cost+' '+t('coins'));return;}
+      if(locked){if(essence>=s.cost){essence-=s.cost;s.owned=true;selSkin=s.id;syncEss();saveSkins();renderSkins();}else alert(t('need_coins')+' '+s.cost+' '+t('coins'));return;}
       selSkin=s.id;saveSkins();renderSkins();
     };
     grid.appendChild(card);
@@ -754,7 +721,7 @@ const LANGS = {
     sk_lava:'Лава',sk_mint:'Мята',sk_coral:'Коралл',sk_cobalt:'Кобальт',
     sk_lime:'Лайм',sk_rose:'Розовый X',sk_cyber:'Кибер',sk_sunset:'Закат',
     sk_forest:'Лес',sk_storm:'Буря',sk_sand:'Песок',sk_venom:'Яд',
-    sk_candy:'Конфетка',sk_obsidian:'Обсидиан',sk_legend:'Легенда 2026',sk_pro:'Профессионал',
+    sk_candy:'Конфетка',sk_obsidian:'Обсидиан',
     tips:['Зажми ЛКМ — ускорение!','Заставь врага врезаться в хвост!','Убивай игроков — монеты!','Минимум 10 массы для ускорения','A — автопилот']
   },
   en:{code:'en',name:'English',
@@ -778,7 +745,7 @@ const LANGS = {
     sk_lava:'Lava',sk_mint:'Mint',sk_coral:'Coral',sk_cobalt:'Cobalt',
     sk_lime:'Lime',sk_rose:'Rose',sk_cyber:'Cyber',sk_sunset:'Sunset',
     sk_forest:'Forest',sk_storm:'Storm',sk_sand:'Sand',sk_venom:'Venom',
-    sk_candy:'Candy',sk_obsidian:'Obsidian',sk_legend:'Legend 2026',sk_pro:'Professional',
+    sk_candy:'Candy',sk_obsidian:'Obsidian',
     tips:['Hold LMB — speed boost!','Make enemies hit your tail!','Kill players — earn coins!','Need 10+ mass to boost','A — autopilot']
   },
   de:{code:'de',name:'Deutsch',
@@ -1052,64 +1019,6 @@ function switchScreen(toId, onReady){
   }, current ? 200 : 0);
 }
 
-  const SEASON_XP_PER_LEVEL=250;
-const SEASON_REWARDS=[
-  {lvl:1,type:'coins',amount:50},{lvl:2,type:'xp',amount:100},{lvl:3,type:'coins',amount:75},
-  {lvl:4,type:'xp',amount:150},{lvl:5,type:'coins',amount:100},{lvl:6,type:'xp',amount:200},
-  {lvl:7,type:'coins',amount:125},{lvl:8,type:'xp',amount:250},{lvl:9,type:'coins',amount:150},
-  {lvl:10,type:'xp',amount:300},{lvl:11,type:'coins',amount:175},{lvl:12,type:'xp',amount:350},
-  {lvl:13,type:'coins',amount:200},{lvl:14,type:'xp',amount:400},{lvl:15,type:'coins',amount:225},
-  {lvl:16,type:'xp',amount:450},{lvl:17,type:'coins',amount:250},{lvl:18,type:'xp',amount:500},
-  {lvl:19,type:'coins',amount:275},{lvl:20,type:'xp',amount:550},{lvl:21,type:'coins',amount:300},
-  {lvl:22,type:'xp',amount:600},{lvl:23,type:'coins',amount:325},{lvl:24,type:'xp',amount:650},
-  {lvl:25,type:'skin',skinId:30},{lvl:26,type:'coins',amount:350},{lvl:27,type:'xp',amount:700},
-  {lvl:28,type:'coins',amount:375},{lvl:29,type:'xp',amount:750},{lvl:30,type:'coins',amount:400},
-  {lvl:31,type:'xp',amount:800},{lvl:32,type:'coins',amount:425},{lvl:33,type:'xp',amount:850},
-  {lvl:34,type:'coins',amount:450},{lvl:35,type:'xp',amount:900},{lvl:36,type:'coins',amount:475},
-  {lvl:37,type:'xp',amount:950},{lvl:38,type:'coins',amount:500},{lvl:39,type:'xp',amount:1000},
-  {lvl:40,type:'coins',amount:525},{lvl:41,type:'xp',amount:1050},{lvl:42,type:'coins',amount:550},
-  {lvl:43,type:'xp',amount:1100},{lvl:44,type:'coins',amount:575},{lvl:45,type:'xp',amount:1150},
-  {lvl:46,type:'coins',amount:600},{lvl:47,type:'xp',amount:1200},{lvl:48,type:'coins',amount:625},
-  {lvl:49,type:'xp',amount:1250},{lvl:50,type:'skin',skinId:31},
-];
-
-let seasonXP=parseInt(localStorage.getItem('dvx_seasonxp')||'0');
-let seasonLevel=Math.floor(seasonXP/SEASON_XP_PER_LEVEL)+1;
-let seasonClaimed=JSON.parse(localStorage.getItem('dvx_seasonclaimed')||'[]');
-
-function addSeasonXP(amount){
-  const oldLvl=seasonLevel;
-  seasonXP+=amount;
-  localStorage.setItem('dvx_seasonxp',seasonXP);
-  seasonLevel=Math.min(50,Math.floor(seasonXP/SEASON_XP_PER_LEVEL)+1);
-  if(seasonLevel>oldLvl){
-    showToast('🐍 Сезон: Уровень '+seasonLevel+'!','#00e5cc');
-    checkSeasonRewards();
-  }
-}
-
-function renderSeasonRewards(){
-  const pct=((seasonXP%SEASON_XP_PER_LEVEL)/SEASON_XP_PER_LEVEL)*100;
-  const bar=document.getElementById('seasonProgressBar');if(bar)bar.style.width=pct+'%';
-  const lt=document.getElementById('seasonLvlText');if(lt)lt.textContent='Уровень '+seasonLevel;
-  const xt=document.getElementById('seasonXpText');if(xt)xt.textContent=(seasonXP%SEASON_XP_PER_LEVEL)+'/'+SEASON_XP_PER_LEVEL+' XP';
-  const list=document.getElementById('seasonRewardsList');if(!list)return;
-  list.innerHTML=SEASON_REWARDS.map(r=>{
-    const done=seasonClaimed.includes(r.lvl);
-    const current=r.lvl===seasonLevel;
-    const locked=r.lvl>seasonLevel;
-    let icon='',label='';
-    if(r.type==='coins'){icon='🪙';label='+'+r.amount+' монет';}
-    else if(r.type==='xp'){icon='⭐';label='+'+r.amount+' XP';}
-    else if(r.type==='skin'){const sk=SKINS_DATA.find(s=>s.id===r.skinId);icon='👑';label=t(sk?sk.key:'');}
-    return`<div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:16px;background:${done?'rgba(0,229,204,0.1)':current?'rgba(0,229,204,0.05)':'rgba(255,255,255,0.03)'};border:2px solid ${done?'rgba(0,229,204,0.4)':current?'rgba(0,229,204,0.2)':'rgba(255,255,255,0.06)'};opacity:${locked?0.5:1}">
-      <div style="font-family:'Fredoka One',cursive;font-size:13px;color:#00e5cc;width:30px;text-align:center">${r.lvl}</div>
-      <div style="font-size:24px">${icon}</div>
-      <div style="flex:1;font-family:'Fredoka One',cursive;font-size:16px;color:#fff">${label}</div>
-      <div style="font-size:20px">${done?'✅':current?'👈':locked?'🔒':''}</div>
-    </div>`;
-  }).join('');
-}
 function showMenu(){
   switchScreen('menuScreen', ()=>{
     document.getElementById('hud').style.display='none';
@@ -1122,12 +1031,6 @@ function showMenu(){
 }
 function showModeSelect(){
   switchScreen('modeScreen');
-}
-  function showSeason(){
-  switchScreen('seasonScreen',()=>{
-    document.querySelector('.coins-fixed').style.display='none';
-    renderSeasonRewards();
-  });
 }
 function showSkins(){
   renderSkins();
@@ -1146,8 +1049,6 @@ function setLoadStatus(text,pct){
 
 document.getElementById('skinsMenuBtn').onclick=showSkins;
 document.getElementById('skinsBack').onclick=showMenu;
-document.getElementById('seasonBtn').onclick=showSeason;
-  checkSeasonRewards();
 document.getElementById('modeBackBtn').onclick=showMenu;
 
 // ══════ CANVAS ══════
@@ -1700,7 +1601,6 @@ function offlineEatFood(sn){
         if(xg>0){_xpFoodCounter-=xg*5;addXP(xg);}
       }
       offlineState.foods[i]=mkOfflineFood();
-      if(sn.isMe) addSeasonXP(5);
     }
   }
 }
@@ -1760,7 +1660,6 @@ function offlineCheckCollisions(){
           if(!sn.isMe&&other.isMe){
             essence=Math.min(9999,essence+3);syncEss();
             showToast('💀 +3 '+t('kill_reward'),'#ff6b6b');
-            addSeasonXP(25);
             trackAch('kills',1);
           }
           break;
@@ -1911,7 +1810,7 @@ function connectWS(){
             camX+=(sh.x-W/2-camX)*0.12;camY+=(sh.y-H/2-camY)*0.12;
             if(player){
               const gained=me.score-(player.score||MIN_LEN);
-              if(gained>0){trackQuest('eat_food',gained);addSeasonXP(gained*5);_xpFoodCounter+=gained;const xg=Math.floor(_xpFoodCounter/5);if(xg>0){_xpFoodCounter-=xg*5;addXP(xg);}}
+              if(gained>0){trackQuest('eat_food',gained);_xpFoodCounter+=gained;const xg=Math.floor(_xpFoodCounter/5);if(xg>0){_xpFoodCounter-=xg*5;addXP(xg);}}
               player.segs=me.segs;player.score=me.score||player.score;_prevScore=me.score;
             }
           }
@@ -1926,9 +1825,7 @@ function connectWS(){
         switchScreen('deathScreen',()=>{renderRecords(score);trackQuest('reach_mass',score);});
       }
       if(msg.type==='kill_reward'){essence=Math.min(9999,essence+msg.coins);syncEss();showToast('💀 +'+msg.coins+' '+t('kill_reward'),'#ff6b6b');}
-      addSeasonXP(25);
       if(msg.type==='coin_reward'){essence=Math.min(9999,essence+msg.coins);syncEss();}
-      addSeasonXP(5);
     }catch(err){console.warn('WS msg error',err);}
   };
   ws.onerror=()=>{clearTimeout(_connectTimeout);clearInterval(_loadInterval);wsConnecting=false;setLoadStatus(t('conn_err'),100);document.getElementById('loadBarFill').style.background='#e74c3c';setTimeout(()=>showMenu(),3000);};
