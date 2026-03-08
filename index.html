@@ -1067,6 +1067,12 @@ function showMenu(){
 function showModeSelect(){
   switchScreen('modeScreen');
 }
+  function showSeason(){
+  switchScreen('seasonScreen',()=>{
+    document.querySelector('.coins-fixed').style.display='none';
+    renderSeasonRewards();
+  });
+}
 function showSkins(){
   renderSkins();
   switchScreen('skinsScreen', ()=>{
