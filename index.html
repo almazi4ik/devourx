@@ -1930,6 +1930,7 @@ function connectWS(){
       if(msg.type==='kill_reward'){essence=Math.min(9999,essence+msg.coins);syncEss();showToast('💀 +'+msg.coins+' '+t('kill_reward'),'#ff6b6b');}
       addSeasonXP(25);
       if(msg.type==='coin_reward'){essence=Math.min(9999,essence+msg.coins);syncEss();}
+      addSeasonXP(5);
     }catch(err){console.warn('WS msg error',err);}
   };
   ws.onerror=()=>{clearTimeout(_connectTimeout);clearInterval(_loadInterval);wsConnecting=false;setLoadStatus(t('conn_err'),100);document.getElementById('loadBarFill').style.background='#e74c3c';setTimeout(()=>showMenu(),3000);};
