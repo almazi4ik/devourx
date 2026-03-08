@@ -680,7 +680,7 @@ syncEss();
 
 function renderSkins(){
   const grid=document.getElementById('skinsGrid');grid.innerHTML='';
-  const list=curCat==='all'?SKINS_DATA:SKINS_DATA.filter(s=>s.rarity===curCat);
+  const list=curCat==='all'?SKINS_DATA:SKINS_DATA.filter(s=>s.rarity===curCat||s.rarity==='season'&&curCat==='season');
   list.forEach(s=>{
     const locked=!s.owned,card=document.createElement('div');
     card.className='skin-card'+(s.id===selSkin?' selected':'')+(locked?' locked':'');
