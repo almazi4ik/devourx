@@ -1054,6 +1054,76 @@ function switchScreen(toId, onReady){
   }, current ? 200 : 0);
 }
 
+  const SEASON_XP_PER_LEVEL=100;
+const SEASON_REWARDS=[
+  {lvl:1,type:'coins',amount:50},{lvl:2,type:'xp',amount:100},{lvl:3,type:'coins',amount:75},
+  {lvl:4,type:'xp',amount:150},{lvl:5,type:'coins',amount:100},{lvl:6,type:'xp',amount:200},
+  {lvl:7,type:'coins',amount:125},{lvl:8,type:'xp',amount:250},{lvl:9,type:'coins',amount:150},
+  {lvl:10,type:'xp',amount:300},{lvl:11,type:'coins',amount:175},{lvl:12,type:'xp',amount:350},
+  {lvl:13,type:'coins',amount:200},{lvl:14,type:'xp',amount:400},{lvl:15,type:'coins',amount:225},
+  {lvl:16,type:'xp',amount:450},{lvl:17,type:'coins',amount:250},{lvl:18,type:'xp',amount:500},
+  {lvl:19,type:'coins',amount:275},{lvl:20,type:'xp',amount:550},{lvl:21,type:'coins',amount:300},
+  {lvl:22,type:'xp',amount:600},{lvl:23,type:'coins',amount:325},{lvl:24,type:'xp',amount:650},
+  {lvl:25,type:'skin',skinId:30},{lvl:26,type:'coins',amount:350},{lvl:27,type:'xp',amount:700},
+  {lvl:28,type:'coins',amount:375},{lvl:29,type:'xp',amount:750},{lvl:30,type:'coins',amount:400},
+  {lvl:31,type:'xp',amount:800},{lvl:32,type:'coins',amount:425},{lvl:33,type:'xp',amount:850},
+  {lvl:34,type:'coins',amount:450},{lvl:35,type:'xp',amount:900},{lvl:36,type:'coins',amount:475},
+  {lvl:37,type:'xp',amount:950},{lvl:38,type:'coins',amount:500},{lvl:39,type:'xp',amount:1000},
+  {lvl:40,type:'coins',amount:525},{lvl:41,type:'xp',amount:1050},{lvl:42,type:'coins',amount:550},
+  {lvl:43,type:'xp',amount:1100},{lvl:44,type:'coins',amount:575},{lvl:45,type:'xp',amount:1150},
+  {lvl:46,type:'coins',amount:600},{lvl:47,type:'xp',amount:1200},{lvl:48,type:'coins',amount:625},
+  {lvl:49,type:'xp',amount:1250},{lvl:50,type:'skin',skinId:31},
+];
+
+let seasonXP=parseInt(localStorage.getItem('dvx_seasonxp')||'0');
+let seasonLevel=Math.floor(seasonXP/SEASON_XP_PER_LEVEL)+1;
+let seasonClaimed=JSON.parse(localStorage.getItem('dvx_seasonclaimed')||'[]');
+
+function addSeasonXP(amount){
+  const oldLvl=seasonLevel;
+  seasonXP+=amount;
+  localStorage.setItem('dvx_seasonxp',seasonXP);
+  seasonLevel=Math.min(50,Math.floor(seasonXP/SEASON_XP_PER_LEVEL)+1);
+  if(seasonLevel>oldLvl){
+    showToast('🐍 Сезон: Уровень '+seasonLevel+'!','#00e5cc');
+    checkSeasonRewards();
+  }
+}
+
+function checkSeasonRewards(){
+  for(const r of SEASON_REWARDS){
+    if(r.lvl<=seasonLevel&&!seasonClaimed.includes(r.lvl)){
+      seasonClaimed.push(r.lvl);
+      localStorage.setItem('dvx_seasonclaimed',JSON.stringify(seasonClaimed));
+      if(r.type==='coins'){essence=Math.min(9999,essence+r.amount);syncEss();showToast('🐍 +'+r.amount+' монет!','#f9ca24');}
+      else if(r.type==='xp'){addXP(r.amount);showToast('🐍 +'+r.amount+' XP!','#a29bfe');}
+      else if(r.type==='skin'){const sk=SKINS_DATA.find(s=>s.id===r.skinId);if(sk){sk.owned=true;saveSkins();showToast('🐍 Скин '+t(sk.key)+' разблокирован!','#00e5cc');}}
+    }
+  }
+}
+
+function renderSeasonRewards(){
+  const pct=((seasonXP%SEASON_XP_PER_LEVEL)/SEASON_XP_PER_LEVEL)*100;
+  const bar=document.getElementById('seasonProgressBar');if(bar)bar.style.width=pct+'%';
+  const lt=document.getElementById('seasonLvlText');if(lt)lt.textContent='Уровень '+seasonLevel;
+  const xt=document.getElementById('seasonXpText');if(xt)xt.textContent=(seasonXP%SEASON_XP_PER_LEVEL)+'/'+SEASON_XP_PER_LEVEL+' XP';
+  const list=document.getElementById('seasonRewardsList');if(!list)return;
+  list.innerHTML=SEASON_REWARDS.map(r=>{
+    const done=seasonClaimed.includes(r.lvl);
+    const current=r.lvl===seasonLevel;
+    const locked=r.lvl>seasonLevel;
+    let icon='',label='';
+    if(r.type==='coins'){icon='🪙';label='+'+r.amount+' монет';}
+    else if(r.type==='xp'){icon='⭐';label='+'+r.amount+' XP';}
+    else if(r.type==='skin'){const sk=SKINS_DATA.find(s=>s.id===r.skinId);icon='👑';label=t(sk?sk.key:'');}
+    return`<div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:16px;background:${done?'rgba(0,229,204,0.1)':current?'rgba(0,229,204,0.05)':'rgba(255,255,255,0.03)'};border:2px solid ${done?'rgba(0,229,204,0.4)':current?'rgba(0,229,204,0.2)':'rgba(255,255,255,0.06)'};opacity:${locked?0.5:1}">
+      <div style="font-family:'Fredoka One',cursive;font-size:13px;color:#00e5cc;width:30px;text-align:center">${r.lvl}</div>
+      <div style="font-size:24px">${icon}</div>
+      <div style="flex:1;font-family:'Fredoka One',cursive;font-size:16px;color:#fff">${label}</div>
+      <div style="font-size:20px">${done?'✅':current?'👈':locked?'🔒':''}</div>
+    </div>`;
+  }).join('');
+}
 function showMenu(){
   switchScreen('menuScreen', ()=>{
     document.getElementById('hud').style.display='none';
