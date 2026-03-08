@@ -719,8 +719,6 @@ card.innerHTML=`${locked&&!isSeason?'<span class="lock-ico">🔒</span>':''}<div
 
 И ещё найди через **Ctrl+F**:
 ```
-if(skin.rarity==='standard')skin.owned=true;
-if(skin.rarity==='season')skin.owned=false;
 if(locked){if(essence>=s.cost){essence-=s.cost;s.owned=true;selSkin=s.id;syncEss();saveSkins();renderSkins();}else alert(t('need_coins')+' '+s.cost+' '+t('coins'));return;}
       selSkin=s.id;saveSkins();renderSkins();
     };
