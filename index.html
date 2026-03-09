@@ -2002,13 +2002,25 @@ function drawServerSnake(p,cx,cy){
 }
 
 function draw(cx,cy){
+  ctx.save();
+  ctx.translate(W/2, H/2);
+  ctx.scale(currentZoom, currentZoom);
+  ctx.translate(-W/2, -H/2);
+  const ox=(1-currentZoom)*W/2;
+  const oy=(1-currentZoom)*H/2;
+  ctx.translate(ox/currentZoom, oy/currentZoom);
   drawBackground(cx,cy);
   if(!running){
     updateParticles();
     drawParticles();
+    ctx.restore();
     return;
   }
-  if(serverWorld){drawFoodList(serverWorld.foods||[],cx,cy);for(const p of(serverWorld.players||[]))drawServerSnake(p,cx,cy);}
+  if(serverWorld){
+    drawFoodList(serverWorld.foods||[],cx,cy);
+    for(const p of(serverWorld.players||[]))drawServerSnake(p,cx,cy);
+  }
+  ctx.restore();
 }
 
 // ══════ LOOP ══════
