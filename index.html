@@ -1509,6 +1509,8 @@ applyBGTheme(currentBG);
 const WORLD=4000,CELL=22;
 let serverWorld=null,player=null,running=false;
 let camX=0,camY=0,boosting=false,pname='Player';
+  let currentZoom=1;
+const ZOOM_MIN=0.35, ZOOM_MAX=1.0, ZOOM_SPEED=0.05;
 let autopilotMode=false;
 let gameMode='online';
 
