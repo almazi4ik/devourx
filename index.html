@@ -1509,8 +1509,6 @@ applyBGTheme(currentBG);
 const WORLD=4000,CELL=22;
 let serverWorld=null,player=null,running=false;
 let camX=0,camY=0,boosting=false,pname='Player';
-  let currentZoom=1;
-const ZOOM_MIN=0.35, ZOOM_MAX=1.0, ZOOM_SPEED=0.05;
 let autopilotMode=false;
 let gameMode='online';
 
@@ -1617,7 +1615,7 @@ function offlineEatFood(sn){
       }
       if(sn.isMe){
         sn.foodEaten=(sn.foodEaten||0)+1;
-        if(sn.foodEaten>=3){sn.foodEaten-=3;essence=Math.min(1000000,essence+1);syncEss();}
+        if(sn.foodEaten>=3){sn.foodEaten-=3;essence=Math.min(9999,essence+1);syncEss();}
         trackAch('eat',1);
         _xpFoodCounter+=g;
         const xg=Math.floor(_xpFoodCounter/5);
@@ -1730,8 +1728,6 @@ function offlineTick(){
   offlineUpdateSnake(me,0.18);
   offlineEatFood(me);
   if(me.segs.length>0){camX+=(me.segs[0].x-W/2-camX)*0.12;camY+=(me.segs[0].y-H/2-camY)*0.12;}
-  const targetZoom=Math.max(ZOOM_MIN, ZOOM_MAX - (me.score/1200)*0.65);
-currentZoom+=(targetZoom-currentZoom)*ZOOM_SPEED;
   const now=performance.now();
   if(now-lastSurviveTick>=1000){surviveTimer++;lastSurviveTick=now;trackQuest('survive_time',1);}
   for(const bot of offlineState.bots){
@@ -1833,8 +1829,6 @@ function connectWS(){
           if(me&&me.segs&&me.segs.length>0){
             const sh=me.segs[0];
             camX+=(sh.x-W/2-camX)*0.12;camY+=(sh.y-H/2-camY)*0.12;
-            const targetZoom=Math.max(ZOOM_MIN, ZOOM_MAX - (me.score/1200)*0.65);
-currentZoom+=(targetZoom-currentZoom)*ZOOM_SPEED;
             if(player){
               const gained=me.score-(player.score||MIN_LEN);
               if(gained>0){trackQuest('eat_food',gained);_xpFoodCounter+=gained;const xg=Math.floor(_xpFoodCounter/5);if(xg>0){_xpFoodCounter-=xg*5;addXP(xg);}}
@@ -2002,25 +1996,13 @@ function drawServerSnake(p,cx,cy){
 }
 
 function draw(cx,cy){
-  ctx.save();
-  ctx.translate(W/2, H/2);
-  ctx.scale(currentZoom, currentZoom);
-  ctx.translate(-W/2, -H/2);
-  const ox=(1-currentZoom)*W/2;
-  const oy=(1-currentZoom)*H/2;
-  ctx.translate(ox/currentZoom, oy/currentZoom);
   drawBackground(cx,cy);
   if(!running){
     updateParticles();
     drawParticles();
-    ctx.restore();
     return;
   }
-  if(serverWorld){
-    drawFoodList(serverWorld.foods||[],cx,cy);
-    for(const p of(serverWorld.players||[]))drawServerSnake(p,cx,cy);
-  }
-  ctx.restore();
+  if(serverWorld){drawFoodList(serverWorld.foods||[],cx,cy);for(const p of(serverWorld.players||[]))drawServerSnake(p,cx,cy);}
 }
 
 // ══════ LOOP ══════
