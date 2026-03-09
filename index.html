@@ -1831,6 +1831,8 @@ function connectWS(){
           if(me&&me.segs&&me.segs.length>0){
             const sh=me.segs[0];
             camX+=(sh.x-W/2-camX)*0.12;camY+=(sh.y-H/2-camY)*0.12;
+            const targetZoom=Math.max(ZOOM_MIN, ZOOM_MAX - (me.score/1200)*0.65);
+currentZoom+=(targetZoom-currentZoom)*ZOOM_SPEED;
             if(player){
               const gained=me.score-(player.score||MIN_LEN);
               if(gained>0){trackQuest('eat_food',gained);_xpFoodCounter+=gained;const xg=Math.floor(_xpFoodCounter/5);if(xg>0){_xpFoodCounter-=xg*5;addXP(xg);}}
