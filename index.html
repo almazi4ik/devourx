@@ -1730,6 +1730,8 @@ function offlineTick(){
   offlineUpdateSnake(me,0.18);
   offlineEatFood(me);
   if(me.segs.length>0){camX+=(me.segs[0].x-W/2-camX)*0.12;camY+=(me.segs[0].y-H/2-camY)*0.12;}
+  const targetZoom=Math.max(ZOOM_MIN, ZOOM_MAX - (me.score/1200)*0.65);
+currentZoom+=(targetZoom-currentZoom)*ZOOM_SPEED;
   const now=performance.now();
   if(now-lastSurviveTick>=1000){surviveTimer++;lastSurviveTick=now;trackQuest('survive_time',1);}
   for(const bot of offlineState.bots){
