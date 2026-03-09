@@ -1615,7 +1615,7 @@ function offlineEatFood(sn){
       }
       if(sn.isMe){
         sn.foodEaten=(sn.foodEaten||0)+1;
-        if(sn.foodEaten>=3){sn.foodEaten-=3;essence=Math.min(9999,essence+1);syncEss();}
+        if(sn.foodEaten>=3){sn.foodEaten-=3;essence=Math.min(9999999,essence+1);syncEss();}
         trackAch('eat',1);
         _xpFoodCounter+=g;
         const xg=Math.floor(_xpFoodCounter/5);
