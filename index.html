@@ -1820,6 +1820,7 @@ function offlineTick(){
       running=false;
       const score=me.score||0;
       document.getElementById('deathScore').textContent=t('mass')+': '+score;
+      jbSaveScore(pname, score);
       document.getElementById('hud').style.display='none';
       switchScreen('deathScreen',()=>{renderRecords(score);trackAch('mass',score);trackAch('survive',surviveTimer);});
     }
@@ -1951,6 +1952,7 @@ function connectWS(){
         clearTimeout(_connectTimeout);
         const score=msg.score||0;
         document.getElementById('deathScore').textContent=t('mass')+': '+score;
+        jbSaveScore(pname, score);
         document.getElementById('hud').style.display='none';
         running=false;
         switchScreen('deathScreen',()=>{renderRecords(score);trackQuest('reach_mass',score);});
