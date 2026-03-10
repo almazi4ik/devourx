@@ -1963,8 +1963,8 @@ function drawServerSnake(p,cx,cy){
     const prevSegs=_prevWorld._segsMap[p.name];
     if(prevSegs&&prevSegs.length===segs.length){
       const elapsed=performance.now()-_worldRecvTime;
-      const tt=Math.min(elapsed/INTERP_DURATION,1);
-      segs=interpSegs(prevSegs,segs,tt);
+      const tt=Math.min(elapsed/INTERP_DURATION,1.2);
+      segs=interpSegs(prevSegs,segs,Math.min(tt,1));
     }
   }
   if(!segs||segs.length<2)return;
