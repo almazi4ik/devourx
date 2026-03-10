@@ -1637,33 +1637,100 @@ function offlineKill(sn){
   if(offlineState.foods.length>OFFLINE_FOOD_COUNT+200)offlineState.foods.splice(0,offlineState.foods.length-(OFFLINE_FOOD_COUNT+200));
 }
 
-function offlineBotAI(bot){
-  bot._thinkTimer=(bot._thinkTimer||0)-1;
-  if(bot._thinkTimer>0)return;
-  bot._thinkTimer=8+Math.floor(Math.random()*16);
-  const h=bot.segs[0];
-  const margin=180;
-  if(h.x<margin||h.x>WORLD-margin||h.y<margin||h.y>WORLD-margin){
-    bot.tAngle=Math.atan2(WORLD/2-h.y,WORLD/2-h.x)+(Math.random()-.5)*0.5;return;
+function offlineBotAI(bot) {
+  bot._thinkTimer = (bot._thinkTimer || 0) - 1;
+  if (bot._thinkTimer > 0) return;
+  bot._thinkTimer = 3 + Math.floor(Math.random() * 5);
+
+  const h = bot.segs[0];
+  const margin = 180;
+  const allSnakes = [offlineState.player, ...offlineState.bots];
+
+  // Уходим от стен
+  if (h.x < margin || h.x > WORLD - margin || h.y < margin || h.y > WORLD - margin) {
+    bot.tAngle = Math.atan2(WORLD / 2 - h.y, WORLD / 2 - h.x) + (Math.random() - .5) * 0.5;
+    bot.boosting = false;
+    return;
   }
-  let danger=false;
-  const allSnakes=[offlineState.player,...offlineState.bots.filter(b=>b!==bot&&b.alive)];
-  for(const other of allSnakes){
-    if(!other.alive||!other.segs)continue;
-    for(let i=1;i<Math.min(other.segs.length,18);i++){
-      const s=other.segs[i],dx=h.x-s.x,dy=h.y-s.y;
-      if(dx*dx+dy*dy<90*90){bot.tAngle=Math.atan2(h.y-s.y,h.x-s.x)+(Math.random()-.5)*1.0;danger=true;break;}
+
+  // Проверка опасности точки
+  function danger(tx, ty) {
+    for (const other of allSnakes) {
+      if (!other || !other.alive || other === bot || !other.segs) continue;
+      for (let i = 1; i < Math.min(other.segs.length, 30); i++) {
+        const s = other.segs[i], dx = tx - s.x, dy = ty - s.y;
+        if (dx * dx + dy * dy < 90 * 90) return true;
+      }
     }
-    if(danger)break;
+    return tx < 150 || tx > WORLD - 150 || ty < 150 || ty > WORLD - 150;
   }
-  if(danger)return;
-  let best=Infinity,tgt=null;
-  for(let i=0;i<offlineState.foods.length;i+=2){
-    const f=offlineState.foods[i],dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;
-    if(d<best){best=d;tgt=f;}
+
+  // Ищем жертву — живую змею меньше нас
+  let victim = null, victimDist = Infinity;
+  for (const other of allSnakes) {
+    if (!other || !other.alive || other === bot || !other.segs) continue;
+    const dx = other.segs[0].x - h.x, dy = other.segs[0].y - h.y;
+    const d = dx * dx + dy * dy;
+    if (other.length < bot.length * 0.85 && d < 400 * 400 && d < victimDist) {
+      victimDist = d; victim = other;
+    }
   }
-  if(tgt){bot.tAngle=Math.atan2(tgt.y-h.y,tgt.x-h.x)+(Math.random()-.5)*0.25;}
-  else{bot.tAngle+=(Math.random()-.5)*0.4;}
+
+  // Режим охоты — обкручиваем жертву
+  if (victim) {
+    const vh = victim.segs[0];
+    const vAngle = victim.angle;
+    // Целимся чуть впереди головы жертвы — перехват
+    const intercept = 80;
+    const tx = vh.x + Math.cos(vAngle) * intercept;
+    const ty = vh.y + Math.sin(vAngle) * intercept;
+    let angle = Math.atan2(ty - h.y, tx - h.x);
+
+    // Если путь опасен — обходим
+    const ax = h.x + Math.cos(angle) * 100, ay = h.y + Math.sin(angle) * 100;
+    if (danger(ax, ay)) {
+      angle += (Math.random() > 0.5 ? 1 : -1) * (Math.PI / 3 + Math.random() * 0.3);
+    }
+
+    bot.tAngle = angle + (Math.random() - .5) * 0.08;
+    // Ускоряемся если близко к жертве
+    bot.boosting = victimDist < 200 * 200 && bot.length > 15;
+    return;
+  }
+
+  // Режим еды — ищем ближайшую безопасную
+  let best = Infinity, tgt = null;
+  for (let i = 0; i < offlineState.foods.length; i++) {
+    const f = offlineState.foods[i];
+    if (!f) continue;
+    const dx = f.x - h.x, dy = f.y - h.y, d = dx * dx + dy * dy;
+    if (d < best && !danger(f.x, f.y)) { best = d; tgt = f; }
+  }
+  if (!tgt) {
+    for (let i = 0; i < offlineState.foods.length; i++) {
+      const f = offlineState.foods[i];
+      if (!f) continue;
+      const dx = f.x - h.x, dy = f.y - h.y, d = dx * dx + dy * dy;
+      if (d < best) { best = d; tgt = f; }
+    }
+  }
+
+  if (tgt) {
+    let angle = Math.atan2(tgt.y - h.y, tgt.x - h.x);
+    const ax = h.x + Math.cos(angle) * 120, ay = h.y + Math.sin(angle) * 120;
+    if (danger(ax, ay)) {
+      const left = angle - Math.PI / 3, right = angle + Math.PI / 3;
+      const alx = h.x + Math.cos(left) * 120, aly = h.y + Math.sin(left) * 120;
+      const arx = h.x + Math.cos(right) * 120, ary = h.y + Math.sin(right) * 120;
+      if (!danger(alx, aly)) angle = left;
+      else if (!danger(arx, ary)) angle = right;
+      else angle += Math.PI * (0.8 + Math.random() * 0.4);
+    }
+    bot.tAngle = angle + (Math.random() - .5) * 0.12;
+  }
+
+  // Ускорение если большой и рядом еда
+  bot.boosting = best < 100 * 100 && bot.length > 20;
 }
 
 function offlineCheckCollisions(){
