@@ -2700,6 +2700,10 @@ function getClickRippleColor_global(){
   return 'rgba(184,245,192,0.5)';
 }
 
+// ══════ PLAYER ID ══════
+let _playerId = localStorage.getItem('dvx_pid');
+if(!_playerId){ _playerId = 'p_'+(Date.now().toString(36)+Math.random().toString(36).slice(2)); localStorage.setItem('dvx_pid',_playerId); }
+  
 // ══════ JSONBIN РЕКОРДЫ ══════
 const JB_KEY = '$2a$10$1RxMPxZqdBQPROTRZrFWe.yPjWcmTOYdsoA1xOAVV2hB7zf3yOy5O';
 const JB_URL_CREATE = 'https://api.jsonbin.io/v3/b';
