@@ -2768,8 +2768,9 @@ function updateBestMassWidget(scores) {
   const best = scores[0];
   document.getElementById('bmName').textContent = best.name;
   document.getElementById('bmScore').textContent = best.score;
+}
 
-  function openLbPanel(){
+function openLbPanel(){
   document.getElementById('lbPanelList').innerHTML='<div class="lb-panel-loading">Загрузка...</div>';
   document.getElementById('lbOverlay').classList.add('open');
   document.getElementById('lbPanel').classList.add('open');
@@ -2778,7 +2779,7 @@ function updateBestMassWidget(scores) {
     const myName=document.getElementById('nameInput').value.trim()||'Player';
     if(!scores.length){document.getElementById('lbPanelList').innerHTML='<div class="lb-panel-loading">Рекордов пока нет!</div>';return;}
     document.getElementById('lbPanelList').innerHTML=scores.slice(0,10).map((s,i)=>{
-      const isMe=s.name===myName;
+      const isMe=s.pid===_playerId;
       const rank=i<3?medals[i]:`${i+1}`;
       return `<div class="lb-panel-row${isMe?' me':''}">
         <span class="lb-panel-rank">${rank}</span>
@@ -2795,7 +2796,6 @@ function closeLbPanel(){
 document.getElementById('lbMenuBtn').onclick=openLbPanel;
 document.getElementById('lbPanelClose').onclick=closeLbPanel;
 document.getElementById('lbOverlay').addEventListener('click',closeLbPanel);
-}
 
 jbLoadScores().then(scores => updateBestMassWidget(scores));
   
