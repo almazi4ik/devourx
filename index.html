@@ -2748,7 +2748,7 @@ async function jbSaveScore(name, score) {
       scores[existing].score = score;
       scores[existing].date = Date.now();
     } else {
-      scores.push({ name, score, date: Date.now() });
+      scores.push({ name, score, date: Date.now(), pid: _playerId });
     }
     scores.sort((a, b) => b.score - a.score);
     const top = scores.slice(0, 100);
