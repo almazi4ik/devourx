@@ -981,6 +981,9 @@ function applyLang(){
   if(mb){mb.textContent=musicEnabled?L.music_on:L.music_off;if(!musicEnabled)mb.classList.add('off');else mb.classList.remove('off');}
   const oc=document.getElementById('onlineCounter');
   if(oc)oc.innerHTML=(L.online||'Online')+': <span id="onlineNum">0</span>';
+  const lbBtn=document.getElementById('lbMenuBtn');if(lbBtn)lbBtn.textContent=L.rating||'🏆 RATING';
+  const lbPT=document.getElementById('lbPanelTitle');if(lbPT)lbPT.textContent=L.global_rating||'🏆 GLOBAL RATING';
+  const bmL=document.getElementById('bmLabel');if(bmL)bmL.textContent=L.best_mass||'Best Mass';
   TIPS.length=0;L.tips.forEach(tip=>TIPS.push(tip));
   renderLangPanel();
 }
