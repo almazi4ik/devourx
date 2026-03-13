@@ -2743,6 +2743,7 @@ async function jbSaveScore(name, score) {
     const id = await jbEnsureBin();
     const scores = await jbLoadScores();
     const existing = scores.findIndex(s => s.pid === _playerId);
+    if (existing >= 0) {
       if (score <= scores[existing].score) return;
       scores[existing].score = score;
       scores[existing].date = Date.now();
