@@ -1599,7 +1599,7 @@ function renderAccPanel() {
 // ══════ JSONBIN РЕКОРДЫ ══════
 const JB_KEY = '$2a$10$X7AxR.ZEZnOBJmq/N124WOu7jwbEUAUzKnwkPq.PlaAGhPx4fVNl6';
 const JB_URL_CREATE = 'https://api.jsonbin.io/v3/b';
-let jbBinId = '69b038cc8d9bd565842d3f8b';
+let jbBinId = localStorage.getItem('dvx_binid') || '69b5ba00c3097a1dd525dce7';
 
 async function jbEnsureBin(){if(jbBinId)return jbBinId;const res=await fetch(JB_URL_CREATE,{method:'POST',headers:{'Content-Type':'application/json','X-Master-Key':JB_KEY,'X-Bin-Name':'devourx-scores','X-Bin-Private':'false'},body:JSON.stringify({scores:[]})});const data=await res.json();jbBinId=data.metadata.id;localStorage.setItem('dvx_binid',jbBinId);return jbBinId;}
 async function jbLoadScores(){try{const id=await jbEnsureBin();const res=await fetch(`https://api.jsonbin.io/v3/b/${id}/latest`,{headers:{'X-Master-Key':JB_KEY}});const data=await res.json();return data.record.scores||[];}catch(e){return[];}}
