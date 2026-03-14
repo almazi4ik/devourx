@@ -1247,7 +1247,7 @@ applyBGTheme(currentBG);
 
 const WORLD=4000,CELL=22;
 let serverWorld=null,player=null,running=false;
-let camX=0,camY=0,boosting=false,pname='Player';
+let camX=0,camY=0,boosting=false,pname=localStorage.getItem('dvx_name')||'Player';
 let autopilotMode=false;
 let gameMode='online';
 
@@ -1601,6 +1601,43 @@ let jbBinId = '69b038cc8d9bd565842d3f8b';
 async function jbEnsureBin(){if(jbBinId)return jbBinId;const res=await fetch(JB_URL_CREATE,{method:'POST',headers:{'Content-Type':'application/json','X-Master-Key':JB_KEY,'X-Bin-Name':'devourx-scores','X-Bin-Private':'false'},body:JSON.stringify({scores:[]})});const data=await res.json();jbBinId=data.metadata.id;localStorage.setItem('dvx_binid',jbBinId);return jbBinId;}
 async function jbLoadScores(){try{const id=await jbEnsureBin();const res=await fetch(`https://api.jsonbin.io/v3/b/${id}/latest`,{headers:{'X-Master-Key':JB_KEY}});const data=await res.json();return data.record.scores||[];}catch(e){return[];}}
 async function jbSaveScore(name,score){try{const id=await jbEnsureBin();const scores=await jbLoadScores();const existing=scores.findIndex(s=>s.pid===_playerId);if(existing>=0){if(score<=scores[existing].score)return;scores[existing].score=score;scores[existing].date=Date.now();}else{scores.push({name,score,date:Date.now(),pid:_playerId});}scores.sort((a,b)=>b.score-a.score);const top=scores.slice(0,100);await fetch(`https://api.jsonbin.io/v3/b/${id}`,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':JB_KEY},body:JSON.stringify({scores:top})});updateBestMassWidget(top);}catch(e){console.warn('jbSaveScore error',e);}}
+
+// Обновляем имя в глобальном рейтинге без изменения счёта
+let _nameUpdateTimer = null;
+async function jbUpdateName(name) {
+  if(_nameUpdateTimer) clearTimeout(_nameUpdateTimer);
+  _nameUpdateTimer = setTimeout(async () => {
+    try {
+      const id = await jbEnsureBin();
+      const scores = await jbLoadScores();
+      const existing = scores.findIndex(s => s.pid === _playerId);
+      if(existing >= 0 && scores[existing].name !== name) {
+        scores[existing].name = name;
+        await fetch(`https://api.jsonbin.io/v3/b/${id}`, {method:'PUT', headers:{'Content-Type':'application/json','X-Master-Key':JB_KEY}, body:JSON.stringify({scores})});
+        updateBestMassWidget(scores);
+      }
+    } catch(e) {}
+  }, 1500); // дебаунс 1.5 сек — не спамим запросами при каждом символе
+}
+
+// Обновляем имя в клане
+let _clanNameTimer = null;
+async function clanUpdateName(name) {
+  if(_clanNameTimer) clearTimeout(_clanNameTimer);
+  _clanNameTimer = setTimeout(async () => {
+    if(!myClanId) return;
+    try {
+      const clans = await clanLoadAll();
+      const clan = clans.find(c => c.id === myClanId);
+      if(!clan) return;
+      const member = clan.members.find(m => m.pid === _playerId);
+      if(member && member.name !== name) {
+        member.name = name;
+        await clanSaveAll(clans);
+      }
+    } catch(e) {}
+  }, 1500);
+}
 function updateBestMassWidget(scores){if(!scores||!scores.length)return;const best=scores[0];document.getElementById('bmName').textContent=best.name;document.getElementById('bmScore').textContent=best.score;}
 
 function openLbPanel(){document.getElementById('lbPanelList').innerHTML='<div class="lb-panel-loading">Загрузка...</div>';document.getElementById('lbOverlay').classList.add('open');document.getElementById('lbPanel').classList.add('open');jbLoadScores().then(scores=>{const medals=['🥇','🥈','🥉'];if(!scores.length){document.getElementById('lbPanelList').innerHTML='<div class="lb-panel-loading">Рекордов пока нет!</div>';return;}document.getElementById('lbPanelList').innerHTML=scores.slice(0,10).map((s,i)=>{const isMe=s.pid===_playerId;const rank=i<3?medals[i]:`${i+1}`;return `<div class="lb-panel-row${isMe?' me':''}"><span class="lb-panel-rank">${rank}</span><span class="lb-panel-name">${s.name}</span><span class="lb-panel-score">${s.score}</span></div>`;}).join('');});}
@@ -1610,7 +1647,23 @@ document.getElementById('lbPanelClose').onclick=closeLbPanel;
 document.getElementById('lbOverlay').addEventListener('click',closeLbPanel);
 jbLoadScores().then(scores=>updateBestMassWidget(scores));
 
-window.addEventListener('load',()=>{drawRobotIcon();applyLang();initRipples();applyBGTheme(currentBG);renderAccPanel();drawClanShield(null);initClanOnLoad();});
+window.addEventListener('load',()=>{
+  drawRobotIcon();applyLang();initRipples();applyBGTheme(currentBG);renderAccPanel();drawClanShield(null);initClanOnLoad();
+  // Загружаем сохранённый ник
+  const savedName = localStorage.getItem('dvx_name');
+  if(savedName) document.getElementById('nameInput').value = savedName;
+});
+
+// Live обновление ника
+document.getElementById('nameInput').addEventListener('input', () => {
+  const name = document.getElementById('nameInput').value.trim() || 'Player';
+  pname = name;
+  localStorage.setItem('dvx_name', name);
+  // Обновляем в глобальном рейтинге (меняем имя в записи)
+  jbUpdateName(name);
+  // Обновляем в клане
+  clanUpdateName(name);
+});
 
 // ══════ IRIS ══════
 function playIrisOpen(onMidpoint,onDone){const W2=irisCv.width,H2=irisCv.height;const maxR=Math.sqrt(W2*W2+H2*H2)*0.55;let start=null;const FADE_DUR=500,HOLD_DUR=180,OPEN_DUR=680;const TOTAL=FADE_DUR+HOLD_DUR+OPEN_DUR;let midDone=false;function frame(ts){if(!start)start=ts;const elapsed=ts-start;irisCx.clearRect(0,0,W2,H2);if(elapsed<FADE_DUR){const alpha=elapsed/FADE_DUR;irisCx.fillStyle=`rgba(0,0,0,${alpha.toFixed(3)})`;irisCx.fillRect(0,0,W2,H2);requestAnimationFrame(frame);}else if(elapsed<FADE_DUR+HOLD_DUR){irisCx.fillStyle='rgba(0,0,0,1)';irisCx.fillRect(0,0,W2,H2);if(!midDone){midDone=true;onMidpoint&&onMidpoint();}requestAnimationFrame(frame);}else if(elapsed<TOTAL){const t=(elapsed-FADE_DUR-HOLD_DUR)/OPEN_DUR;const ease=1-Math.pow(1-t,3);const r=maxR*ease;irisCx.fillStyle='rgba(0,0,0,1)';irisCx.beginPath();irisCx.rect(0,0,W2,H2);irisCx.arc(W2/2,H2/2,r,0,Math.PI*2,true);irisCx.fill('evenodd');requestAnimationFrame(frame);}else{irisCx.clearRect(0,0,W2,H2);onDone&&onDone();}}requestAnimationFrame(frame);}
