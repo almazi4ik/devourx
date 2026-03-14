@@ -1277,7 +1277,7 @@ function offlineKill(sn){if(!sn.alive)return;sn.alive=false;const dropCount=Math
 
 function offlineBotAI(bot){bot._thinkTimer=(bot._thinkTimer||0)-1;if(bot._thinkTimer>0)return;bot._thinkTimer=3+Math.floor(Math.random()*5);const h=bot.segs[0];const margin=180;const allSnakes=[offlineState.player,...offlineState.bots];if(h.x<margin||h.x>WORLD-margin||h.y<margin||h.y>WORLD-margin){bot.tAngle=Math.atan2(WORLD/2-h.y,WORLD/2-h.x)+(Math.random()-.5)*0.5;bot.boosting=false;return;}function danger(tx,ty){for(const other of allSnakes){if(!other||!other.alive||other===bot||!other.segs)continue;for(let i=1;i<Math.min(other.segs.length,30);i++){const s=other.segs[i],dx=tx-s.x,dy=ty-s.y;if(dx*dx+dy*dy<90*90)return true;}}return tx<150||tx>WORLD-150||ty<150||ty>WORLD-150;}let victim=null,victimDist=Infinity;for(const other of allSnakes){if(!other||!other.alive||other===bot||!other.segs)continue;const dx=other.segs[0].x-h.x,dy=other.segs[0].y-h.y;const d=dx*dx+dy*dy;if(other.length<bot.length*0.85&&d<400*400&&d<victimDist){victimDist=d;victim=other;}}if(victim){const vh=victim.segs[0];const vAngle=victim.angle;const intercept=80;const tx=vh.x+Math.cos(vAngle)*intercept;const ty=vh.y+Math.sin(vAngle)*intercept;let angle=Math.atan2(ty-h.y,tx-h.x);const ax=h.x+Math.cos(angle)*100,ay=h.y+Math.sin(angle)*100;if(danger(ax,ay)){angle+=(Math.random()>0.5?1:-1)*(Math.PI/3+Math.random()*0.3);}bot.tAngle=angle+(Math.random()-.5)*0.08;bot.boosting=victimDist<200*200&&bot.length>15;return;}let best=Infinity,tgt=null;for(let i=0;i<offlineState.foods.length;i++){const f=offlineState.foods[i];if(!f)continue;const dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;if(d<best&&!danger(f.x,f.y)){best=d;tgt=f;}}if(!tgt){for(let i=0;i<offlineState.foods.length;i++){const f=offlineState.foods[i];if(!f)continue;const dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;if(d<best){best=d;tgt=f;}}}if(tgt){let angle=Math.atan2(tgt.y-h.y,tgt.x-h.x);const ax=h.x+Math.cos(angle)*120,ay=h.y+Math.sin(angle)*120;if(danger(ax,ay)){const left=angle-Math.PI/3,right=angle+Math.PI/3;const alx=h.x+Math.cos(left)*120,aly=h.y+Math.sin(left)*120;const arx=h.x+Math.cos(right)*120,ary=h.y+Math.sin(right)*120;if(!danger(alx,aly))angle=left;else if(!danger(arx,ary))angle=right;else angle+=Math.PI*(0.8+Math.random()*0.4);}bot.tAngle=angle+(Math.random()-.5)*0.12;}bot.boosting=best<100*100&&bot.length>20;}
 
-function offlineCheckCollisions(){const alive=[offlineState.player,...offlineState.bots].filter(s=>s.alive);for(const sn of alive){if(!sn.alive)continue;const h=sn.segs[0],r=offlineGetR(sn.score);for(const other of alive){if(!other.alive||other===sn)continue;for(let i=2;i<other.segs.length;i++){const s=other.segs[i],dx=h.x-s.x,dy=h.y-s.y;const otherR=offlineGetR(other.score)*0.55;if(dx*dx+dy*dy<(r*0.85+otherR)**2){offlineKill(sn);if(!sn.isMe&&other.isMe){essence=Math.min(9999,essence+3);syncEss();showToast('💀 +3 '+t('kill_reward'),'#ff6b6b');trackAch('kills',1);}break;}}if(!sn.alive)break;}}}
+function offlineCheckCollisions(){const alive=[offlineState.player,...offlineState.bots].filter(s=>s.alive);for(const sn of alive){if(!sn.alive)continue;const h=sn.segs[0],r=offlineGetR(sn.score);for(const other of alive){if(!other.alive||other===sn)continue;for(let i=2;i<other.segs.length;i++){const s=other.segs[i],dx=h.x-s.x,dy=h.y-s.y;const otherR=offlineGetR(other.score)*0.55;if(dx*dx+dy*dy<(r*0.85+otherR)**2){offlineKill(sn);if(!sn.isMe&&other.isMe){essence=Math.min(9999999,essence+3);syncEss();showToast('💀 +3 '+t('kill_reward'),'#ff6b6b');trackAch('kills',1);}break;}}if(!sn.alive)break;}}}
 
 function offlineRespawnBots(){for(let i=0;i<offlineState.bots.length;i++){if(!offlineState.bots[i].alive){const name=BOT_NAMES[Math.floor(Math.random()*BOT_NAMES.length)];offlineState.bots[i]=mkBot(name,Math.floor(Math.random()*3));}}}
 
@@ -1290,7 +1290,7 @@ const SERVER='wss://devourx-server.onrender.com';
 let ws=null,wsConnecting=false;
 let _connectTimeout=null,_loadInterval=null;
 
-function connectWS(){if(wsConnecting)return;wsConnecting=true;gameMode='online';serverWorld=null;_prevWorld=null;if(ws){try{ws.close();}catch(e){}ws=null;}showLoading(t('connecting'));let loadPct=0;_loadInterval=setInterval(()=>{loadPct=Math.min(loadPct+3,85);document.getElementById('loadBarFill').style.width=loadPct+'%';},100);ws=new WebSocket(SERVER);_connectTimeout=setTimeout(()=>{if(!running){clearInterval(_loadInterval);wsConnecting=false;if(ws){try{ws.close();}catch(e){}ws=null;}setLoadStatus(t('no_server'),100);document.getElementById('loadBarFill').style.background='#e74c3c';setTimeout(()=>showMenu(),3000);}},8000);ws.onopen=()=>{clearInterval(_loadInterval);document.getElementById('loadBarFill').style.width='92%';setLoadStatus(t('auth'));const name=document.getElementById('nameInput').value.trim()||'Player';ws.send(JSON.stringify({type:'join',name,skinId:selSkin,skinColor:SKINS_DATA[selSkin].b[0]}));};ws.onmessage=(e)=>{try{const msg=JSON.parse(e.data);if(msg.type==='joined'){clearTimeout(_connectTimeout);wsConnecting=false;document.getElementById('loadBarFill').style.width='100%';setLoadStatus(t('ready'));if(msg.playerCount){document.getElementById('onlineNum').textContent=msg.playerCount;}pname=document.getElementById('nameInput').value.trim()||'Player';player={segs:[{x:msg.spawnX||WORLD/2,y:msg.spawnY||WORLD/2}],tAngle:0,angle:0,score:MIN_LEN,boosting:false,alive:true};camX=(msg.spawnX||WORLD/2)-W/2;camY=(msg.spawnY||WORLD/2)-H/2;playIrisOpen(()=>{document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});document.getElementById('gearBtn').style.display='none';document.getElementById('hud').style.display='block';document.getElementById('xpBarWrap').style.display='none';document.getElementById('bestMassWidget').style.display='none';document.getElementById('achBtn').style.display='none';document.getElementById('achPanel').classList.remove('open');achOpen=false;autopilotMode=false;document.getElementById('apBtn').classList.remove('active');running=true;surviveTimer=0;lastSurviveTick=performance.now();_xpFoodCounter=0;_prevScore=MIN_LEN;_foodCoinCounter=0;if(isMobile())showJoystick(true);},null);}if(msg.type==='world'){_prevWorld=serverWorld?{players:serverWorld.players,_segsMap:buildSegsMap(serverWorld)}:null;_worldRecvTime=performance.now();serverWorld=msg;if(msg.playerCount){document.getElementById('onlineNum').textContent=msg.playerCount;}if(serverWorld.players){const me=serverWorld.players.find(p=>p.isMe);if(me&&me.segs&&me.segs.length>0){const sh=me.segs[0];camX+=(sh.x-W/2-camX)*0.08;camY+=(sh.y-H/2-camY)*0.08;if(player){const gained=me.score-(player.score||MIN_LEN);if(gained>0){trackQuest('eat_food',gained);_xpFoodCounter+=gained;const xg=Math.floor(_xpFoodCounter/5);if(xg>0){_xpFoodCounter-=xg*5;addXP(xg);}}player.segs=me.segs;player.score=me.score||player.score;_prevScore=me.score;}}}}if(msg.type==='dead'){clearTimeout(_connectTimeout);const score=msg.score||0;document.getElementById('deathScore').textContent=t('mass')+': '+score;jbSaveScore(pname,score);clanUpdateScore(score);document.getElementById('hud').style.display='none';running=false;switchScreen('deathScreen',()=>{renderRecords(score);trackQuest('reach_mass',score);});}if(msg.type==='kill_reward'){essence=Math.min(9999,essence+msg.coins);syncEss();showToast('💀 +'+msg.coins+' '+t('kill_reward'),'#ff6b6b');}if(msg.type==='coin_reward'){essence=Math.min(9999,essence+msg.coins);syncEss();}}catch(err){console.warn('WS msg error',err);}};ws.onerror=()=>{clearTimeout(_connectTimeout);clearInterval(_loadInterval);wsConnecting=false;setLoadStatus(t('conn_err'),100);document.getElementById('loadBarFill').style.background='#e74c3c';setTimeout(()=>showMenu(),3000);};ws.onclose=()=>{wsConnecting=false;ws=null;serverWorld=null;_prevWorld=null;if(running&&gameMode==='online'){running=false;document.getElementById('hud').style.display='none';showMenu();}};}
+function connectWS(){if(wsConnecting)return;wsConnecting=true;gameMode='online';serverWorld=null;_prevWorld=null;if(ws){try{ws.close();}catch(e){}ws=null;}showLoading(t('connecting'));let loadPct=0;_loadInterval=setInterval(()=>{loadPct=Math.min(loadPct+3,85);document.getElementById('loadBarFill').style.width=loadPct+'%';},100);ws=new WebSocket(SERVER);_connectTimeout=setTimeout(()=>{if(!running){clearInterval(_loadInterval);wsConnecting=false;if(ws){try{ws.close();}catch(e){}ws=null;}setLoadStatus(t('no_server'),100);document.getElementById('loadBarFill').style.background='#e74c3c';setTimeout(()=>showMenu(),3000);}},8000);ws.onopen=()=>{clearInterval(_loadInterval);document.getElementById('loadBarFill').style.width='92%';setLoadStatus(t('auth'));const name=document.getElementById('nameInput').value.trim()||'Player';ws.send(JSON.stringify({type:'join',name,skinId:selSkin,skinColor:SKINS_DATA[selSkin].b[0]}));};ws.onmessage=(e)=>{try{const msg=JSON.parse(e.data);if(msg.type==='joined'){clearTimeout(_connectTimeout);wsConnecting=false;document.getElementById('loadBarFill').style.width='100%';setLoadStatus(t('ready'));if(msg.playerCount){document.getElementById('onlineNum').textContent=msg.playerCount;}pname=document.getElementById('nameInput').value.trim()||'Player';player={segs:[{x:msg.spawnX||WORLD/2,y:msg.spawnY||WORLD/2}],tAngle:0,angle:0,score:MIN_LEN,boosting:false,alive:true};camX=(msg.spawnX||WORLD/2)-W/2;camY=(msg.spawnY||WORLD/2)-H/2;playIrisOpen(()=>{document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});document.getElementById('gearBtn').style.display='none';document.getElementById('hud').style.display='block';document.getElementById('xpBarWrap').style.display='none';document.getElementById('bestMassWidget').style.display='none';document.getElementById('achBtn').style.display='none';document.getElementById('achPanel').classList.remove('open');achOpen=false;autopilotMode=false;document.getElementById('apBtn').classList.remove('active');running=true;surviveTimer=0;lastSurviveTick=performance.now();_xpFoodCounter=0;_prevScore=MIN_LEN;_foodCoinCounter=0;if(isMobile())showJoystick(true);},null);}if(msg.type==='world'){_prevWorld=serverWorld?{players:serverWorld.players,_segsMap:buildSegsMap(serverWorld)}:null;_worldRecvTime=performance.now();serverWorld=msg;if(msg.playerCount){document.getElementById('onlineNum').textContent=msg.playerCount;}if(serverWorld.players){const me=serverWorld.players.find(p=>p.isMe);if(me&&me.segs&&me.segs.length>0){const sh=me.segs[0];camX+=(sh.x-W/2-camX)*0.08;camY+=(sh.y-H/2-camY)*0.08;if(player){const gained=me.score-(player.score||MIN_LEN);if(gained>0){trackQuest('eat_food',gained);_xpFoodCounter+=gained;const xg=Math.floor(_xpFoodCounter/5);if(xg>0){_xpFoodCounter-=xg*5;addXP(xg);}}player.segs=me.segs;player.score=me.score||player.score;_prevScore=me.score;}}}}if(msg.type==='dead'){clearTimeout(_connectTimeout);const score=msg.score||0;document.getElementById('deathScore').textContent=t('mass')+': '+score;jbSaveScore(pname,score);clanUpdateScore(score);document.getElementById('hud').style.display='none';running=false;switchScreen('deathScreen',()=>{renderRecords(score);trackQuest('reach_mass',score);});}if(msg.type==='kill_reward'){essence=Math.min(9999999,essence+msg.coins);syncEss();showToast('💀 +'+msg.coins+' '+t('kill_reward'),'#ff6b6b');}if(msg.type==='coin_reward'){essence=Math.min(9999999,essence+msg.coins);syncEss();}}catch(err){console.warn('WS msg error',err);}};ws.onerror=()=>{clearTimeout(_connectTimeout);clearInterval(_loadInterval);wsConnecting=false;setLoadStatus(t('conn_err'),100);document.getElementById('loadBarFill').style.background='#e74c3c';setTimeout(()=>showMenu(),3000);};ws.onclose=()=>{wsConnecting=false;ws=null;serverWorld=null;_prevWorld=null;if(running&&gameMode==='online'){running=false;document.getElementById('hud').style.display='none';showMenu();}};}
 
 // ══════ INPUT ══════
 let mx=400,my=300;
@@ -1863,6 +1863,7 @@ async function joinClan(clanId) {
   myClanId = clanId; myClanRole = 'member';
   localStorage.setItem('dvx_clan_id', clanId);
   localStorage.setItem('dvx_clan_role', 'member');
+  localStorage.setItem('dvx_clan_tag', clan.tag);
   updateClanBtn(clan);
   const chatTab = document.getElementById('chatTab'); if (chatTab) chatTab.style.display = '';
   showToast(`Вступил в клан [${clan.tag}]!`, '#a29bfe');
@@ -1977,6 +1978,7 @@ document.getElementById('clanEditSave').addEventListener('click', async () => {
     myClanId = newClan.id; myClanRole = 'leader';
     localStorage.setItem('dvx_clan_id', newClan.id);
     localStorage.setItem('dvx_clan_role', 'leader');
+    localStorage.setItem('dvx_clan_tag', tag);
     updateClanBtn(newClan);
     const chatTabEl = document.getElementById('chatTab'); if (chatTabEl) chatTabEl.style.display = '';
     closeCreateClan();
@@ -2147,25 +2149,37 @@ async function clanUpdateScore(score) {
 // ── Инициализация (вызывается после window.load) ──
 async function initClanOnLoad() {
   if (!myClanId) return;
+  // Сразу показываем из кэша не ждя сервер
+  const cachedTag = localStorage.getItem('dvx_clan_tag');
+  if (cachedTag) drawClanShield(cachedTag);
+  const chatTab = document.getElementById('chatTab');
+  if (chatTab) chatTab.style.display = '';
+  // Синхронизируем с JSONBin
   try {
     const clans = await clanLoadAll();
     const clan = getMyClan(clans);
     if (clan) {
       updateClanBtn(clan);
+      localStorage.setItem('dvx_clan_tag', clan.tag);
       const member = getMyMember(clan);
       if (member) {
         myClanRole = member.role;
         localStorage.setItem('dvx_clan_role', member.role);
-        const chatTab = document.getElementById('chatTab');
-        if (chatTab) chatTab.style.display = '';
       } else {
+        // Нас выгнали — только тогда сбрасываем
         myClanId = null; myClanRole = null;
-        localStorage.removeItem('dvx_clan_id'); localStorage.removeItem('dvx_clan_role');
+        localStorage.removeItem('dvx_clan_id');
+        localStorage.removeItem('dvx_clan_role');
+        localStorage.removeItem('dvx_clan_tag');
+        drawClanShield(null);
+        if (chatTab) chatTab.style.display = 'none';
       }
-    } else {
-      myClanId = null; localStorage.removeItem('dvx_clan_id');
     }
-  } catch(e) {}
+    // clan не найден — НЕ сбрасываем, вдруг JSONBin лагает
+  } catch(e) {
+    // Ошибка сети — оставляем клан из localStorage
+    console.warn('Clan sync failed, keeping local data');
+  }
 }
 
 // ══ CLAN CHAT ══
