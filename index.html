@@ -709,6 +709,7 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
     <div class="cp-sec active" id="cpSecAll"><div class="cp-loading">Загрузка...</div></div>
     <div class="cp-sec" id="cpSecTop"><div class="cp-loading">Загрузка...</div></div>
     <div class="cp-sec" id="cpSecMy"><div class="cp-loading">Загрузка...</div></div>
+    <div class="cp-sec" id="cpSecChat"><div class="cp-loading">Загрузка...</div></div>
   </div>
 </div>
 
@@ -1690,6 +1691,12 @@ async function loadClanTab(tab) {
   // Стоп-поллинг чата если уходим с вкладки
   if (tab !== 'chat' && _chatPollInterval) { clearInterval(_chatPollInterval); _chatPollInterval = null; }
 
+  // Скрываем все секции, показываем нужную
+  document.querySelectorAll('.cp-sec').forEach(s => s.classList.remove('active'));
+  const secMap = { all: 'cpSecAll', top: 'cpSecTop', my: 'cpSecMy', chat: 'cpSecChat' };
+  const activeSec = document.getElementById(secMap[tab]);
+  if (activeSec) activeSec.classList.add('active');
+
   if (tab === 'chat') { loadClanChatTab(); return; }
 
   const clans = await clanLoadAll();
@@ -1705,7 +1712,6 @@ async function loadClanTab(tab) {
 // ── ВСЕ КЛАНЫ ──
 function renderClanAll(clans) {
   const sec = document.getElementById('cpSecAll');
-  document.querySelectorAll('.cp-sec').forEach(s => s.classList.remove('active'));
   sec.classList.add('active');
   const myClan = getMyClan(clans);
 
@@ -1750,7 +1756,6 @@ function renderClanAll(clans) {
 // ── ТОП КЛАНОВ ──
 function renderClanTop(clans) {
   const sec = document.getElementById('cpSecTop');
-  document.querySelectorAll('.cp-sec').forEach(s => s.classList.remove('active'));
   sec.classList.add('active');
 
   const sorted = [...clans].map(c => ({
@@ -1778,7 +1783,6 @@ function renderClanTop(clans) {
 // ── МОЙ КЛАН ──
 function renderClanMy(clans) {
   const sec = document.getElementById('cpSecMy');
-  document.querySelectorAll('.cp-sec').forEach(s => s.classList.remove('active'));
   sec.classList.add('active');
 
   const clan = getMyClan(clans);
@@ -2234,7 +2238,7 @@ function renderChatMessages(msgs) {
 }
 
 async function loadClanChatTab() {
-  const body = document.getElementById('cpBody');
+  const body = document.getElementById('cpSecChat');
   if (!myClanId) {
     body.innerHTML = '<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,0.3);font-size:13px;font-weight:800;">Вступи в клан чтобы пользоваться чатом 🛡️</div>';
     return;
