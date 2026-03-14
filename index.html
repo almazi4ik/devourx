@@ -1402,7 +1402,7 @@ function trackAch(type,amount){
   saveAchStats();
   for(const a of achievements){
     if(a.done)continue;
-    const val=achStats[a.type]||0;
+    const val=(a.type==='mass'?achStats.maxMass:achStats[a.type])||0;
     const newProg=Math.min(a.goal,val);
     if(newProg!==a.progress){a.progress=newProg;changed=true;}
     if(a.progress>=a.goal&&!a.done){
