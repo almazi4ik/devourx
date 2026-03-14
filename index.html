@@ -5,6 +5,7 @@
 <title>DevourX.io</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2ecc71">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DevourX">
@@ -1173,7 +1174,17 @@ const mc=document.getElementById('minimap');
 const mctx=mc.getContext('2d');
 mc.width=108;mc.height=108;
 let W,H;
-function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+let _mobileZoom=1.0;
+function resize(){
+  W=canvas.width=window.innerWidth;
+  H=canvas.height=window.innerHeight;
+  // Адаптивный зум — на вертикальном телефоне зумим дальше
+  if(isMobile() && window.innerHeight > window.innerWidth) {
+    _mobileZoom = 0.6; // вертикально — видно больше
+  } else {
+    _mobileZoom = 1.0; // горизонтально/десктоп — обычный зум
+  }
+}
 resize();window.addEventListener('resize',resize);
 
 // ══════ PARTICLES ══════
@@ -1313,7 +1324,26 @@ function drawFoodList(fl,cx,cy){for(const f of fl){const fx=f.x-cx,fy=f.y-cy;if(
 
 function drawServerSnake(p,cx,cy){let segs=p.segs;if(gameMode==='online'&&_prevWorld&&_prevWorld._segsMap){const prevSegs=_prevWorld._segsMap[p.name];if(prevSegs&&prevSegs.length===segs.length){const elapsed=performance.now()-_worldRecvTime;const tt=Math.min(elapsed/INTERP_DURATION,1.2);segs=interpSegs(prevSegs,segs,Math.min(tt,1));}}if(!segs||segs.length<2)return;const hd0=segs[0],hsx=hd0.x-cx,hsy=hd0.y-cy;if(hsx<-500||hsx>W+500||hsy<-500||hsy>H+500)return;const sk=SKINS_DATA[p.skinId%SKINS_DATA.length]||SKINS_DATA[0];const r=6+(Math.min(p.score||10,1000)/1000)*22;if(p.boosting)ctx.globalAlpha=0.72;for(let i=segs.length-1;i>=1;i--){const s=segs[i],sx=s.x-cx,sy=s.y-cy;if(sx<-150||sx>W+150||sy<-150||sy>H+150)continue;const tt=i/segs.length;ctx.beginPath();ctx.arc(sx,sy,r*(.72+.28*(1-tt)),0,Math.PI*2);ctx.fillStyle=i%2===0?sk.b[0]:sk.b[1];ctx.fill();}ctx.globalAlpha=1;const hx=hd0.x-cx,hy=hd0.y-cy;if(p.isMe){ctx.beginPath();ctx.arc(hx,hy,r+9,0,Math.PI*2);ctx.fillStyle='rgba(57,255,20,0.11)';ctx.fill();}ctx.beginPath();ctx.arc(hx,hy,r,0,Math.PI*2);ctx.fillStyle=sk.h;ctx.fill();const ang=segs.length>1?Math.atan2(segs[0].y-segs[1].y,segs[0].x-segs[1].x):0;[ang-.48,ang+.48].forEach(a=>{const ex=hx+Math.cos(a)*r*.5,ey=hy+Math.sin(a)*r*.5,er=r*.33;ctx.beginPath();ctx.arc(ex,ey,er,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.beginPath();ctx.arc(ex+Math.cos(ang)*er*.5,ey+Math.sin(ang)*er*.5,er*.5,0,Math.PI*2);ctx.fillStyle='#111';ctx.fill();});ctx.font='bold '+(9+r)+'px Nunito';ctx.textAlign='center';ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillText(p.name,hx+1,hy-r-8+1);ctx.fillStyle=p.isMe?'#f9ca24':'#fff';ctx.fillText(p.name,hx,hy-r-8);}
 
-function draw(cx,cy){drawBackground(cx,cy);if(!running){updateParticles();drawParticles();return;}if(serverWorld){drawFoodList(serverWorld.foods||[],cx,cy);for(const p of(serverWorld.players||[]))drawServerSnake(p,cx,cy);}}
+function draw(cx,cy){
+  const z = _mobileZoom;
+  if(z !== 1.0) {
+    ctx.save();
+    ctx.translate(W/2, H/2);
+    ctx.scale(z, z);
+    ctx.translate(-W/2, -H/2);
+    // Корректируем cx/cy под зум
+    const dx = (W/2) * (1/z - 1);
+    const dy = (H/2) * (1/z - 1);
+    drawBackground(cx - dx, cy - dy);
+    if(!running){updateParticles();drawParticles();ctx.restore();return;}
+    if(serverWorld){drawFoodList(serverWorld.foods||[], cx - dx, cy - dy);for(const p of(serverWorld.players||[]))drawServerSnake(p, cx - dx, cy - dy);}
+    ctx.restore();
+  } else {
+    drawBackground(cx,cy);
+    if(!running){updateParticles();drawParticles();return;}
+    if(serverWorld){drawFoodList(serverWorld.foods||[],cx,cy);for(const p of(serverWorld.players||[]))drawServerSnake(p,cx,cy);}
+  }
+}
 
 let lastT=0;
 function loop(ts){const dt=Math.min((ts-lastT)/16,3);lastT=ts;if(running)updHUD();draw(camX,camY);if(running)drawMM();requestAnimationFrame(loop);}
