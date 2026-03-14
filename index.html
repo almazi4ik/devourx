@@ -540,6 +540,25 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
 .clan-action-btn.promote:hover { background:rgba(249,202,36,0.2); border-color:#f9ca24; color:#f9ca24; }
 
 .clan-cost-banner { background:linear-gradient(135deg,rgba(249,202,36,0.12),rgba(255,159,67,0.08)); border:1px solid rgba(249,202,36,0.3); border-radius:12px; padding:12px 16px; display:flex; align-items:center; gap:10px; }
+/* ══ CLAN CHAT ══ */
+#clanChatWrap { display:flex; flex-direction:column; height:100%; gap:10px; }
+#clanChatMessages { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding:4px 0; min-height:0; max-height:340px; }
+#clanChatMessages::-webkit-scrollbar { width:4px; }
+#clanChatMessages::-webkit-scrollbar-thumb { background:rgba(162,155,254,0.3); border-radius:4px; }
+.chat-msg { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:8px 12px; }
+.chat-msg.me { background:rgba(162,155,254,0.1); border-color:rgba(162,155,254,0.3); }
+.chat-msg-header { display:flex; gap:6px; align-items:center; margin-bottom:2px; }
+.chat-msg-name { font-size:12px; font-weight:900; color:#a29bfe; }
+.chat-msg-role { font-size:10px; font-weight:800; padding:1px 6px; border-radius:10px; background:rgba(162,155,254,0.15); color:rgba(162,155,254,0.7); }
+.chat-msg-role.leader { background:rgba(249,202,36,0.15); color:#f9ca24; }
+.chat-msg-time { font-size:10px; color:rgba(255,255,255,0.25); margin-left:auto; }
+.chat-msg-text { font-size:13px; color:#d4f5e9; word-break:break-word; }
+#clanChatInputRow { display:flex; gap:8px; }
+#clanChatInput { flex:1; background:rgba(255,255,255,0.06); border:1px solid rgba(162,155,254,0.3); border-radius:10px; padding:9px 12px; color:#fff; font-size:13px; font-weight:700; outline:none; }
+#clanChatInput::placeholder { color:rgba(255,255,255,0.25); }
+#clanChatSend { background:linear-gradient(135deg,#a29bfe,#6c63ff); border:none; border-radius:10px; color:#fff; font-size:16px; padding:0 14px; cursor:pointer; transition:transform .15s; }
+#clanChatSend:hover { transform:scale(1.08); }
+#clanChatNoMember { text-align:center; padding:40px 20px; color:rgba(255,255,255,0.3); font-size:13px; font-weight:800; }
 </style>
 </head>
 <body>
@@ -684,8 +703,9 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
     <div class="cp-tab active" data-ct="all">ВСЕ</div>
     <div class="cp-tab" data-ct="top">🏆 ТОП</div>
     <div class="cp-tab" data-ct="my">МОЙ КЛАН</div>
+    <div class="cp-tab" data-ct="chat" id="chatTab" style="display:none">💬 ЧАТ</div>
   </div>
-  <div class="cp-body">
+  <div class="cp-body" id="cpBody">
     <div class="cp-sec active" id="cpSecAll"><div class="cp-loading">Загрузка...</div></div>
     <div class="cp-sec" id="cpSecTop"><div class="cp-loading">Загрузка...</div></div>
     <div class="cp-sec" id="cpSecMy"><div class="cp-loading">Загрузка...</div></div>
@@ -1589,7 +1609,7 @@ document.getElementById('lbPanelClose').onclick=closeLbPanel;
 document.getElementById('lbOverlay').addEventListener('click',closeLbPanel);
 jbLoadScores().then(scores=>updateBestMassWidget(scores));
 
-window.addEventListener('load',()=>{drawRobotIcon();applyLang();initRipples();applyBGTheme(currentBG);renderAccPanel();drawClanShield(null);});
+window.addEventListener('load',()=>{drawRobotIcon();applyLang();initRipples();applyBGTheme(currentBG);renderAccPanel();drawClanShield(null);initClanOnLoad();});
 
 // ══════ IRIS ══════
 function playIrisOpen(onMidpoint,onDone){const W2=irisCv.width,H2=irisCv.height;const maxR=Math.sqrt(W2*W2+H2*H2)*0.55;let start=null;const FADE_DUR=500,HOLD_DUR=180,OPEN_DUR=680;const TOTAL=FADE_DUR+HOLD_DUR+OPEN_DUR;let midDone=false;function frame(ts){if(!start)start=ts;const elapsed=ts-start;irisCx.clearRect(0,0,W2,H2);if(elapsed<FADE_DUR){const alpha=elapsed/FADE_DUR;irisCx.fillStyle=`rgba(0,0,0,${alpha.toFixed(3)})`;irisCx.fillRect(0,0,W2,H2);requestAnimationFrame(frame);}else if(elapsed<FADE_DUR+HOLD_DUR){irisCx.fillStyle='rgba(0,0,0,1)';irisCx.fillRect(0,0,W2,H2);if(!midDone){midDone=true;onMidpoint&&onMidpoint();}requestAnimationFrame(frame);}else if(elapsed<TOTAL){const t=(elapsed-FADE_DUR-HOLD_DUR)/OPEN_DUR;const ease=1-Math.pow(1-t,3);const r=maxR*ease;irisCx.fillStyle='rgba(0,0,0,1)';irisCx.beginPath();irisCx.rect(0,0,W2,H2);irisCx.arc(W2/2,H2/2,r,0,Math.PI*2,true);irisCx.fill('evenodd');requestAnimationFrame(frame);}else{irisCx.clearRect(0,0,W2,H2);onDone&&onDone();}}requestAnimationFrame(frame);}
@@ -1667,7 +1687,16 @@ document.querySelectorAll('.cp-tab').forEach(tab => {
 });
 
 async function loadClanTab(tab) {
+  // Стоп-поллинг чата если уходим с вкладки
+  if (tab !== 'chat' && _chatPollInterval) { clearInterval(_chatPollInterval); _chatPollInterval = null; }
+
+  if (tab === 'chat') { loadClanChatTab(); return; }
+
   const clans = await clanLoadAll();
+  // Показываем вкладку чата только если в клане
+  const chatTab = document.getElementById('chatTab');
+  if (chatTab) chatTab.style.display = myClanId ? '' : 'none';
+
   if (tab === 'all')  renderClanAll(clans);
   if (tab === 'top')  renderClanTop(clans);
   if (tab === 'my')   renderClanMy(clans);
@@ -1835,6 +1864,7 @@ async function joinClan(clanId) {
   localStorage.setItem('dvx_clan_id', clanId);
   localStorage.setItem('dvx_clan_role', 'member');
   updateClanBtn(clan);
+  const chatTab = document.getElementById('chatTab'); if (chatTab) chatTab.style.display = '';
   showToast(`Вступил в клан [${clan.tag}]!`, '#a29bfe');
   renderClanAll(clans);
 }
@@ -1862,6 +1892,7 @@ async function leaveClan(clanId) {
   localStorage.removeItem('dvx_clan_id');
   localStorage.removeItem('dvx_clan_role');
   updateClanBtn(null);
+  const chatTabLeave = document.getElementById('chatTab'); if (chatTabLeave) chatTabLeave.style.display = 'none';
   showToast('Ты покинул клан', '#a29bfe');
   renderClanMy(clans);
 }
@@ -1947,6 +1978,7 @@ document.getElementById('clanEditSave').addEventListener('click', async () => {
     localStorage.setItem('dvx_clan_id', newClan.id);
     localStorage.setItem('dvx_clan_role', 'leader');
     updateClanBtn(newClan);
+    const chatTabEl = document.getElementById('chatTab'); if (chatTabEl) chatTabEl.style.display = '';
     closeCreateClan();
     showToast(`Клан [${tag}] создан!`, '#a29bfe');
     // Переключить на "Мой клан"
@@ -2112,19 +2144,21 @@ async function clanUpdateScore(score) {
   } catch(e) {}
 }
 
-// ── Инициализация ──
-(async function initClan() {
+// ── Инициализация (вызывается после window.load) ──
+async function initClanOnLoad() {
   if (!myClanId) return;
   try {
     const clans = await clanLoadAll();
     const clan = getMyClan(clans);
     if (clan) {
       updateClanBtn(clan);
-      // Синхронизируем роль
       const member = getMyMember(clan);
-      if (member) { myClanRole = member.role; localStorage.setItem('dvx_clan_role', member.role); }
-      else {
-        // Нас выгнали
+      if (member) {
+        myClanRole = member.role;
+        localStorage.setItem('dvx_clan_role', member.role);
+        const chatTab = document.getElementById('chatTab');
+        if (chatTab) chatTab.style.display = '';
+      } else {
         myClanId = null; myClanRole = null;
         localStorage.removeItem('dvx_clan_id'); localStorage.removeItem('dvx_clan_role');
       }
@@ -2132,7 +2166,105 @@ async function clanUpdateScore(score) {
       myClanId = null; localStorage.removeItem('dvx_clan_id');
     }
   } catch(e) {}
-})();
+}
+
+// ══ CLAN CHAT ══
+let _chatPollInterval = null;
+let _lastChatCount = 0;
+
+async function clanChatLoad() {
+  if (!myClanId) return [];
+  try {
+    const clans = await clanLoadAll();
+    const clan = clans.find(c => c.id === myClanId);
+    return clan ? (clan.chat || []) : [];
+  } catch(e) { return []; }
+}
+
+async function clanChatSend(text) {
+  if (!myClanId || !text.trim()) return null;
+  const playerName = document.getElementById('nameInput').value.trim() || 'Player';
+  try {
+    const clans = await clanLoadAll();
+    const clan = clans.find(c => c.id === myClanId);
+    if (!clan) return null;
+    if (!clan.chat) clan.chat = [];
+    const msg = { pid: _playerId, name: playerName, role: myClanRole || 'member', text: text.trim().slice(0,120), ts: Date.now() };
+    clan.chat.push(msg);
+    if (clan.chat.length > 80) clan.chat = clan.chat.slice(-80);
+    await clanSaveAll(clans);
+    return msg;
+  } catch(e) { return null; }
+}
+
+function renderChatMessages(msgs) {
+  const box = document.getElementById('clanChatMessages');
+  if (!box) return;
+  if (!msgs.length) {
+    box.innerHTML = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.2);font-size:13px;font-weight:800;">Сообщений пока нет 💬</div>';
+    return;
+  }
+  const wasAtBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+  box.innerHTML = msgs.map(m => {
+    const isMe = m.pid === _playerId;
+    const time = new Date(m.ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    const roleLabel = m.role === 'leader' ? 'ЛИДЕР' : m.role === 'officer' ? 'ОФИЦЕР' : '';
+    const roleHtml = roleLabel ? `<span class="chat-msg-role ${m.role}">${roleLabel}</span>` : '';
+    return `<div class="chat-msg${isMe?' me':''}">
+      <div class="chat-msg-header"><span class="chat-msg-name">${m.name}</span>${roleHtml}<span class="chat-msg-time">${time}</span></div>
+      <div class="chat-msg-text">${m.text}</div>
+    </div>`;
+  }).join('');
+  if (wasAtBottom || _lastChatCount === 0) box.scrollTop = box.scrollHeight;
+  _lastChatCount = msgs.length;
+}
+
+async function loadClanChatTab() {
+  const body = document.getElementById('cpBody');
+  if (!myClanId) {
+    body.innerHTML = '<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,0.3);font-size:13px;font-weight:800;">Вступи в клан чтобы пользоваться чатом 🛡️</div>';
+    return;
+  }
+  body.innerHTML = `<div id="clanChatWrap">
+    <div id="clanChatMessages"><div style="text-align:center;padding:30px;color:rgba(255,255,255,0.2);font-size:13px;">Загрузка...</div></div>
+    <div id="clanChatInputRow">
+      <input id="clanChatInput" maxlength="120" placeholder="Написать в клан...">
+      <button id="clanChatSend">➤</button>
+    </div>
+  </div>`;
+
+  const msgs = await clanChatLoad();
+  renderChatMessages(msgs);
+  _lastChatCount = msgs.length;
+
+  const inp = document.getElementById('clanChatInput');
+  const sendBtn = document.getElementById('clanChatSend');
+
+  async function doSend() {
+    const txt = inp.value.trim();
+    if (!txt) return;
+    inp.value = '';
+    sendBtn.disabled = true;
+    const msg = await clanChatSend(txt);
+    sendBtn.disabled = false;
+    if (msg) {
+      const msgs2 = await clanChatLoad();
+      renderChatMessages(msgs2);
+    }
+    inp.focus();
+  }
+
+  sendBtn.addEventListener('click', doSend);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') doSend(); });
+
+  // Автообновление чата каждые 8 сек
+  if (_chatPollInterval) clearInterval(_chatPollInterval);
+  _chatPollInterval = setInterval(async () => {
+    if (!document.getElementById('clanChatMessages')) { clearInterval(_chatPollInterval); return; }
+    const fresh = await clanChatLoad();
+    if (fresh.length !== _lastChatCount) renderChatMessages(fresh);
+  }, 8000);
+}
 
 function showToast(msg,color='#fff'){const w=document.getElementById('toastWrap'),tt=document.createElement('div');tt.className='toast';tt.textContent=msg;tt.style.borderColor=color;tt.style.color=color;w.appendChild(tt);setTimeout(()=>tt.remove(),2300);}
 </script>
