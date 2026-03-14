@@ -420,6 +420,126 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
 #bestMassWidget .bm-label { font-size: 10px; font-weight: 800; color: rgba(249,202,36,0.7); letter-spacing: 1.5px; text-transform: uppercase; }
 #bestMassWidget .bm-name { font-family: 'Fredoka One', cursive; font-size: 13px; color: #fff; }
 #bestMassWidget .bm-score { font-family: 'Fredoka One', cursive; font-size: 22px; color: #f9ca24; line-height: 1; }
+/* ══════ CLAN BUTTON ══════ */
+#clanBtn {
+  position: fixed; bottom: 130px; right: 16px; z-index: 200;
+  width: 58px; height: 58px; border-radius: 50%;
+  background: rgba(0,0,0,0.65);
+  border: 2px solid rgba(162,155,254,0.55);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; backdrop-filter: blur(6px);
+  transition: border-color .2s, box-shadow .2s, transform .15s;
+  pointer-events: all; padding: 0;
+}
+#clanBtn:hover {
+  border-color: #a29bfe;
+  box-shadow: 0 0 22px rgba(162,155,254,0.45);
+  transform: scale(1.08);
+}
+
+/* ══════ CLAN PANEL ══════ */
+#clanOverlay, #clanEditOverlay {
+  position: fixed; inset: 0; z-index: 700;
+  background: rgba(0,0,0,0); pointer-events: none;
+  transition: background .3s;
+}
+#clanOverlay.open, #clanEditOverlay.open {
+  background: rgba(0,0,0,0.7); pointer-events: all; backdrop-filter: blur(6px);
+}
+#clanPanel {
+  position: fixed; right: 0; top: 0; bottom: 0;
+  width: min(400px, 100vw); z-index: 701;
+  background: linear-gradient(160deg,#080f12,#050d10,#030a0d);
+  border-left: 1px solid rgba(162,155,254,0.2);
+  box-shadow: -6px 0 48px rgba(0,0,0,0.7);
+  display: flex; flex-direction: column;
+  transform: translateX(100%);
+  transition: transform .4s cubic-bezier(0.34,1.06,0.64,1);
+}
+#clanPanel.open { transform: translateX(0); }
+#clanPanel::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background: linear-gradient(90deg,#a29bfe,#6c5ce7,#ff6b9d);
+}
+#clanEditPanel {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -60%) scale(0.9);
+  width: min(380px, 92vw); z-index: 801;
+  background: linear-gradient(160deg,#0a0f0d,#061009);
+  border: 2px solid rgba(162,155,254,0.4); border-radius: 24px;
+  opacity: 0; pointer-events: none;
+  transition: all .35s cubic-bezier(0.34,1.1,0.64,1);
+}
+#clanEditPanel.open { transform: translate(-50%,-50%) scale(1); opacity:1; pointer-events:all; }
+#clanEditOverlay { z-index: 800; }
+
+.cp-header { display:flex; align-items:center; justify-content:space-between; padding:22px 20px 14px; border-bottom:1px solid rgba(255,255,255,0.06); }
+.cp-title { font-family:'Fredoka One',cursive; font-size:22px; background:linear-gradient(90deg,#a29bfe,#6c5ce7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.cp-close { width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.14); color:rgba(255,255,255,0.6); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; flex-shrink:0; }
+.cp-close:hover { background:rgba(231,76,60,0.2); border-color:#e74c3c; color:#e74c3c; }
+.cp-tabs { display:flex; gap:0; border-bottom:1px solid rgba(255,255,255,0.06); padding:0 16px; }
+.cp-tab { font-family:'Fredoka One',cursive; font-size:13px; color:rgba(255,255,255,0.35); padding:13px 12px; cursor:pointer; border-bottom:3px solid transparent; transition:all .2s; white-space:nowrap; }
+.cp-tab.active { color:#a29bfe; border-bottom-color:#a29bfe; }
+.cp-body { flex:1; overflow:hidden; position:relative; }
+.cp-sec { position:absolute; inset:0; overflow-y:auto; padding:14px; display:none; flex-direction:column; gap:10px; }
+.cp-sec.active { display:flex; }
+.cp-sec::-webkit-scrollbar { width:4px; }
+.cp-sec::-webkit-scrollbar-thumb { background:rgba(162,155,254,0.25); border-radius:4px; }
+.cp-loading { text-align:center; font-family:'Fredoka One',cursive; font-size:16px; color:rgba(168,230,192,0.4); padding:40px 0; }
+
+/* Clan card */
+.clan-card {
+  background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+  border-radius:16px; padding:14px 16px; cursor:pointer;
+  transition: all .2s; display:flex; align-items:center; gap:14px;
+}
+.clan-card:hover { background:rgba(162,155,254,0.08); border-color:rgba(162,155,254,0.3); }
+.clan-card.my-clan { border-color:rgba(162,155,254,0.4); background:rgba(162,155,254,0.08); }
+.clan-tag-badge {
+  background: linear-gradient(135deg,#6c5ce7,#a29bfe);
+  border-radius:10px; padding:6px 10px;
+  font-family:'Fredoka One',cursive; font-size:16px; color:#fff;
+  flex-shrink:0; min-width:44px; text-align:center;
+  box-shadow: 0 3px 10px rgba(108,92,231,0.4);
+}
+.clan-info { flex:1; min-width:0; }
+.clan-fullname { font-family:'Fredoka One',cursive; font-size:15px; color:#e8f5e9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.clan-members { font-size:11px; font-weight:800; color:rgba(168,230,192,0.5); margin-top:2px; }
+.clan-mass { font-family:'Fredoka One',cursive; font-size:18px; color:#a29bfe; flex-shrink:0; }
+.clan-rank-num { font-family:'Fredoka One',cursive; font-size:22px; color:rgba(255,255,255,0.25); width:28px; flex-shrink:0; text-align:center; }
+
+/* Create button */
+.clan-create-btn {
+  background: linear-gradient(180deg,#a29bfe 0%,#6c5ce7 100%);
+  border:none; border-radius:50px; color:#fff;
+  font-family:'Fredoka One',cursive; font-size:18px; letter-spacing:2px;
+  padding:13px 0; width:100%; cursor:pointer;
+  box-shadow:0 5px 0 #4a2cb0; transition:transform .1s;
+  margin-bottom:6px;
+}
+.clan-create-btn:hover { transform:translateY(-2px); }
+
+/* My clan view */
+.clan-my-header { background:rgba(162,155,254,0.1); border:1px solid rgba(162,155,254,0.3); border-radius:16px; padding:18px; margin-bottom:10px; text-align:center; }
+.clan-my-tag { font-family:'Fredoka One',cursive; font-size:36px; color:#a29bfe; }
+.clan-my-name { font-family:'Fredoka One',cursive; font-size:18px; color:#e8f5e9; margin-top:4px; }
+.clan-my-stats { display:flex; gap:10px; margin-top:10px; justify-content:center; }
+.clan-stat-box { background:rgba(0,0,0,0.3); border-radius:10px; padding:8px 14px; text-align:center; }
+.clan-stat-val { font-family:'Fredoka One',cursive; font-size:18px; color:#f9ca24; }
+.clan-stat-lbl { font-size:10px; font-weight:800; color:rgba(168,230,192,0.5); letter-spacing:1px; }
+.clan-member-row { display:flex; align-items:center; gap:10px; padding:10px 12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; }
+.clan-member-role { font-size:10px; font-weight:900; padding:2px 8px; border-radius:20px; letter-spacing:1px; flex-shrink:0; }
+.role-leader { background:rgba(249,202,36,0.2); color:#f9ca24; border:1px solid rgba(249,202,36,0.4); }
+.role-officer { background:rgba(162,155,254,0.2); color:#a29bfe; border:1px solid rgba(162,155,254,0.4); }
+.role-member { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.5); border:1px solid rgba(255,255,255,0.1); }
+.clan-member-name { flex:1; font-size:14px; font-weight:800; color:#d4f5e9; }
+.clan-member-score { font-family:'Fredoka One',cursive; font-size:14px; color:#a29bfe; }
+.clan-member-actions { display:flex; gap:5px; }
+.clan-action-btn { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); border-radius:8px; color:rgba(255,255,255,0.6); font-size:13px; padding:4px 8px; cursor:pointer; transition:all .15s; }
+.clan-action-btn:hover { background:rgba(231,76,60,0.2); border-color:#e74c3c; color:#e74c3c; }
+.clan-action-btn.promote:hover { background:rgba(249,202,36,0.2); border-color:#f9ca24; color:#f9ca24; }
+
+.clan-cost-banner { background:linear-gradient(135deg,rgba(249,202,36,0.12),rgba(255,159,67,0.08)); border:1px solid rgba(249,202,36,0.3); border-radius:12px; padding:12px 16px; display:flex; align-items:center; gap:10px; }
 </style>
 </head>
 <body>
@@ -546,6 +666,55 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
     <button class="lb-panel-close" id="lbPanelClose">✕</button>
   </div>
   <div id="lbPanelList"></div>
+</div>
+
+<!-- КНОПКА КЛАНОВ -->
+<button id="clanBtn">
+  <canvas id="clanShieldCanvas" width="44" height="44"></canvas>
+</button>
+
+<!-- КЛАНЫ ОВЕРЛЕЙ + ПАНЕЛЬ -->
+<div id="clanOverlay"></div>
+<div id="clanPanel">
+  <div class="cp-header">
+    <div class="cp-title" id="cpTitle">⚔️ КЛАНЫ</div>
+    <button class="cp-close" id="clanClose">✕</button>
+  </div>
+  <div class="cp-tabs">
+    <div class="cp-tab active" data-ct="all">ВСЕ</div>
+    <div class="cp-tab" data-ct="top">🏆 ТОП</div>
+    <div class="cp-tab" data-ct="my">МОЙ КЛАН</div>
+  </div>
+  <div class="cp-body">
+    <div class="cp-sec active" id="cpSecAll"><div class="cp-loading">Загрузка...</div></div>
+    <div class="cp-sec" id="cpSecTop"><div class="cp-loading">Загрузка...</div></div>
+    <div class="cp-sec" id="cpSecMy"><div class="cp-loading">Загрузка...</div></div>
+  </div>
+</div>
+
+<!-- СОЗДАТЬ / РЕДАКТИРОВАТЬ КЛАН -->
+<div id="clanEditOverlay"></div>
+<div id="clanEditPanel">
+  <div class="cp-header">
+    <div class="cp-title" id="clanEditTitle">⚔️ СОЗДАТЬ КЛАН</div>
+    <button class="cp-close" id="clanEditClose">✕</button>
+  </div>
+  <div style="padding:20px;display:flex;flex-direction:column;gap:14px;">
+    <div class="clan-cost-banner" id="clanCostBanner">
+      <span style="font-size:22px">💰</span>
+      <span style="font-family:'Fredoka One',cursive;font-size:14px;color:#f9ca24;">Создание клана: 5 000 монет</span>
+    </div>
+    <div>
+      <div class="acc-label" style="margin-bottom:6px">ПОЛНОЕ НАЗВАНИЕ</div>
+      <input class="acc-input" id="clanFullName" maxlength="24" placeholder="Например: DevourX Warriors">
+    </div>
+    <div>
+      <div class="acc-label" style="margin-bottom:6px">СОКРАЩЕНИЕ (2–4 БУКВЫ)</div>
+      <input class="acc-input" id="clanShortName" maxlength="4" placeholder="DVX" style="text-transform:uppercase;letter-spacing:3px;font-family:'Fredoka One',cursive;font-size:18px;text-align:center;">
+    </div>
+    <div id="clanEditError" style="color:#ff6b6b;font-size:13px;font-weight:800;min-height:16px;text-align:center;"></div>
+    <button class="acc-btn acc-btn-green" id="clanEditSave">СОЗДАТЬ ЗА 5 000 💰</button>
+  </div>
 </div>
 
 <div id="bestMassWidget">
@@ -1092,7 +1261,7 @@ function offlineCheckCollisions(){const alive=[offlineState.player,...offlineSta
 
 function offlineRespawnBots(){for(let i=0;i<offlineState.bots.length;i++){if(!offlineState.bots[i].alive){const name=BOT_NAMES[Math.floor(Math.random()*BOT_NAMES.length)];offlineState.bots[i]=mkBot(name,Math.floor(Math.random()*3));}}}
 
-function offlineTick(){if(!running||gameMode!=='offline'||!offlineState)return;const me=offlineState.player;if(!me.alive){if(!me._deathHandled){me._deathHandled=true;clearInterval(offlineTickInterval);offlineTickInterval=null;running=false;const score=me.score||0;document.getElementById('deathScore').textContent=t('mass')+': '+score;jbSaveScore(pname,score);document.getElementById('hud').style.display='none';switchScreen('deathScreen',()=>{renderRecords(score);trackAch('mass',score);trackAch('survive',surviveTimer);});}return;}if(!autopilotMode){me.tAngle=Math.atan2(my-H/2,mx-W/2);me.boosting=boosting&&me.score>MIN_LEN;}else{const h=me.segs[0];let best=Infinity,tgt=null;for(const f of offlineState.foods){const dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;if(d<best){best=d;tgt=f;}}if(tgt)me.tAngle=Math.atan2(tgt.y-h.y,tgt.x-h.x);me.boosting=false;}if(me.boosting&&me.length>MIN_LEN&&Math.random()<0.05){me.length=Math.max(MIN_LEN,me.length-1);me.score=Math.max(MIN_LEN,me.score-1);}offlineUpdateSnake(me,0.18);offlineEatFood(me);if(me.segs.length>0){camX+=(me.segs[0].x-W/2-camX)*0.12;camY+=(me.segs[0].y-H/2-camY)*0.12;}const now=performance.now();if(now-lastSurviveTick>=1000){surviveTimer++;lastSurviveTick=now;trackQuest('survive_time',1);}for(const bot of offlineState.bots){if(!bot.alive)continue;offlineBotAI(bot);if(bot.boosting&&bot.length>MIN_LEN&&Math.random()<0.05){bot.length=Math.max(MIN_LEN,bot.length-1);bot.score=Math.max(MIN_LEN,bot.score-1);}offlineUpdateSnake(bot,0.13);offlineEatFood(bot);}offlineCheckCollisions();offlineRespawnBots();const allPlayers=[me,...offlineState.bots].filter(p=>p.alive).map(p=>({name:p.name,skinId:p.skinId,score:p.score,segs:p.segs.slice(0,750),boosting:p.boosting,isMe:p.isMe}));const lb=[...allPlayers].sort((a,b)=>b.score-a.score).slice(0,10).map(p=>({name:p.name,score:p.score,isMe:p.isMe}));serverWorld={players:allPlayers,foods:offlineState.foods,leaderboard:lb};}
+function offlineTick(){if(!running||gameMode!=='offline'||!offlineState)return;const me=offlineState.player;if(!me.alive){if(!me._deathHandled){me._deathHandled=true;clearInterval(offlineTickInterval);offlineTickInterval=null;running=false;const score=me.score||0;document.getElementById('deathScore').textContent=t('mass')+': '+score;jbSaveScore(pname,score);clanUpdateScore(score);document.getElementById('hud').style.display='none';switchScreen('deathScreen',()=>{renderRecords(score);trackAch('mass',score);trackAch('survive',surviveTimer);});}return;}if(!autopilotMode){me.tAngle=Math.atan2(my-H/2,mx-W/2);me.boosting=boosting&&me.score>MIN_LEN;}else{const h=me.segs[0];let best=Infinity,tgt=null;for(const f of offlineState.foods){const dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;if(d<best){best=d;tgt=f;}}if(tgt)me.tAngle=Math.atan2(tgt.y-h.y,tgt.x-h.x);me.boosting=false;}if(me.boosting&&me.length>MIN_LEN&&Math.random()<0.05){me.length=Math.max(MIN_LEN,me.length-1);me.score=Math.max(MIN_LEN,me.score-1);}offlineUpdateSnake(me,0.18);offlineEatFood(me);if(me.segs.length>0){camX+=(me.segs[0].x-W/2-camX)*0.12;camY+=(me.segs[0].y-H/2-camY)*0.12;}const now=performance.now();if(now-lastSurviveTick>=1000){surviveTimer++;lastSurviveTick=now;trackQuest('survive_time',1);}for(const bot of offlineState.bots){if(!bot.alive)continue;offlineBotAI(bot);if(bot.boosting&&bot.length>MIN_LEN&&Math.random()<0.05){bot.length=Math.max(MIN_LEN,bot.length-1);bot.score=Math.max(MIN_LEN,bot.score-1);}offlineUpdateSnake(bot,0.13);offlineEatFood(bot);}offlineCheckCollisions();offlineRespawnBots();const allPlayers=[me,...offlineState.bots].filter(p=>p.alive).map(p=>({name:p.name,skinId:p.skinId,score:p.score,segs:p.segs.slice(0,750),boosting:p.boosting,isMe:p.isMe}));const lb=[...allPlayers].sort((a,b)=>b.score-a.score).slice(0,10).map(p=>({name:p.name,score:p.score,isMe:p.isMe}));serverWorld={players:allPlayers,foods:offlineState.foods,leaderboard:lb};}
 
 function startOffline(){gameMode='offline';if(offlineTickInterval){clearInterval(offlineTickInterval);offlineTickInterval=null;}serverWorld=null;_prevWorld=null;playIrisOpen(()=>{const{spawnX,spawnY}=initOffline();camX=spawnX-W/2;camY=spawnY-H/2;player=offlineState.player;document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});document.getElementById('gearBtn').style.display='none';document.getElementById('hud').style.display='block';document.getElementById('xpBarWrap').style.display='none';document.getElementById('bestMassWidget').style.display='none';document.getElementById('achBtn').style.display='none';document.getElementById('achPanel').classList.remove('open');achOpen=false;autopilotMode=false;document.getElementById('apBtn').classList.remove('active');running=true;surviveTimer=0;lastSurviveTick=performance.now();_xpFoodCounter=0;_foodCoinCounter=0;if(isMobile())showJoystick(true);offlineTickInterval=setInterval(offlineTick,33);trackAch('games',1);},null);}
 
@@ -1101,7 +1270,7 @@ const SERVER='wss://devourx-server.onrender.com';
 let ws=null,wsConnecting=false;
 let _connectTimeout=null,_loadInterval=null;
 
-function connectWS(){if(wsConnecting)return;wsConnecting=true;gameMode='online';serverWorld=null;_prevWorld=null;if(ws){try{ws.close();}catch(e){}ws=null;}showLoading(t('connecting'));let loadPct=0;_loadInterval=setInterval(()=>{loadPct=Math.min(loadPct+3,85);document.getElementById('loadBarFill').style.width=loadPct+'%';},100);ws=new WebSocket(SERVER);_connectTimeout=setTimeout(()=>{if(!running){clearInterval(_loadInterval);wsConnecting=false;if(ws){try{ws.close();}catch(e){}ws=null;}setLoadStatus(t('no_server'),100);document.getElementById('loadBarFill').style.background='#e74c3c';setTimeout(()=>showMenu(),3000);}},8000);ws.onopen=()=>{clearInterval(_loadInterval);document.getElementById('loadBarFill').style.width='92%';setLoadStatus(t('auth'));const name=document.getElementById('nameInput').value.trim()||'Player';ws.send(JSON.stringify({type:'join',name,skinId:selSkin,skinColor:SKINS_DATA[selSkin].b[0]}));};ws.onmessage=(e)=>{try{const msg=JSON.parse(e.data);if(msg.type==='joined'){clearTimeout(_connectTimeout);wsConnecting=false;document.getElementById('loadBarFill').style.width='100%';setLoadStatus(t('ready'));if(msg.playerCount){document.getElementById('onlineNum').textContent=msg.playerCount;}pname=document.getElementById('nameInput').value.trim()||'Player';player={segs:[{x:msg.spawnX||WORLD/2,y:msg.spawnY||WORLD/2}],tAngle:0,angle:0,score:MIN_LEN,boosting:false,alive:true};camX=(msg.spawnX||WORLD/2)-W/2;camY=(msg.spawnY||WORLD/2)-H/2;playIrisOpen(()=>{document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});document.getElementById('gearBtn').style.display='none';document.getElementById('hud').style.display='block';document.getElementById('xpBarWrap').style.display='none';document.getElementById('bestMassWidget').style.display='none';document.getElementById('achBtn').style.display='none';document.getElementById('achPanel').classList.remove('open');achOpen=false;autopilotMode=false;document.getElementById('apBtn').classList.remove('active');running=true;surviveTimer=0;lastSurviveTick=performance.now();_xpFoodCounter=0;_prevScore=MIN_LEN;_foodCoinCounter=0;if(isMobile())showJoystick(true);},null);}if(msg.type==='world'){_prevWorld=serverWorld?{players:serverWorld.players,_segsMap:buildSegsMap(serverWorld)}:null;_worldRecvTime=performance.now();serverWorld=msg;if(msg.playerCount){document.getElementById('onlineNum').textContent=msg.playerCount;}if(serverWorld.players){const me=serverWorld.players.find(p=>p.isMe);if(me&&me.segs&&me.segs.length>0){const sh=me.segs[0];camX+=(sh.x-W/2-camX)*0.08;camY+=(sh.y-H/2-camY)*0.08;if(player){const gained=me.score-(player.score||MIN_LEN);if(gained>0){trackQuest('eat_food',gained);_xpFoodCounter+=gained;const xg=Math.floor(_xpFoodCounter/5);if(xg>0){_xpFoodCounter-=xg*5;addXP(xg);}}player.segs=me.segs;player.score=me.score||player.score;_prevScore=me.score;}}}}if(msg.type==='dead'){clearTimeout(_connectTimeout);const score=msg.score||0;document.getElementById('deathScore').textContent=t('mass')+': '+score;jbSaveScore(pname,score);document.getElementById('hud').style.display='none';running=false;switchScreen('deathScreen',()=>{renderRecords(score);trackQuest('reach_mass',score);});}if(msg.type==='kill_reward'){essence=Math.min(9999,essence+msg.coins);syncEss();showToast('💀 +'+msg.coins+' '+t('kill_reward'),'#ff6b6b');}if(msg.type==='coin_reward'){essence=Math.min(9999,essence+msg.coins);syncEss();}}catch(err){console.warn('WS msg error',err);}};ws.onerror=()=>{clearTimeout(_connectTimeout);clearInterval(_loadInterval);wsConnecting=false;setLoadStatus(t('conn_err'),100);document.getElementById('loadBarFill').style.background='#e74c3c';setTimeout(()=>showMenu(),3000);};ws.onclose=()=>{wsConnecting=false;ws=null;serverWorld=null;_prevWorld=null;if(running&&gameMode==='online'){running=false;document.getElementById('hud').style.display='none';showMenu();}};}
+function connectWS(){if(wsConnecting)return;wsConnecting=true;gameMode='online';serverWorld=null;_prevWorld=null;if(ws){try{ws.close();}catch(e){}ws=null;}showLoading(t('connecting'));let loadPct=0;_loadInterval=setInterval(()=>{loadPct=Math.min(loadPct+3,85);document.getElementById('loadBarFill').style.width=loadPct+'%';},100);ws=new WebSocket(SERVER);_connectTimeout=setTimeout(()=>{if(!running){clearInterval(_loadInterval);wsConnecting=false;if(ws){try{ws.close();}catch(e){}ws=null;}setLoadStatus(t('no_server'),100);document.getElementById('loadBarFill').style.background='#e74c3c';setTimeout(()=>showMenu(),3000);}},8000);ws.onopen=()=>{clearInterval(_loadInterval);document.getElementById('loadBarFill').style.width='92%';setLoadStatus(t('auth'));const name=document.getElementById('nameInput').value.trim()||'Player';ws.send(JSON.stringify({type:'join',name,skinId:selSkin,skinColor:SKINS_DATA[selSkin].b[0]}));};ws.onmessage=(e)=>{try{const msg=JSON.parse(e.data);if(msg.type==='joined'){clearTimeout(_connectTimeout);wsConnecting=false;document.getElementById('loadBarFill').style.width='100%';setLoadStatus(t('ready'));if(msg.playerCount){document.getElementById('onlineNum').textContent=msg.playerCount;}pname=document.getElementById('nameInput').value.trim()||'Player';player={segs:[{x:msg.spawnX||WORLD/2,y:msg.spawnY||WORLD/2}],tAngle:0,angle:0,score:MIN_LEN,boosting:false,alive:true};camX=(msg.spawnX||WORLD/2)-W/2;camY=(msg.spawnY||WORLD/2)-H/2;playIrisOpen(()=>{document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});document.getElementById('gearBtn').style.display='none';document.getElementById('hud').style.display='block';document.getElementById('xpBarWrap').style.display='none';document.getElementById('bestMassWidget').style.display='none';document.getElementById('achBtn').style.display='none';document.getElementById('achPanel').classList.remove('open');achOpen=false;autopilotMode=false;document.getElementById('apBtn').classList.remove('active');running=true;surviveTimer=0;lastSurviveTick=performance.now();_xpFoodCounter=0;_prevScore=MIN_LEN;_foodCoinCounter=0;if(isMobile())showJoystick(true);},null);}if(msg.type==='world'){_prevWorld=serverWorld?{players:serverWorld.players,_segsMap:buildSegsMap(serverWorld)}:null;_worldRecvTime=performance.now();serverWorld=msg;if(msg.playerCount){document.getElementById('onlineNum').textContent=msg.playerCount;}if(serverWorld.players){const me=serverWorld.players.find(p=>p.isMe);if(me&&me.segs&&me.segs.length>0){const sh=me.segs[0];camX+=(sh.x-W/2-camX)*0.08;camY+=(sh.y-H/2-camY)*0.08;if(player){const gained=me.score-(player.score||MIN_LEN);if(gained>0){trackQuest('eat_food',gained);_xpFoodCounter+=gained;const xg=Math.floor(_xpFoodCounter/5);if(xg>0){_xpFoodCounter-=xg*5;addXP(xg);}}player.segs=me.segs;player.score=me.score||player.score;_prevScore=me.score;}}}}if(msg.type==='dead'){clearTimeout(_connectTimeout);const score=msg.score||0;document.getElementById('deathScore').textContent=t('mass')+': '+score;jbSaveScore(pname,score);clanUpdateScore(score);document.getElementById('hud').style.display='none';running=false;switchScreen('deathScreen',()=>{renderRecords(score);trackQuest('reach_mass',score);});}if(msg.type==='kill_reward'){essence=Math.min(9999,essence+msg.coins);syncEss();showToast('💀 +'+msg.coins+' '+t('kill_reward'),'#ff6b6b');}if(msg.type==='coin_reward'){essence=Math.min(9999,essence+msg.coins);syncEss();}}catch(err){console.warn('WS msg error',err);}};ws.onerror=()=>{clearTimeout(_connectTimeout);clearInterval(_loadInterval);wsConnecting=false;setLoadStatus(t('conn_err'),100);document.getElementById('loadBarFill').style.background='#e74c3c';setTimeout(()=>showMenu(),3000);};ws.onclose=()=>{wsConnecting=false;ws=null;serverWorld=null;_prevWorld=null;if(running&&gameMode==='online'){running=false;document.getElementById('hud').style.display='none';showMenu();}};}
 
 // ══════ INPUT ══════
 let mx=400,my=300;
@@ -1420,10 +1589,550 @@ document.getElementById('lbPanelClose').onclick=closeLbPanel;
 document.getElementById('lbOverlay').addEventListener('click',closeLbPanel);
 jbLoadScores().then(scores=>updateBestMassWidget(scores));
 
-window.addEventListener('load',()=>{drawRobotIcon();applyLang();initRipples();applyBGTheme(currentBG);renderAccPanel();});
+window.addEventListener('load',()=>{drawRobotIcon();applyLang();initRipples();applyBGTheme(currentBG);renderAccPanel();drawClanShield(null);});
 
 // ══════ IRIS ══════
 function playIrisOpen(onMidpoint,onDone){const W2=irisCv.width,H2=irisCv.height;const maxR=Math.sqrt(W2*W2+H2*H2)*0.55;let start=null;const FADE_DUR=500,HOLD_DUR=180,OPEN_DUR=680;const TOTAL=FADE_DUR+HOLD_DUR+OPEN_DUR;let midDone=false;function frame(ts){if(!start)start=ts;const elapsed=ts-start;irisCx.clearRect(0,0,W2,H2);if(elapsed<FADE_DUR){const alpha=elapsed/FADE_DUR;irisCx.fillStyle=`rgba(0,0,0,${alpha.toFixed(3)})`;irisCx.fillRect(0,0,W2,H2);requestAnimationFrame(frame);}else if(elapsed<FADE_DUR+HOLD_DUR){irisCx.fillStyle='rgba(0,0,0,1)';irisCx.fillRect(0,0,W2,H2);if(!midDone){midDone=true;onMidpoint&&onMidpoint();}requestAnimationFrame(frame);}else if(elapsed<TOTAL){const t=(elapsed-FADE_DUR-HOLD_DUR)/OPEN_DUR;const ease=1-Math.pow(1-t,3);const r=maxR*ease;irisCx.fillStyle='rgba(0,0,0,1)';irisCx.beginPath();irisCx.rect(0,0,W2,H2);irisCx.arc(W2/2,H2/2,r,0,Math.PI*2,true);irisCx.fill('evenodd');requestAnimationFrame(frame);}else{irisCx.clearRect(0,0,W2,H2);onDone&&onDone();}}requestAnimationFrame(frame);}
+
+// ══════════════════════════════════════════
+// СИСТЕМА КЛАНОВ
+// ══════════════════════════════════════════
+const CLAN_BIN_ID = '686e4c3f8d9bd565842d6f52'; // отдельный бин для кланов
+const CLAN_MAX_MEMBERS = 25;
+const CLAN_CREATE_COST = 5000;
+
+// Текущий клан игрока (из localStorage)
+let myClanId = localStorage.getItem('dvx_clan_id') || null;
+let myClanRole = localStorage.getItem('dvx_clan_role') || null; // 'leader','officer','member'
+let _clanCache = null; // кэш всех кланов
+
+// ── JSONBin helpers ──
+async function clanLoadAll() {
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${CLAN_BIN_ID}/latest`, {
+      headers: { 'X-Master-Key': JB_KEY }
+    });
+    const data = await res.json();
+    _clanCache = data.record.clans || [];
+    return _clanCache;
+  } catch(e) { return _clanCache || []; }
+}
+
+async function clanSaveAll(clans) {
+  await fetch(`https://api.jsonbin.io/v3/b/${CLAN_BIN_ID}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'X-Master-Key': JB_KEY },
+    body: JSON.stringify({ clans })
+  });
+  _clanCache = clans;
+}
+
+function getMyClan(clans) {
+  if (!myClanId) return null;
+  return clans.find(c => c.id === myClanId) || null;
+}
+
+function getMyMember(clan) {
+  if (!clan) return null;
+  return clan.members.find(m => m.pid === _playerId) || null;
+}
+
+// ── Открыть / закрыть панель ──
+let _clanPanelOpen = false;
+
+function openClanPanel() {
+  _clanPanelOpen = true;
+  document.getElementById('clanPanel').classList.add('open');
+  document.getElementById('clanOverlay').classList.add('open');
+  loadClanTab('all');
+}
+
+function closeClanPanel() {
+  _clanPanelOpen = false;
+  document.getElementById('clanPanel').classList.remove('open');
+  document.getElementById('clanOverlay').classList.remove('open');
+}
+
+document.getElementById('clanBtn').addEventListener('click', openClanPanel);
+document.getElementById('clanClose').addEventListener('click', closeClanPanel);
+document.getElementById('clanOverlay').addEventListener('click', closeClanPanel);
+
+// ── Табы ──
+document.querySelectorAll('.cp-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.cp-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    loadClanTab(tab.dataset.ct);
+  });
+});
+
+async function loadClanTab(tab) {
+  const clans = await clanLoadAll();
+  if (tab === 'all')  renderClanAll(clans);
+  if (tab === 'top')  renderClanTop(clans);
+  if (tab === 'my')   renderClanMy(clans);
+}
+
+// ── ВСЕ КЛАНЫ ──
+function renderClanAll(clans) {
+  const sec = document.getElementById('cpSecAll');
+  document.querySelectorAll('.cp-sec').forEach(s => s.classList.remove('active'));
+  sec.classList.add('active');
+  const myClan = getMyClan(clans);
+
+  let html = '';
+  if (!myClan) {
+    html += `<button class="clan-create-btn" id="btnCreateClan">⚔️ СОЗДАТЬ КЛАН — ${CLAN_CREATE_COST.toLocaleString()} 💰</button>`;
+  }
+
+  if (!clans.length) {
+    html += `<div class="cp-loading">Кланов пока нет — создай первый!</div>`;
+  } else {
+    clans.forEach(c => {
+      const isMyC = myClan && myClan.id === c.id;
+      const isMember = !!c.members.find(m => m.pid === _playerId);
+      const totalMass = c.members.reduce((s, m) => s + (m.bestScore || 0), 0);
+      const canJoin = !myClan && c.members.length < CLAN_MAX_MEMBERS;
+      html += `<div class="clan-card${isMyC ? ' my-clan' : ''}">
+        <div class="clan-tag-badge">[${c.tag}]</div>
+        <div class="clan-info">
+          <div class="clan-fullname">${c.name}</div>
+          <div class="clan-members">👥 ${c.members.length}/${CLAN_MAX_MEMBERS} участников</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+          <div class="clan-mass">${fmtMass(totalMass)}</div>
+          ${isMyC
+            ? `<span style="font-size:10px;color:#a29bfe;font-weight:900;">✓ МОЙ КЛАН</span>`
+            : canJoin
+              ? `<button class="clan-action-btn" onclick="joinClan('${c.id}')">ВСТУПИТЬ</button>`
+              : c.members.length >= CLAN_MAX_MEMBERS
+                ? `<span style="font-size:10px;color:rgba(255,255,255,0.3)">ПОЛНЫЙ</span>`
+                : `<span style="font-size:10px;color:rgba(255,255,255,0.3)">УЖЕ В КЛАНЕ</span>`
+          }
+        </div>
+      </div>`;
+    });
+  }
+  sec.innerHTML = html;
+  const btn = document.getElementById('btnCreateClan');
+  if (btn) btn.addEventListener('click', openCreateClan);
+}
+
+// ── ТОП КЛАНОВ ──
+function renderClanTop(clans) {
+  const sec = document.getElementById('cpSecTop');
+  document.querySelectorAll('.cp-sec').forEach(s => s.classList.remove('active'));
+  sec.classList.add('active');
+
+  const sorted = [...clans].map(c => ({
+    ...c,
+    totalMass: c.members.reduce((s, m) => s + (m.bestScore || 0), 0)
+  })).sort((a, b) => b.totalMass - a.totalMass);
+
+  if (!sorted.length) { sec.innerHTML = '<div class="cp-loading">Кланов пока нет</div>'; return; }
+
+  const topColors = ['#f9ca24', '#c0c0c0', '#cd7f32'];
+  sec.innerHTML = sorted.map((c, i) => {
+    const isMyC = myClanId === c.id;
+    return `<div class="clan-card${isMyC ? ' my-clan' : ''}">
+      <div class="clan-rank-num" style="color:${topColors[i] || 'rgba(255,255,255,0.25)'}">${i + 1}</div>
+      <div class="clan-tag-badge">[${c.tag}]</div>
+      <div class="clan-info">
+        <div class="clan-fullname">${c.name}</div>
+        <div class="clan-members">👥 ${c.members.length} участников</div>
+      </div>
+      <div class="clan-mass">${fmtMass(c.totalMass)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── МОЙ КЛАН ──
+function renderClanMy(clans) {
+  const sec = document.getElementById('cpSecMy');
+  document.querySelectorAll('.cp-sec').forEach(s => s.classList.remove('active'));
+  sec.classList.add('active');
+
+  const clan = getMyClan(clans);
+  if (!clan) {
+    sec.innerHTML = `<div class="cp-loading">Ты не в клане</div>
+      <button class="clan-create-btn" id="btnCreateClan2">⚔️ СОЗДАТЬ КЛАН — ${CLAN_CREATE_COST.toLocaleString()} 💰</button>`;
+    const btn2 = document.getElementById('btnCreateClan2');
+    if (btn2) btn2.addEventListener('click', () => { closeClanPanel(); openCreateClan(); });
+    return;
+  }
+
+  const myMember = getMyMember(clan);
+  const role = myMember?.role || 'member';
+  const isLeader = role === 'leader';
+  const isOfficer = role === 'officer' || isLeader;
+  const totalMass = clan.members.reduce((s, m) => s + (m.bestScore || 0), 0);
+  const playerName = document.getElementById('nameInput').value.trim() || 'Player';
+
+  let membersHtml = clan.members
+    .sort((a, b) => {
+      const rOrder = { leader: 0, officer: 1, member: 2 };
+      return (rOrder[a.role] || 2) - (rOrder[b.role] || 2);
+    })
+    .map(m => {
+      const isMe = m.pid === _playerId;
+      const roleLabel = { leader: 'ЛИДЕР', officer: 'ОФИЦЕР', member: 'УЧАСТНИК' }[m.role] || 'УЧАСТНИК';
+      const roleCls = { leader: 'role-leader', officer: 'role-officer', member: 'role-member' }[m.role] || 'role-member';
+      let actions = '';
+      if (isLeader && !isMe) {
+        actions += `<button class="clan-action-btn promote" title="Повысить/понизить" onclick="clanToggleRole('${clan.id}','${m.pid}')">▲▼</button>`;
+        actions += `<button class="clan-action-btn" title="Выгнать" onclick="clanKick('${clan.id}','${m.pid}')">✕</button>`;
+      }
+      return `<div class="clan-member-row">
+        <span class="clan-member-role ${roleCls}">${roleLabel}</span>
+        <span class="clan-member-name">${isMe ? '⭐ ' : ''}${m.name}</span>
+        <span class="clan-member-score">${fmtMass(m.bestScore || 0)}</span>
+        ${actions ? `<div class="clan-member-actions">${actions}</div>` : ''}
+      </div>`;
+    }).join('');
+
+  sec.innerHTML = `
+    <div class="clan-my-header">
+      <div class="clan-my-tag">[${clan.tag}]</div>
+      <div class="clan-my-name">${clan.name}</div>
+      <div class="clan-my-stats">
+        <div class="clan-stat-box"><div class="clan-stat-val">${fmtMass(totalMass)}</div><div class="clan-stat-lbl">МАССА</div></div>
+        <div class="clan-stat-box"><div class="clan-stat-val">${clan.members.length}/${CLAN_MAX_MEMBERS}</div><div class="clan-stat-lbl">УЧАСТНИКИ</div></div>
+        <div class="clan-stat-box"><div class="clan-stat-val">${roleLabel(role)}</div><div class="clan-stat-lbl">РОЛЬ</div></div>
+      </div>
+    </div>
+    <div style="font-size:11px;font-weight:800;color:rgba(168,230,192,0.5);letter-spacing:2px;margin:4px 0 6px;">УЧАСТНИКИ</div>
+    ${membersHtml}
+    <button class="acc-btn acc-btn-red" style="margin-top:10px;" onclick="leaveClan('${clan.id}')">
+      ${isLeader ? 'РАСПУСТИТЬ КЛАН' : 'ПОКИНУТЬ КЛАН'}
+    </button>
+  `;
+}
+
+function roleLabel(r) {
+  return { leader: 'ЛИДЕР', officer: 'ОФИЦЕР', member: 'УЧАСТНИК' }[r] || 'УЧАСТНИК';
+}
+
+function fmtMass(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n/1000).toFixed(1) + 'k';
+  return String(n);
+}
+
+// ── ВСТУПИТЬ В КЛАН ──
+async function joinClan(clanId) {
+  if (myClanId) { showToast('Сначала покинь текущий клан', '#ff6b6b'); return; }
+  const clans = await clanLoadAll();
+  const clan = clans.find(c => c.id === clanId);
+  if (!clan) { showToast('Клан не найден', '#ff6b6b'); return; }
+  if (clan.members.length >= CLAN_MAX_MEMBERS) { showToast('Клан переполнен!', '#ff6b6b'); return; }
+
+  const playerName = document.getElementById('nameInput').value.trim() || 'Player';
+  // Обновляем bestScore в других кланах если нужно
+  clan.members.push({ pid: _playerId, name: playerName, role: 'member', bestScore: 0, joined: Date.now() });
+  await clanSaveAll(clans);
+
+  myClanId = clanId; myClanRole = 'member';
+  localStorage.setItem('dvx_clan_id', clanId);
+  localStorage.setItem('dvx_clan_role', 'member');
+  updateClanBtn(clan);
+  showToast(`Вступил в клан [${clan.tag}]!`, '#a29bfe');
+  renderClanAll(clans);
+}
+
+// ── ПОКИНУТЬ / РАСПУСТИТЬ ──
+async function leaveClan(clanId) {
+  const clans = await clanLoadAll();
+  const idx = clans.findIndex(c => c.id === clanId);
+  if (idx < 0) return;
+  const clan = clans[idx];
+  const myMember = getMyMember(clan);
+
+  if (myMember?.role === 'leader') {
+    if (clan.members.length > 1) {
+      if (!confirm('Ты лидер! Назначь нового лидера или распусти клан. Распустить?')) return;
+    }
+    // Распустить — удаляем весь клан
+    clans.splice(idx, 1);
+  } else {
+    clan.members = clan.members.filter(m => m.pid !== _playerId);
+  }
+
+  await clanSaveAll(clans);
+  myClanId = null; myClanRole = null;
+  localStorage.removeItem('dvx_clan_id');
+  localStorage.removeItem('dvx_clan_role');
+  updateClanBtn(null);
+  showToast('Ты покинул клан', '#a29bfe');
+  renderClanMy(clans);
+}
+
+// ── ВЫГНАТЬ ──
+async function clanKick(clanId, targetPid) {
+  if (!confirm('Выгнать участника?')) return;
+  const clans = await clanLoadAll();
+  const clan = clans.find(c => c.id === clanId);
+  if (!clan) return;
+  clan.members = clan.members.filter(m => m.pid !== targetPid);
+  await clanSaveAll(clans);
+  showToast('Участник выгнан', '#f9ca24');
+  renderClanMy(clans);
+}
+
+// ── ПОВЫСИТЬ / ПОНИЗИТЬ ──
+async function clanToggleRole(clanId, targetPid) {
+  const clans = await clanLoadAll();
+  const clan = clans.find(c => c.id === clanId);
+  if (!clan) return;
+  const member = clan.members.find(m => m.pid === targetPid);
+  if (!member) return;
+  member.role = member.role === 'officer' ? 'member' : 'officer';
+  await clanSaveAll(clans);
+  showToast(member.role === 'officer' ? `${member.name} повышен до офицера` : `${member.name} понижен`, '#a29bfe');
+  renderClanMy(clans);
+}
+
+// ── СОЗДАТЬ КЛАН ──
+function openCreateClan() {
+  document.getElementById('clanEditPanel').classList.add('open');
+  document.getElementById('clanEditOverlay').classList.add('open');
+  document.getElementById('clanEditTitle').textContent = '⚔️ СОЗДАТЬ КЛАН';
+  document.getElementById('clanEditSave').textContent = `СОЗДАТЬ ЗА ${CLAN_CREATE_COST.toLocaleString()} 💰`;
+  document.getElementById('clanFullName').value = '';
+  document.getElementById('clanShortName').value = '';
+  document.getElementById('clanEditError').textContent = '';
+}
+
+function closeCreateClan() {
+  document.getElementById('clanEditPanel').classList.remove('open');
+  document.getElementById('clanEditOverlay').classList.remove('open');
+}
+
+document.getElementById('clanEditClose').addEventListener('click', closeCreateClan);
+document.getElementById('clanEditOverlay').addEventListener('click', closeCreateClan);
+
+document.getElementById('clanShortName').addEventListener('input', function() {
+  this.value = this.value.toUpperCase().replace(/[^A-ZА-ЯЁ0-9]/g, '').slice(0, 4);
+});
+
+document.getElementById('clanEditSave').addEventListener('click', async () => {
+  const fullName = document.getElementById('clanFullName').value.trim();
+  const tag = document.getElementById('clanShortName').value.trim().toUpperCase();
+  const errEl = document.getElementById('clanEditError');
+
+  if (!fullName || fullName.length < 2) { errEl.textContent = 'Введи название клана (мин. 2 символа)'; return; }
+  if (!tag || tag.length < 2) { errEl.textContent = 'Введи сокращение (2–4 символа)'; return; }
+  if (essence < CLAN_CREATE_COST) { errEl.textContent = `Нужно ${CLAN_CREATE_COST} монет! У тебя ${essence}`; return; }
+  if (myClanId) { errEl.textContent = 'Сначала покинь текущий клан'; return; }
+
+  const btn = document.getElementById('clanEditSave');
+  btn.textContent = '...'; btn.disabled = true;
+
+  try {
+    const clans = await clanLoadAll();
+    // Проверка уникальности тега
+    if (clans.find(c => c.tag === tag)) { errEl.textContent = `Тег [${tag}] уже занят`; btn.textContent = `СОЗДАТЬ ЗА ${CLAN_CREATE_COST.toLocaleString()} 💰`; btn.disabled = false; return; }
+
+    const playerName = document.getElementById('nameInput').value.trim() || 'Player';
+    const newClan = {
+      id: 'clan_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+      name: fullName, tag,
+      created: Date.now(),
+      members: [{ pid: _playerId, name: playerName, role: 'leader', bestScore: 0, joined: Date.now() }]
+    };
+    clans.push(newClan);
+    await clanSaveAll(clans);
+
+    essence -= CLAN_CREATE_COST; syncEss();
+    myClanId = newClan.id; myClanRole = 'leader';
+    localStorage.setItem('dvx_clan_id', newClan.id);
+    localStorage.setItem('dvx_clan_role', 'leader');
+    updateClanBtn(newClan);
+    closeCreateClan();
+    showToast(`Клан [${tag}] создан!`, '#a29bfe');
+    // Переключить на "Мой клан"
+    document.querySelectorAll('.cp-tab').forEach(t => { t.classList.toggle('active', t.dataset.ct === 'my'); });
+    openClanPanel();
+    renderClanMy(clans);
+  } catch(e) {
+    errEl.textContent = 'Ошибка сервера, попробуй позже';
+  }
+  btn.textContent = `СОЗДАТЬ ЗА ${CLAN_CREATE_COST.toLocaleString()} 💰`; btn.disabled = false;
+});
+
+// ── Нарисовать скрещённые мечи на кнопке (стиль ⚔️) ──
+function drawClanShield(tag) {
+  const cv = document.getElementById('clanShieldCanvas');
+  if (!cv) return;
+  const c = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  c.clearRect(0, 0, W, H);
+  const cx = W / 2, cy = H / 2;
+  const hasClan = !!tag;
+
+  // Glow when in clan
+  if (hasClan) {
+    const glow = c.createRadialGradient(cx, cy, 3, cx, cy, 21);
+    glow.addColorStop(0, 'rgba(162,155,254,0.4)');
+    glow.addColorStop(1, 'rgba(162,155,254,0)');
+    c.fillStyle = glow;
+    c.beginPath(); c.arc(cx, cy, 21, 0, Math.PI * 2); c.fill();
+  }
+
+  const col = hasClan ? '#c8c4ff' : 'rgba(255,255,255,0.75)';
+  const col2 = hasClan ? '#a29bfe' : 'rgba(255,255,255,0.45)';
+  const gold = hasClan ? '#f9ca24' : 'rgba(255,210,80,0.7)';
+
+  // Draw one sword: tip at (tx,ty), pommel at (px,py)
+  function sword(tx, ty, px2, py2) {
+    const dx = px2 - tx, dy = py2 - ty;
+    const len = Math.sqrt(dx*dx + dy*dy);
+    const ux = dx/len, uy = dy/len; // unit along blade
+    const nx = -uy, ny = ux;        // normal (perpendicular)
+
+    // ── Blade ──
+    // Blade: wide at 30% from pommel, tapers to tip
+    const b0x = tx, b0y = ty;                           // tip
+    const b1x = tx + ux*len*0.72 + nx*1.2, b1y = ty + uy*len*0.72 + ny*1.2;
+    const b2x = tx + ux*len*0.72 - nx*1.2, b2y = ty + uy*len*0.72 - ny*1.2;
+    const b3x = tx + ux*len*0.3  + nx*2.2, b3y = ty + uy*len*0.3  + ny*2.2;
+    const b4x = tx + ux*len*0.3  - nx*2.2, b4y = ty + uy*len*0.3  - ny*2.2;
+    const b5x = tx + ux*len*0.28 + nx*2.4, b5y = ty + uy*len*0.28 + ny*2.4;
+    const b6x = tx + ux*len*0.28 - nx*2.4, b6y = ty + uy*len*0.28 - ny*2.4;
+
+    const bladeGrad = c.createLinearGradient(tx, ty, tx+ux*len*0.72, ty+uy*len*0.72);
+    bladeGrad.addColorStop(0, col);
+    bladeGrad.addColorStop(1, col2);
+    c.fillStyle = bladeGrad;
+    c.beginPath();
+    c.moveTo(b0x, b0y);
+    c.lineTo(b1x, b1y); c.lineTo(b3x, b3y); c.lineTo(b5x, b5y);
+    c.lineTo(b6x, b6y); c.lineTo(b4x, b4y); c.lineTo(b2x, b2y);
+    c.closePath(); c.fill();
+
+    // Blade shine
+    c.strokeStyle = 'rgba(255,255,255,0.5)';
+    c.lineWidth = 0.7; c.lineCap = 'round';
+    c.beginPath();
+    c.moveTo(tx + nx*0.5, ty + ny*0.5);
+    c.lineTo(tx + ux*len*0.65 + nx*0.5, ty + uy*len*0.65 + ny*0.5);
+    c.stroke();
+
+    // ── Guard (crossguard) at ~28% from tip ──
+    const gp = 0.3;
+    const gcx = tx + ux*len*gp, gcy = ty + uy*len*gp;
+    c.strokeStyle = gold;
+    c.lineWidth = 2.2; c.lineCap = 'round';
+    c.beginPath();
+    c.moveTo(gcx + nx*6.5, gcy + ny*6.5);
+    c.lineTo(gcx - nx*6.5, gcy - ny*6.5);
+    c.stroke();
+    // Guard tips
+    c.fillStyle = gold;
+    c.beginPath(); c.arc(gcx + nx*6.5, gcy + ny*6.5, 1.5, 0, Math.PI*2); c.fill();
+    c.beginPath(); c.arc(gcx - nx*6.5, gcy - ny*6.5, 1.5, 0, Math.PI*2); c.fill();
+
+    // ── Handle ──
+    const h0x = tx + ux*len*0.3, h0y = ty + uy*len*0.3;
+    const h1x = tx + ux*len*0.28, h1y = ty + uy*len*0.28; // just past guard
+
+    c.strokeStyle = hasClan ? '#8b5e3c' : 'rgba(160,100,50,0.8)';
+    c.lineWidth = 3; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(h1x, h1y); c.lineTo(px2 - ux*3, py2 - uy*3); c.stroke();
+
+    // Grip wrap lines
+    c.strokeStyle = hasClan ? 'rgba(249,202,36,0.55)' : 'rgba(255,210,80,0.4)';
+    c.lineWidth = 1;
+    for (let i = 1; i <= 4; i++) {
+      const tt = i / 5;
+      const wx = h1x + (px2 - h1x)*tt, wy = h1y + (py2 - h1y)*tt;
+      c.beginPath();
+      c.moveTo(wx + nx*2.2, wy + ny*2.2);
+      c.lineTo(wx - nx*2.2, wy - ny*2.2);
+      c.stroke();
+    }
+
+    // ── Pommel ──
+    c.fillStyle = gold;
+    c.beginPath(); c.arc(px2, py2, 3.2, 0, Math.PI*2); c.fill();
+    c.strokeStyle = hasClan ? '#c9a007' : 'rgba(180,140,20,0.7)';
+    c.lineWidth = 0.8;
+    c.beginPath(); c.arc(px2, py2, 3.2, 0, Math.PI*2); c.stroke();
+    // Pommel shine
+    c.fillStyle = 'rgba(255,255,255,0.5)';
+    c.beginPath(); c.arc(px2 - ux*1 + nx*1, py2 - uy*1 + ny*1, 1, 0, Math.PI*2); c.fill();
+  }
+
+  // Sword 1: tip top-left, pommel bottom-right
+  sword(cx - 13, cy - 13, cx + 13, cy + 13);
+  // Sword 2: tip top-right, pommel bottom-left
+  sword(cx + 13, cy - 13, cx - 13, cy + 13);
+
+  // Center gem where blades cross
+  c.fillStyle = hasClan ? '#6c5ce7' : 'rgba(100,80,200,0.4)';
+  c.beginPath(); c.arc(cx, cy, 3, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'rgba(255,255,255,0.7)';
+  c.beginPath(); c.arc(cx - 1, cy - 1, 1, 0, Math.PI*2); c.fill();
+
+  // Clan tag above if in clan
+  if (hasClan && tag) {
+    c.fillStyle = 'rgba(200,196,255,0.95)';
+    c.font = '700 7px Fredoka One, cursive';
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillText('[' + tag + ']', cx, 5);
+  }
+}
+
+// ── Обновить кнопку клана ──
+function updateClanBtn(clan) {
+  drawClanShield(clan ? clan.tag : null);
+  // Подсветка кнопки если в клане
+  const btn = document.getElementById('clanBtn');
+  if (btn) {
+    btn.style.borderColor = clan ? 'rgba(162,155,254,0.85)' : 'rgba(162,155,254,0.5)';
+    btn.style.boxShadow = clan ? '0 0 16px rgba(162,155,254,0.3)' : '';
+  }
+}
+
+// ── Обновить bestScore в клане после игры ──
+async function clanUpdateScore(score) {
+  if (!myClanId || !score) return;
+  try {
+    const clans = await clanLoadAll();
+    const clan = clans.find(c => c.id === myClanId);
+    if (!clan) return;
+    const member = clan.members.find(m => m.pid === _playerId);
+    if (!member) return;
+    if (score > (member.bestScore || 0)) {
+      member.bestScore = score;
+      const playerName = document.getElementById('nameInput').value.trim() || 'Player';
+      member.name = playerName;
+      await clanSaveAll(clans);
+    }
+  } catch(e) {}
+}
+
+// ── Инициализация ──
+(async function initClan() {
+  if (!myClanId) return;
+  try {
+    const clans = await clanLoadAll();
+    const clan = getMyClan(clans);
+    if (clan) {
+      updateClanBtn(clan);
+      // Синхронизируем роль
+      const member = getMyMember(clan);
+      if (member) { myClanRole = member.role; localStorage.setItem('dvx_clan_role', member.role); }
+      else {
+        // Нас выгнали
+        myClanId = null; myClanRole = null;
+        localStorage.removeItem('dvx_clan_id'); localStorage.removeItem('dvx_clan_role');
+      }
+    } else {
+      myClanId = null; localStorage.removeItem('dvx_clan_id');
+    }
+  } catch(e) {}
+})();
 
 function showToast(msg,color='#fff'){const w=document.getElementById('toastWrap'),tt=document.createElement('div');tt.className='toast';tt.textContent=msg;tt.style.borderColor=color;tt.style.color=color;w.appendChild(tt);setTimeout(()=>tt.remove(),2300);}
 </script>
