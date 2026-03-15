@@ -423,6 +423,46 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
 #bestMassWidget .bm-label { font-size: 10px; font-weight: 800; color: rgba(249,202,36,0.7); letter-spacing: 1.5px; text-transform: uppercase; }
 #bestMassWidget .bm-name { font-family: 'Fredoka One', cursive; font-size: 13px; color: #fff; }
 #bestMassWidget .bm-score { font-family: 'Fredoka One', cursive; font-size: 22px; color: #f9ca24; line-height: 1; }
+/* ══════ CLAN BATTLE ══════ */
+.cb-battle-btn {
+  width:100%; border:none; border-radius:14px; padding:13px;
+  background:linear-gradient(135deg,#ff6b6b,#ee5a24);
+  color:#fff; font-family:'Fredoka One',cursive; font-size:18px;
+  letter-spacing:2px; cursor:pointer; margin-top:10px;
+  box-shadow:0 4px 0 #a93226; transition:transform .1s;
+}
+.cb-battle-btn:hover { transform:translateY(-2px); }
+.cb-battle-btn:active { transform:translateY(2px); }
+.cb-battle-btn.waiting {
+  background:linear-gradient(135deg,#f9ca24,#e67e22);
+  box-shadow:0 4px 0 #9a6000;
+}
+.cb-hud {
+  position:fixed; top:60px; left:50%; transform:translateX(-50%);
+  background:rgba(0,0,0,0.75); backdrop-filter:blur(10px);
+  border:1px solid rgba(255,100,100,0.4); border-radius:18px;
+  padding:10px 20px; z-index:300; display:none;
+  flex-direction:column; align-items:center; gap:4px; min-width:260px;
+}
+.cb-hud.active { display:flex; }
+.cb-hud-title { font-family:'Fredoka One',cursive; font-size:13px; color:rgba(255,150,150,0.8); letter-spacing:2px; }
+.cb-hud-scores { display:flex; align-items:center; gap:14px; }
+.cb-clan-score { display:flex; flex-direction:column; align-items:center; }
+.cb-clan-name { font-family:'Nunito',sans-serif; font-weight:800; font-size:11px; }
+.cb-clan-val { font-family:'Fredoka One',cursive; font-size:22px; }
+.cb-vs { font-family:'Fredoka One',cursive; font-size:16px; color:rgba(255,255,255,0.4); }
+.cb-timer { font-family:'Fredoka One',cursive; font-size:12px; color:rgba(255,255,255,0.5); }
+#cbResultScreen {
+  position:fixed; inset:0; background:rgba(0,0,0,0.88); backdrop-filter:blur(12px);
+  z-index:9000; display:none; flex-direction:column; align-items:center;
+  justify-content:center; text-align:center;
+}
+#cbResultScreen.active { display:flex; }
+.cb-result-emoji { font-size:80px; margin-bottom:10px; }
+.cb-result-title { font-family:'Fredoka One',cursive; font-size:42px; margin-bottom:6px; }
+.cb-result-sub { font-family:'Nunito',sans-serif; font-weight:800; font-size:16px; color:rgba(255,255,255,0.6); margin-bottom:24px; }
+.cb-result-reward { font-family:'Fredoka One',cursive; font-size:22px; color:#f9ca24; margin-bottom:28px; }
+
 /* ══════ CLAN BUTTON ══════ */
 #clanBtn {
   position: fixed; bottom: 130px; right: 16px; z-index: 200;
@@ -838,6 +878,32 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
 </div>
 
 <canvas id="gameCanvas"></canvas>
+
+<!-- Clan Battle HUD -->
+<div class="cb-hud" id="cbHud">
+  <div class="cb-hud-title">⚔️ КЛАНОВАЯ БИТВА</div>
+  <div class="cb-hud-scores">
+    <div class="cb-clan-score">
+      <div class="cb-clan-name" id="cbHudName1">—</div>
+      <div class="cb-clan-val" id="cbHudScore1" style="color:#ff6b6b">0</div>
+    </div>
+    <div class="cb-vs">VS</div>
+    <div class="cb-clan-score">
+      <div class="cb-clan-name" id="cbHudName2">—</div>
+      <div class="cb-clan-val" id="cbHudScore2" style="color:#74b9ff">0</div>
+    </div>
+  </div>
+  <div class="cb-timer" id="cbHudTimer">⏱ --:--</div>
+</div>
+
+<!-- Clan Battle Result -->
+<div id="cbResultScreen">
+  <div class="cb-result-emoji" id="cbResultEmoji">🏆</div>
+  <div class="cb-result-title" id="cbResultTitle">ПОБЕДА!</div>
+  <div class="cb-result-sub" id="cbResultSub"></div>
+  <div class="cb-result-reward" id="cbResultReward"></div>
+  <button class="acc-btn acc-btn-green" style="width:220px;font-size:18px;" onclick="cbCloseResult()">В МЕНЮ</button>
+</div>
 <canvas id="fxCanvas" style="position:fixed;inset:0;pointer-events:none;z-index:99998;"></canvas>
 <canvas id="irisCanvas" style="position:fixed;inset:0;pointer-events:none;z-index:99999;"></canvas>
 
@@ -1391,7 +1457,7 @@ let _connectTimeout=null,_loadInterval=null;
 function connectWS(){if(wsConnecting)return;wsConnecting=true;gameMode='online';serverWorld=null;_prevWorld=null;if(ws){try{ws.close();}catch(e){}ws=null;}showLoading(t('connecting'));let loadPct=0;_loadInterval=setInterval(()=>{loadPct=Math.min(loadPct+3,85);document.getElementById('loadBarFill').style.width=loadPct+'%';},100);ws=new WebSocket(SERVER);_connectTimeout=setTimeout(()=>{if(!running){clearInterval(_loadInterval);wsConnecting=false;if(ws){try{ws.close();}catch(e){}ws=null;}setLoadStatus(t('no_server'),100);document.getElementById('loadBarFill').style.background='#e74c3c';setTimeout(()=>showMenu(),3000);}},8000);ws.onopen=()=>{clearInterval(_loadInterval);document.getElementById('loadBarFill').style.width='92%';setLoadStatus(t('auth'));const name=document.getElementById('nameInput').value.trim()||'Player';ws.send(JSON.stringify({type:'join',name,skinId:selSkin,skinColor:SKINS_DATA[selSkin].b[0]}));};ws.onmessage=(e)=>{try{const msg=JSON.parse(e.data);if(msg.type==='joined'){clearTimeout(_connectTimeout);wsConnecting=false;document.getElementById('loadBarFill').style.width='100%';setLoadStatus(t('ready'));if(msg.playerCount){document.getElementById('onlineNum').textContent=msg.playerCount;}pname=document.getElementById('nameInput').value.trim()||'Player';player={segs:[{x:msg.spawnX||WORLD/2,y:msg.spawnY||WORLD/2}],tAngle:0,angle:0,score:MIN_LEN,boosting:false,alive:true};camX=(msg.spawnX||WORLD/2)-W/2;camY=(msg.spawnY||WORLD/2)-H/2;playIrisOpen(()=>{document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});document.getElementById('gearBtn').style.display='none';document.getElementById('hud').style.display='block';document.getElementById('xpBarWrap').style.display='none';document.getElementById('bestMassWidget').style.display='none';document.getElementById('achBtn').style.display='none';document.getElementById('achPanel').classList.remove('open');achOpen=false;autopilotMode=false;document.getElementById('apBtn').classList.remove('active');running=true;surviveTimer=0;lastSurviveTick=performance.now();_xpFoodCounter=0;_prevScore=MIN_LEN;_foodCoinCounter=0;if(isMobile())showJoystick(true);},null);}if(msg.type==='world'){_prevWorld=serverWorld?{players:serverWorld.players,_segsMap:buildSegsMap(serverWorld)}:null;_worldRecvTime=performance.now();serverWorld=msg;if(msg.playerCount){document.getElementById('onlineNum').textContent=msg.playerCount;}if(serverWorld.players){const me=serverWorld.players.find(p=>p.isMe);if(me&&me.segs&&me.segs.length>0){const sh=me.segs[0];camX+=(sh.x-W/2-camX)*0.08;camY+=(sh.y-H/2-camY)*0.08;if(player){const gained=me.score-(player.score||MIN_LEN);if(gained>0){trackQuest('eat_food',gained);_xpFoodCounter+=gained;const xg=Math.floor(_xpFoodCounter/5);if(xg>0){_xpFoodCounter-=xg*5;addXP(xg);}}player.segs=me.segs;player.score=me.score||player.score;_prevScore=me.score;}}}}if(msg.type==='dead'){clearTimeout(_connectTimeout);const score=msg.score||0;document.getElementById('deathScore').textContent=t('mass')+': '+score;
 const causeEl=document.getElementById('deathCauseMsg');
 if(causeEl){const c=msg.deathCause;if(c==='wall')causeEl.textContent='🧱 Вы врезались в край карты';else if(c&&c.killerName)causeEl.textContent='💀 Вас подбил '+c.killerName;else causeEl.textContent='';}
-jbSaveScore(pname,score);clanUpdateScore(score);document.getElementById('hud').style.display='none';running=false;switchScreen('deathScreen',()=>{renderRecords(score);trackQuest('reach_mass',score);});}if(msg.type==='kill_reward'){essence=Math.min(9999999,essence+msg.coins);syncEss();showToast('💀 +'+msg.coins+' '+t('kill_reward'),'#ff6b6b');}if(msg.type==='coin_reward'){essence=Math.min(9999999,essence+msg.coins);syncEss();}}catch(err){console.warn('WS msg error',err);}};ws.onerror=()=>{clearTimeout(_connectTimeout);clearInterval(_loadInterval);wsConnecting=false;setLoadStatus(t('conn_err'),100);document.getElementById('loadBarFill').style.background='#e74c3c';setTimeout(()=>showMenu(),3000);};ws.onclose=()=>{wsConnecting=false;ws=null;serverWorld=null;_prevWorld=null;if(running&&gameMode==='online'){running=false;document.getElementById('hud').style.display='none';showMenu();}};}
+jbSaveScore(pname,score);clanUpdateScore(score);cbAddScore(score);document.getElementById('hud').style.display='none';running=false;switchScreen('deathScreen',()=>{renderRecords(score);trackQuest('reach_mass',score);});}if(msg.type==='kill_reward'){essence=Math.min(9999999,essence+msg.coins);syncEss();showToast('💀 +'+msg.coins+' '+t('kill_reward'),'#ff6b6b');}if(msg.type==='coin_reward'){essence=Math.min(9999999,essence+msg.coins);syncEss();}}catch(err){console.warn('WS msg error',err);}};ws.onerror=()=>{clearTimeout(_connectTimeout);clearInterval(_loadInterval);wsConnecting=false;setLoadStatus(t('conn_err'),100);document.getElementById('loadBarFill').style.background='#e74c3c';setTimeout(()=>showMenu(),3000);};ws.onclose=()=>{wsConnecting=false;ws=null;serverWorld=null;_prevWorld=null;if(running&&gameMode==='online'){running=false;document.getElementById('hud').style.display='none';showMenu();}};}
 
 // ══════ INPUT ══════
 let mx=400,my=300;
@@ -2097,6 +2163,7 @@ function renderClanMy(clans) {
     <button class="acc-btn acc-btn-red" style="margin-top:10px;" onclick="leaveClan('${clan.id}')">
       ${isLeader ? 'РАСПУСТИТЬ КЛАН' : 'ПОКИНУТЬ КЛАН'}
     </button>
+    <button class="cb-battle-btn" id="cbJoinBtn" onclick="cbJoinOrCancel()">⚔️ КЛАНОВАЯ БИТВА</button>
   `;
 }
 
@@ -2544,6 +2611,218 @@ async function loadClanChatTab() {
 }
 
 function showToast(msg,color='#fff'){const w=document.getElementById('toastWrap'),tt=document.createElement('div');tt.className='toast';tt.textContent=msg;tt.style.borderColor=color;tt.style.color=color;w.appendChild(tt);setTimeout(()=>tt.remove(),2300);}
+
+// ══════════════════════════════════════════════
+// ⚔️  КЛАНОВАЯ БИТВА
+// ══════════════════════════════════════════════
+const CB_BIN_ID   = '69b5ba00c3097a1dd525dce8'; // отдельный бин для битвы
+const CB_DURATION = 60 * 60 * 1000; // 1 час в мс
+
+let _cbState      = null;  // текущий объект битвы
+let _cbMySlot     = null;  // 'clan1' | 'clan2'
+let _cbTimerInt   = null;  // интервал обновления HUD
+let _cbPollInt    = null;  // интервал поллинга JSONBin
+let _cbActive     = false; // участвуем ли мы сейчас
+
+// Загрузить состояние битвы из JSONBin
+async function cbLoad() {
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${CB_BIN_ID}/latest`, {
+      headers: { 'X-Master-Key': JB_KEY }
+    });
+    const data = await res.json();
+    return data.record || { battle: null };
+  } catch(e) { return { battle: null }; }
+}
+
+async function cbSave(obj) {
+  try {
+    await fetch(`https://api.jsonbin.io/v3/b/${CB_BIN_ID}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': JB_KEY },
+      body: JSON.stringify(obj)
+    });
+  } catch(e) {}
+}
+
+// Нажатие кнопки — войти или отменить поиск
+async function cbJoinOrCancel() {
+  const clans = await clanLoadAll();
+  const clan  = getMyClan(clans);
+  if (!clan) { showToast('Ты не в клане!', '#ff6b6b'); return; }
+
+  const btn = document.getElementById('cbJoinBtn');
+  if (btn) btn.disabled = true;
+
+  const rec = await cbLoad();
+  let battle = rec.battle;
+
+  // Уже в ожидании — отменяем
+  if (battle && battle.status === 'waiting' && battle.clan1.id === clan.id) {
+    await cbSave({ battle: null });
+    if (btn) { btn.disabled = false; btn.textContent = '⚔️ КЛАНОВАЯ БИТВА'; btn.classList.remove('waiting'); }
+    showToast('Поиск битвы отменён', '#f9ca24');
+    return;
+  }
+
+  // Уже идёт битва с нашим кланом — переподключаемся
+  if (battle && battle.status === 'active') {
+    if (battle.clan1.id === clan.id) { _cbMySlot = 'clan1'; cbAttach(battle); return; }
+    if (battle.clan2 && battle.clan2.id === clan.id) { _cbMySlot = 'clan2'; cbAttach(battle); return; }
+  }
+
+  // Есть ожидающая битва от другого клана — присоединяемся
+  if (battle && battle.status === 'waiting' && battle.clan1.id !== clan.id) {
+    battle.clan2 = { id: clan.id, tag: clan.tag, name: clan.name, color: '#74b9ff', score: 0 };
+    battle.status = 'active';
+    battle.startedAt = Date.now();
+    _cbMySlot = 'clan2';
+    await cbSave({ battle });
+    cbAttach(battle);
+    if (btn) btn.disabled = false;
+    return;
+  }
+
+  // Создаём новую битву — ждём соперника
+  const clanColor = '#ff6b6b';
+  battle = {
+    status: 'waiting',
+    clan1: { id: clan.id, tag: clan.tag, name: clan.name, color: clanColor, score: 0 },
+    clan2: null,
+    startedAt: null,
+    createdAt: Date.now()
+  };
+  _cbMySlot = 'clan1';
+  await cbSave({ battle });
+  if (btn) { btn.disabled = false; btn.textContent = '⏳ ИЩЕМ СОПЕРНИКА... (отмена)'; btn.classList.add('waiting'); }
+  showToast('Ищем соперника...', '#f9ca24');
+
+  // Поллим пока не найдём соперника
+  _cbPollInt = setInterval(async () => {
+    const r = await cbLoad();
+    const b = r.battle;
+    if (!b) { clearInterval(_cbPollInt); _cbPollInt = null; if (btn) { btn.textContent = '⚔️ КЛАНОВАЯ БИТВА'; btn.classList.remove('waiting'); btn.disabled = false; } return; }
+    if (b.status === 'active' && b.clan2) {
+      clearInterval(_cbPollInt); _cbPollInt = null;
+      _cbState = b;
+      cbAttach(b);
+      if (btn) { btn.textContent = '⚔️ КЛАНОВАЯ БИТВА'; btn.classList.remove('waiting'); btn.disabled = false; }
+    }
+  }, 4000);
+}
+
+// Подключиться к активной битве
+function cbAttach(battle) {
+  _cbState  = battle;
+  _cbActive = true;
+  closeClanPanel();
+  showToast('⚔️ КЛАНОВАЯ БИТВА НАЧАЛАСЬ!', '#ff6b6b');
+  cbUpdateHud();
+  document.getElementById('cbHud').classList.add('active');
+
+  // Обновляем HUD каждую секунду
+  if (_cbTimerInt) clearInterval(_cbTimerInt);
+  _cbTimerInt = setInterval(async () => {
+    await cbTick();
+  }, 5000);
+  cbTick();
+}
+
+// Тик: обновляем состояние из JSONBin и проверяем конец
+async function cbTick() {
+  if (!_cbActive) return;
+  const rec = await cbLoad();
+  const b   = rec.battle;
+  if (!b || b.status !== 'active') { cbDetach(); return; }
+  _cbState = b;
+  cbUpdateHud();
+  // Проверяем конец
+  if (Date.now() - b.startedAt >= CB_DURATION) {
+    await cbFinish(b);
+  }
+}
+
+// Обновить HUD
+function cbUpdateHud() {
+  const b = _cbState; if (!b) return;
+  document.getElementById('cbHudName1').textContent = '[' + b.clan1.tag + ']';
+  document.getElementById('cbHudScore1').textContent = fmtMass(b.clan1.score || 0);
+  document.getElementById('cbHudScore1').style.color = b.clan1.color || '#ff6b6b';
+  document.getElementById('cbHudName2').textContent = b.clan2 ? '[' + b.clan2.tag + ']' : '???';
+  document.getElementById('cbHudScore2').textContent = b.clan2 ? fmtMass(b.clan2.score || 0) : '0';
+  document.getElementById('cbHudScore2').style.color = (b.clan2 && b.clan2.color) || '#74b9ff';
+  if (b.startedAt) {
+    const left = Math.max(0, CB_DURATION - (Date.now() - b.startedAt));
+    const m = Math.floor(left / 60000), s = Math.floor((left % 60000) / 1000);
+    document.getElementById('cbHudTimer').textContent = `⏱ ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  } else {
+    document.getElementById('cbHudTimer').textContent = '⏳ Ждём соперника...';
+  }
+}
+
+// Когда игрок умирает в онлайн-режиме — добавляем массу к счёту клана
+async function cbAddScore(score) {
+  if (!_cbActive || !_cbState || !_cbMySlot) return;
+  const rec = await cbLoad();
+  const b   = rec.battle;
+  if (!b || b.status !== 'active') return;
+  b[_cbMySlot].score = (b[_cbMySlot].score || 0) + score;
+  await cbSave({ battle: b });
+  _cbState = b;
+  cbUpdateHud();
+}
+
+// Завершение битвы
+async function cbFinish(b) {
+  if (!_cbActive) return;
+  _cbActive = false;
+  clearInterval(_cbTimerInt); _cbTimerInt = null;
+  b.status = 'finished';
+  await cbSave({ battle: null }); // очищаем для следующей битвы
+
+  const s1 = b.clan1.score || 0, s2 = (b.clan2 && b.clan2.score) || 0;
+  const mySlot = _cbMySlot;
+  const myScore = mySlot === 'clan1' ? s1 : s2;
+  const oppScore = mySlot === 'clan1' ? s2 : s1;
+  const won = myScore > oppScore;
+  const draw = myScore === oppScore;
+
+  document.getElementById('cbHud').classList.remove('active');
+  const rs = document.getElementById('cbResultScreen');
+  document.getElementById('cbResultEmoji').textContent = draw ? '🤝' : won ? '🏆' : '💀';
+  document.getElementById('cbResultTitle').textContent = draw ? 'НИЧЬЯ!' : won ? 'ПОБЕДА!' : 'ПОРАЖЕНИЕ';
+  document.getElementById('cbResultSub').textContent =
+    `[${b.clan1.tag}] ${fmtMass(s1)} vs [${b.clan2 ? b.clan2.tag : '?'}] ${fmtMass(s2)}`;
+
+  if (won) {
+    document.getElementById('cbResultTitle').style.color = '#f9ca24';
+    document.getElementById('cbResultReward').textContent = '+1500 💰  +2000 ⭐ XP';
+    essence = Math.min(9999999, essence + 1500); syncEss();
+    addXP(2000);
+    showToast('🏆 +1500 монет +2000 XP за победу!', '#f9ca24');
+  } else if (draw) {
+    document.getElementById('cbResultTitle').style.color = '#74b9ff';
+    document.getElementById('cbResultReward').textContent = '';
+  } else {
+    document.getElementById('cbResultTitle').style.color = '#ff6b6b';
+    document.getElementById('cbResultReward').textContent = '';
+  }
+  rs.classList.add('active');
+}
+
+function cbDetach() {
+  _cbActive = false;
+  clearInterval(_cbTimerInt); _cbTimerInt = null;
+  clearInterval(_cbPollInt); _cbPollInt = null;
+  document.getElementById('cbHud').classList.remove('active');
+}
+
+function cbCloseResult() {
+  document.getElementById('cbResultScreen').classList.remove('active');
+  _cbState = null; _cbMySlot = null;
+  showMenu();
+}
+
 </script>
 </body>
 </html>
