@@ -1296,7 +1296,44 @@ function offlineCheckCollisions(){const alive=[offlineState.player,...offlineSta
 
 function offlineRespawnBots(){for(let i=0;i<offlineState.bots.length;i++){if(!offlineState.bots[i].alive){const name=BOT_NAMES[Math.floor(Math.random()*BOT_NAMES.length)];offlineState.bots[i]=mkBot(name,Math.floor(Math.random()*3));}}}
 
-function offlineTick(){if(!running||gameMode!=='offline'||!offlineState)return;const me=offlineState.player;if(!me.alive){if(!me._deathHandled){me._deathHandled=true;clearInterval(offlineTickInterval);offlineTickInterval=null;running=false;const score=me.score||0;document.getElementById('deathScore').textContent=t('mass')+': '+score;jbSaveScore(pname,score);clanUpdateScore(score);document.getElementById('hud').style.display='none';switchScreen('deathScreen',()=>{renderRecords(score);trackAch('mass',score);trackAch('survive',surviveTimer);});}return;}if(!autopilotMode){me.tAngle=Math.atan2(my-H/2,mx-W/2);me.boosting=boosting&&me.score>MIN_LEN;}else{const h=me.segs[0];let best=Infinity,tgt=null;for(const f of offlineState.foods){const dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;if(d<best){best=d;tgt=f;}}if(tgt)me.tAngle=Math.atan2(tgt.y-h.y,tgt.x-h.x);me.boosting=false;}if(me.boosting&&me.length>MIN_LEN&&Math.random()<0.05){me.length=Math.max(MIN_LEN,me.length-1);me.score=Math.max(MIN_LEN,me.score-1);}offlineUpdateSnake(me,0.18);offlineEatFood(me);if(me.segs.length>0){camX+=(me.segs[0].x-W/2-camX)*0.12;camY+=(me.segs[0].y-H/2-camY)*0.12;}const now=performance.now();if(now-lastSurviveTick>=1000){surviveTimer++;lastSurviveTick=now;trackQuest('survive_time',1);}for(const bot of offlineState.bots){if(!bot.alive)continue;offlineBotAI(bot);if(bot.boosting&&bot.length>MIN_LEN&&Math.random()<0.05){bot.length=Math.max(MIN_LEN,bot.length-1);bot.score=Math.max(MIN_LEN,bot.score-1);}offlineUpdateSnake(bot,0.13);offlineEatFood(bot);}offlineCheckCollisions();offlineRespawnBots();const allPlayers=[me,...offlineState.bots].filter(p=>p.alive).map(p=>({name:p.name,skinId:p.skinId,score:p.score,segs:p.segs.slice(0,750),boosting:p.boosting,isMe:p.isMe}));const lb=[...allPlayers].sort((a,b)=>b.score-a.score).slice(0,10).map(p=>({name:p.name,score:p.score,isMe:p.isMe}));serverWorld={players:allPlayers,foods:offlineState.foods,leaderboard:lb};}
+function offlineTick(){if(!running||gameMode!=='offline'||!offlineState)return;const me=offlineState.player;if(!me.alive){if(!me._deathHandled){me._deathHandled=true;clearInterval(offlineTickInterval);offlineTickInterval=null;running=false;const score=me.score||0;document.getElementById('deathScore').textContent=t('mass')+': '+score;jbSaveScore(pname,score);clanUpdateScore(score);document.getElementById('hud').style.display='none';switchScreen('deathScreen',()=>{renderRecords(score);trackAch('mass',score);trackAch('survive',surviveTimer);});}return;}if(!autopilotMode){me.tAngle=Math.atan2(my-H/2,mx-W/2);me.boosting=boosting&&me.score>MIN_LEN;}else{
+  const h=me.segs[0];
+  const allSnakes=[...offlineState.bots].filter(b=>b.alive);
+  const dangerSegs=[];
+  for(const b of allSnakes){for(let i=0;i<b.segs.length;i++)dangerSegs.push(b.segs[i]);}
+  if(me.segs.length>5)for(let i=3;i<me.segs.length;i++)dangerSegs.push(me.segs[i]);
+  const DANGER_R=120,STEPS=3,STEP_DIST=80;
+  function offDanger(tx,ty){
+    if(tx<250||tx>WORLD-250||ty<250||ty>WORLD-250)return 999;
+    let minD=Infinity;
+    for(const s of dangerSegs){const dx=tx-s.x,dy=ty-s.y,d=dx*dx+dy*dy;if(d<minD)minD=d;}
+    return Math.sqrt(minD);
+  }
+  function offPathSafe(angle){
+    let x=h.x,y=h.y;
+    for(let s=1;s<=STEPS;s++){x+=Math.cos(angle)*STEP_DIST;y+=Math.sin(angle)*STEP_DIST;if(offDanger(x,y)<DANGER_R)return false;}
+    return true;
+  }
+  let best=Infinity,tgt=null;
+  for(const f of offlineState.foods){
+    const dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;
+    if(d<best){const ang=Math.atan2(dy,dx);if(offPathSafe(ang)){best=d;tgt=f;}}
+  }
+  if(!tgt){for(const f of offlineState.foods){const dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;if(d<best){best=d;tgt=f;}}}
+  let angle=tgt?Math.atan2(tgt.y-h.y,tgt.x-h.x):me.tAngle;
+  if(!offPathSafe(angle)){
+    let bestAng=null,bestScore=-Infinity;
+    for(let a=0;a<16;a++){
+      const tryAng=angle+(a%2===0?1:-1)*Math.PI*Math.ceil(a/2)/8;
+      if(!offPathSafe(tryAng))continue;
+      const ex=h.x+Math.cos(tryAng)*STEP_DIST*STEPS,ey=h.y+Math.sin(tryAng)*STEP_DIST*STEPS;
+      const score=(tgt?-Math.hypot(ex-tgt.x,ey-tgt.y)*0.001:0)+offDanger(ex,ey);
+      if(score>bestScore){bestScore=score;bestAng=tryAng;}
+    }
+    if(bestAng!==null)angle=bestAng;
+  }
+  me.tAngle=angle;me.boosting=false;
+}if(me.boosting&&me.length>MIN_LEN&&Math.random()<0.05){me.length=Math.max(MIN_LEN,me.length-1);me.score=Math.max(MIN_LEN,me.score-1);}offlineUpdateSnake(me,0.18);offlineEatFood(me);if(me.segs.length>0){camX+=(me.segs[0].x-W/2-camX)*0.12;camY+=(me.segs[0].y-H/2-camY)*0.12;}const now=performance.now();if(now-lastSurviveTick>=1000){surviveTimer++;lastSurviveTick=now;trackQuest('survive_time',1);}for(const bot of offlineState.bots){if(!bot.alive)continue;offlineBotAI(bot);if(bot.boosting&&bot.length>MIN_LEN&&Math.random()<0.05){bot.length=Math.max(MIN_LEN,bot.length-1);bot.score=Math.max(MIN_LEN,bot.score-1);}offlineUpdateSnake(bot,0.13);offlineEatFood(bot);}offlineCheckCollisions();offlineRespawnBots();const allPlayers=[me,...offlineState.bots].filter(p=>p.alive).map(p=>({name:p.name,skinId:p.skinId,score:p.score,segs:p.segs.slice(0,750),boosting:p.boosting,isMe:p.isMe}));const lb=[...allPlayers].sort((a,b)=>b.score-a.score).slice(0,10).map(p=>({name:p.name,score:p.score,isMe:p.isMe}));serverWorld={players:allPlayers,foods:offlineState.foods,leaderboard:lb};}
 
 function startOffline(){gameMode='offline';if(offlineTickInterval){clearInterval(offlineTickInterval);offlineTickInterval=null;}serverWorld=null;_prevWorld=null;playIrisOpen(()=>{const{spawnX,spawnY}=initOffline();camX=spawnX-W/2;camY=spawnY-H/2;player=offlineState.player;document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});document.getElementById('gearBtn').style.display='none';document.getElementById('hud').style.display='block';document.getElementById('xpBarWrap').style.display='none';document.getElementById('bestMassWidget').style.display='none';document.getElementById('achBtn').style.display='none';document.getElementById('achPanel').classList.remove('open');achOpen=false;autopilotMode=false;document.getElementById('apBtn').classList.remove('active');running=true;surviveTimer=0;lastSurviveTick=performance.now();_xpFoodCounter=0;_foodCoinCounter=0;if(isMobile())showJoystick(true);offlineTickInterval=setInterval(offlineTick,33);trackAch('games',1);},null);}
 
@@ -1315,7 +1352,81 @@ canvas.addEventListener('mouseup',e=>{if(e.button===0)boosting=false;});
 window.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ShiftLeft'){e.preventDefault();boosting=true;}if(e.code==='KeyA'&&running){autopilotMode=!autopilotMode;document.getElementById('apBtn').classList.toggle('active',autopilotMode);}});
 window.addEventListener('keyup',e=>{if(e.code==='Space'||e.code==='ShiftLeft')boosting=false;});
 
-function runAutopilot(){if(!player||!player.segs||!player.segs.length)return;const h=player.segs[0];const fl=(serverWorld&&serverWorld.foods)||[];function isDangerous(tx,ty){if(!serverWorld||!serverWorld.players)return false;for(const p of serverWorld.players){if(p.isMe||!p.segs)continue;for(let i=0;i<Math.min(p.segs.length,30);i++){const s=p.segs[i],dx=tx-s.x,dy=ty-s.y;if(dx*dx+dy*dy<110*110)return true;}}if(tx<200||tx>3800||ty<200||ty>3800)return true;return false;}let best=Infinity,tgt=null;for(let i=0;i<fl.length;i+=2){const f=fl[i];const dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;if(d<best&&!isDangerous(f.x,f.y)){best=d;tgt=f;}}if(!tgt){for(let i=0;i<fl.length;i+=2){const f=fl[i],dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;if(d<best){best=d;tgt=f;}}}if(tgt){let angle=Math.atan2(tgt.y-h.y,tgt.x-h.x);const ahead=130;const ax=h.x+Math.cos(angle)*ahead,ay=h.y+Math.sin(angle)*ahead;if(isDangerous(ax,ay)){const left=angle-Math.PI/3,right=angle+Math.PI/3;const alx=h.x+Math.cos(left)*ahead,aly=h.y+Math.sin(left)*ahead;const arx=h.x+Math.cos(right)*ahead,ary=h.y+Math.sin(right)*ahead;if(!isDangerous(alx,aly))angle=left;else if(!isDangerous(arx,ary))angle=right;else angle+=Math.PI;}player.tAngle=angle;}player.boosting=false;}
+function runAutopilot(){
+  if(!player||!player.segs||!player.segs.length)return;
+  const h=player.segs[0];
+  const fl=(serverWorld&&serverWorld.foods)||[];
+  const players=(serverWorld&&serverWorld.players)||[];
+  const DANGER_R=130, STEPS=3, STEP_DIST=80;
+
+  // Строим массив опасных сегментов один раз
+  const dangerSegs=[];
+  for(const p of players){
+    if(p.isMe||!p.segs)continue;
+    for(let i=0;i<p.segs.length;i++) dangerSegs.push(p.segs[i]);
+  }
+  // Добавляем собственный хвост (со 2го сегмента)
+  if(player.segs.length>5) for(let i=3;i<player.segs.length;i++) dangerSegs.push(player.segs[i]);
+
+  function danger(tx,ty){
+    if(tx<250||tx>WORLD-250||ty<250||ty>WORLD-250)return 999;
+    let minD=Infinity;
+    for(const s of dangerSegs){const dx=tx-s.x,dy=ty-s.y,d=dx*dx+dy*dy;if(d<minD)minD=d;}
+    return Math.sqrt(minD);
+  }
+
+  function pathSafe(angle){
+    let x=h.x,y=h.y;
+    for(let s=1;s<=STEPS;s++){
+      x+=Math.cos(angle)*STEP_DIST;
+      y+=Math.sin(angle)*STEP_DIST;
+      if(danger(x,y)<DANGER_R)return false;
+    }
+    return true;
+  }
+
+  // Ищем ближайшую еду на безопасном пути
+  let best=Infinity,tgt=null;
+  for(let i=0;i<fl.length;i+=2){
+    const f=fl[i];if(!f)continue;
+    const dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;
+    if(d<best){
+      const ang=Math.atan2(dy,dx);
+      if(pathSafe(ang)){best=d;tgt=f;}
+    }
+  }
+  // Если безопасной еды нет — берём любую ближайшую
+  if(!tgt){
+    for(let i=0;i<fl.length;i+=2){
+      const f=fl[i];if(!f)continue;
+      const dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;
+      if(d<best){best=d;tgt=f;}
+    }
+  }
+
+  let angle=tgt?Math.atan2(tgt.y-h.y,tgt.x-h.x):player.tAngle;
+
+  // Проверяем путь вперёд — если опасно, ищем лучший угол
+  if(!pathSafe(angle)){
+    let bestAng=null,bestScore=-Infinity;
+    // Проверяем 16 направлений
+    for(let a=0;a<16;a++){
+      const tryAng=angle+(a%2===0?1:-1)*Math.PI*Math.ceil(a/2)/8;
+      if(!pathSafe(tryAng))continue;
+      // Оцениваем: чем ближе к цели и чем дальше от опасности — лучше
+      const ex=h.x+Math.cos(tryAng)*STEP_DIST*STEPS;
+      const ey=h.y+Math.sin(tryAng)*STEP_DIST*STEPS;
+      const distToFood=tgt?-Math.hypot(ex-tgt.x,ey-tgt.y):0;
+      const safeDist=danger(ex,ey);
+      const score=distToFood*0.001+safeDist;
+      if(score>bestScore){bestScore=score;bestAng=tryAng;}
+    }
+    if(bestAng!==null)angle=bestAng;
+  }
+
+  player.tAngle=angle;
+  player.boosting=false;
+}
 
 function updHUD(){if(gameMode==='online'){if(ws&&ws.readyState===WebSocket.OPEN&&player&&running){if(!autopilotMode){player.tAngle=Math.atan2(my-H/2,mx-W/2);player.boosting=boosting&&player.score>MIN_LEN;}else runAutopilot();ws.send(JSON.stringify({type:'input',angle:player.tAngle,boost:player.boosting}));}}if(serverWorld){if(serverWorld.leaderboard){let h='';let meInTop=false;serverWorld.leaderboard.forEach((s,i)=>{const lv=s.isMe?(getLevel(playerXP)+1):Math.min(50,Math.max(1,Math.floor(s.score/80)+1));if(s.isMe)meInTop=true;h+=`<div class="lb-row${s.isMe?' me':''}"><span class="lb-rank">${i+1}</span><span class="lb-lvl">${lv}</span><span class="lb-name">${s.name}</span><span class="lb-score">${s.score}</span></div>`;});if(!meInTop&&serverWorld.players){const me=serverWorld.players.find(p=>p.isMe);if(me){const allSorted=[...serverWorld.players].filter(p=>p.score!==undefined).sort((a,b)=>b.score-a.score);const myPos=allSorted.findIndex(p=>p.isMe)+1;const lv=getLevel(playerXP)+1;h+=`<div class="lb-sep"></div><div class="lb-row me"><span class="lb-rank">${myPos||'?'}</span><span class="lb-lvl">${lv}</span><span class="lb-name">${me.name}</span><span class="lb-score">${me.score}</span></div>`;}}document.getElementById('lbList').innerHTML=h;}const me=serverWorld.players?serverWorld.players.find(p=>p.isMe):null;const myScore=me?me.score:(player?player.score:0);const myRank=serverWorld.leaderboard?(serverWorld.leaderboard.findIndex(s=>s.isMe)+1||'?'):'?';document.getElementById('hudLen').textContent=myScore;document.getElementById('hudRank').textContent=myRank==='?'?'#?':'#'+myRank;if(me&&gameMode==='online'){const r=serverWorld.leaderboard?serverWorld.leaderboard.findIndex(s=>s.isMe)+1:99;if(r>=1&&r<=3&&serverWorld.leaderboard&&serverWorld.leaderboard.length>=4)trackQuest('top3',1);}}}
 
