@@ -912,7 +912,7 @@ const LEVELS=buildLevels();
 let playerXP=parseInt(localStorage.getItem('dvx_xp')||'0');
 function getLevel(xp){let lv=0;for(let i=0;i<LEVELS.length;i++){if(LEVELS[i]&&xp>=LEVELS[i].xp)lv=i;else break;}return lv;}
 function getStartMass(){return MIN_LEN+getLevel(playerXP)*2;}
-function addXP(amount){playerXP=Math.min(playerXP+amount,99999);localStorage.setItem('dvx_xp',playerXP);updateXPBar();}
+function addXP(amount){playerXP=Math.min(playerXP+amount,99999999);localStorage.setItem('dvx_xp',playerXP);updateXPBar();}
 function updateXPBar(){
   const lv=getLevel(playerXP);
   const curLvlData=LEVELS[lv]||{xp:0};
