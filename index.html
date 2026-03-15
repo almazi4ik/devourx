@@ -766,6 +766,7 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
     <div class="sp-tab active" data-tab="lang">🌐 ЯЗЫК</div>
     <div class="sp-tab" data-tab="bg">🎨 ФОНЫ</div>
     <div class="sp-tab" data-tab="account">👤 АККАУНТ</div>
+    <div class="sp-tab" data-tab="stats">📊 СТАТЫ</div>
   </div>
   <div class="sp-body">
     <!-- Language tab -->
@@ -827,6 +828,11 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
         </div>
         <button class="acc-btn acc-btn-red" onclick="accLogout()">ВЫЙТИ ИЗ АККАУНТА</button>
       </div>
+    </div>
+    <!-- Stats tab -->
+    <div class="sp-section" id="spTabStats">
+      <div class="bg-section-title">📊 МОЯ СТАТИСТИКА</div>
+      <div id="statsContent" style="display:flex;flex-direction:column;gap:10px;"></div>
     </div>
   </div>
 </div>
@@ -1104,8 +1110,47 @@ document.querySelectorAll('.sp-tab').forEach(tab=>{
     const secId = 'spTab' + tab.dataset.tab.charAt(0).toUpperCase() + tab.dataset.tab.slice(1);
     const sec = document.getElementById(secId);
     if(sec) sec.classList.add('active');
+    if(tab.dataset.tab === 'stats') renderStats();
   });
 });
+
+function renderStats(){
+  const s = JSON.parse(localStorage.getItem('dvx_achstats')||'{}');
+  const kills   = s.kills   || 0;
+  const maxMass = s.maxMass || 0;
+  const games   = s.games   || 0;
+  const survive = s.survive || 0;
+  const eat     = s.eat     || 0;
+  const xp      = parseInt(localStorage.getItem('dvx_xp')||'0');
+  const coins   = parseInt(localStorage.getItem('dvx_coins')||'0');
+  const recs    = JSON.parse(localStorage.getItem('dvx_records')||'[]');
+  const best    = recs.length ? recs[0] : 0;
+  const ownedSkins = JSON.parse(localStorage.getItem('dvx_skins')||'[]').filter(s=>s.owned).length || 3;
+
+  const rows = [
+    { icon:'🎮', label:'Игр сыграно',       val: games },
+    { icon:'💀', label:'Убийств',            val: kills },
+    { icon:'🏆', label:'Лучший результат',   val: best },
+    { icon:'🐍', label:'Макс. масса',        val: maxMass },
+    { icon:'🍎', label:'Еды съедено',        val: eat },
+    { icon:'⏱️', label:'Макс. выживание',    val: survive + ' сек' },
+    { icon:'⭐', label:'Всего XP',           val: xp.toLocaleString() },
+    { icon:'💰', label:'Монет',              val: coins.toLocaleString() },
+    { icon:'🎨', label:'Скинов куплено',     val: ownedSkins },
+  ];
+
+  const el = document.getElementById('statsContent');
+  el.innerHTML = rows.map(r=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;
+      background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);
+      border-radius:14px;padding:11px 16px;">
+      <span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;color:rgba(255,255,255,0.7);">
+        ${r.icon} ${r.label}
+      </span>
+      <span style="font-family:'Fredoka One',cursive;font-size:18px;color:#2ecc71;">${r.val}</span>
+    </div>
+  `).join('');
+}
 
 // bg card clicks
 document.querySelectorAll('.bg-card').forEach(card=>{
