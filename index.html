@@ -350,6 +350,52 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
 .ap-btn span { color:#00e5cc; font-family:'Fredoka One',cursive; font-size:12px; letter-spacing:1px; }
 .minimap-c { position:absolute; bottom:16px; right:16px; width:108px; height:108px; background:rgba(0,0,0,0.5); border:1px solid rgba(46,204,113,0.2); border-radius:10px; overflow:hidden; }
 #xpBarWrap { position:fixed; top:14px; left:14px; z-index:100; display:block; pointer-events:none; }
+
+/* ── ВЫБОР СЕРВЕРА ── */
+#serverPickBtn {
+  pointer-events:all; margin-top:6px;
+  background:rgba(0,0,0,0.55); border:1.5px solid rgba(255,255,255,0.18);
+  border-radius:10px; padding:4px 10px; cursor:pointer;
+  display:none; align-items:center; gap:5px;
+  font-family:'Fredoka One',cursive; font-size:12px; color:rgba(255,255,255,0.7);
+  transition:border-color .2s, background .2s; width:100%;
+}
+#serverPickBtn:hover { border-color:#2ecc71; color:#fff; background:rgba(46,204,113,0.12); }
+
+#serverPickOverlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:500;
+  display:none; align-items:center; justify-content:center;
+}
+#serverPickOverlay.open { display:flex; }
+#serverPickPanel {
+  background:linear-gradient(160deg,#0a0f0d,#061009);
+  border:2px solid rgba(46,204,113,0.3); border-radius:20px;
+  padding:24px; width:min(340px,90vw);
+}
+#serverPickPanel h3 {
+  font-family:'Fredoka One',cursive; font-size:20px; color:#2ecc71;
+  text-align:center; margin:0 0 18px; letter-spacing:2px;
+}
+.srv-row {
+  display:flex; align-items:center; gap:12px; padding:13px 16px;
+  border-radius:14px; background:rgba(255,255,255,0.04);
+  border:1.5px solid rgba(255,255,255,0.08); cursor:pointer;
+  transition:all .15s; margin-bottom:10px;
+}
+.srv-row:hover { background:rgba(46,204,113,0.1); border-color:rgba(46,204,113,0.4); }
+.srv-row.selected { background:rgba(46,204,113,0.15); border-color:#2ecc71; }
+.srv-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.srv-dot.green { background:#2ecc71; box-shadow:0 0 6px #2ecc71; }
+.srv-dot.yellow { background:#f9ca24; box-shadow:0 0 6px #f9ca24; }
+.srv-info { flex:1; }
+.srv-name { font-family:'Fredoka One',cursive; font-size:16px; color:#e8f5e9; }
+.srv-desc { font-size:11px; color:rgba(255,255,255,0.4); font-weight:700; margin-top:2px; }
+.srv-ping { font-family:'Fredoka One',cursive; font-size:13px; color:rgba(255,255,255,0.4); }
+.srv-close-btn {
+  width:100%; border:none; border-radius:50px; padding:10px;
+  background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.5);
+  font-family:'Fredoka One',cursive; font-size:15px; cursor:pointer; margin-top:4px;
+}
 #xpWidget { display:flex; align-items:center; filter:drop-shadow(0 2px 8px rgba(0,0,0,0.7)); }
 #xpLvlBubble { background:linear-gradient(135deg,#1a6fd4,#0a3d8f); border:3px solid #4db8ff; border-radius:50%; width:52px; height:52px; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:2; box-shadow:0 0 14px rgba(77,184,255,0.5); }
 #xpLvlBubble .xp-lv-lbl { font-size:9px; font-weight:900; color:#9fd4ff; text-transform:uppercase; letter-spacing:1px; line-height:1; }
@@ -606,6 +652,9 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
     </div>
   </div>
   <button class="mode-back" id="modeBackBtn" data-i18n="back">← Назад</button>
+  <button id="serverPickBtn" onclick="openServerPick()" style="margin-top:8px;background:transparent;border:2px solid rgba(255,255,255,0.15);border-radius:50px;padding:9px 40px;cursor:pointer;font-family:'Fredoka One',cursive;font-size:14px;color:rgba(255,255,255,0.4);display:none;align-items:center;justify-content:center;gap:6px;pointer-events:all;letter-spacing:1px;transition:all .15s;">
+    ⚙️ <span id="spbName">Europe_1</span>
+  </button>
 </div>
 
 <!-- ЗАГРУЗКА -->
@@ -675,6 +724,28 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
       <div id="xpBarTrack"><div id="xpBarFill"></div></div>
       <div class="xp-nums"><span id="xpCur">0</span>/<span id="xpNext">50</span> XP</div>
     </div>
+  </div>
+</div>
+
+<!-- Попап выбора сервера -->
+<div id="serverPickOverlay">
+  <div id="serverPickPanel">
+    <h3>🌍 ВЫБОР СЕРВЕРА</h3>
+    <div class="srv-row selected" id="srvRow0" onclick="selectServer(0)">
+      <div class="srv-dot green"></div>
+      <div class="srv-info">
+        <div class="srv-name">Europe_1</div>
+      </div>
+      <div class="srv-ping" id="srvPing0">—</div>
+    </div>
+    <div class="srv-row" id="srvRow1" onclick="selectServer(1)">
+      <div class="srv-dot yellow"></div>
+      <div class="srv-info">
+        <div class="srv-name">Europe_2</div>
+      </div>
+      <div class="srv-ping" id="srvPing1">—</div>
+    </div>
+    <button class="srv-close-btn" onclick="closeServerPick()">ЗАКРЫТЬ</button>
   </div>
 </div>
 
@@ -1208,7 +1279,12 @@ function showMenu(){
     showJoystick(false);updateXPBar();
   });
 }
-function showModeSelect(){ switchScreen('modeScreen'); }
+function showModeSelect(){
+  switchScreen('modeScreen');
+  const sb=document.getElementById('serverPickBtn');
+  if(sb){sb.style.display='flex';document.getElementById('spbName').textContent=SERVERS[_selServer].name;}
+  measurePings();
+}
 function showSkins(){
   renderSkins();
   switchScreen('skinsScreen', ()=>{ document.querySelector('.coins-fixed').style.display='none'; });
@@ -1381,14 +1457,19 @@ function offlineTick(){if(!running||gameMode!=='offline'||!offlineState)return;c
   me.tAngle=angle;me.boosting=false;
 }if(me.boosting&&me.length>MIN_LEN&&Math.random()<0.05){me.length=Math.max(MIN_LEN,me.length-1);me.score=Math.max(MIN_LEN,me.score-1);}offlineUpdateSnake(me,0.18);offlineEatFood(me);if(me.segs.length>0){camX+=(me.segs[0].x-W/2-camX)*0.12;camY+=(me.segs[0].y-H/2-camY)*0.12;}const now=performance.now();if(now-lastSurviveTick>=1000){surviveTimer++;lastSurviveTick=now;trackQuest('survive_time',1);}for(const bot of offlineState.bots){if(!bot.alive)continue;offlineBotAI(bot);if(bot.boosting&&bot.length>MIN_LEN&&Math.random()<0.05){bot.length=Math.max(MIN_LEN,bot.length-1);bot.score=Math.max(MIN_LEN,bot.score-1);}offlineUpdateSnake(bot,0.13);offlineEatFood(bot);}offlineCheckCollisions();offlineRespawnBots();const allPlayers=[me,...offlineState.bots].filter(p=>p.alive).map(p=>({name:p.name,skinId:p.skinId,score:p.score,segs:p.segs.slice(0,750),boosting:p.boosting,isMe:p.isMe}));const lb=[...allPlayers].sort((a,b)=>b.score-a.score).slice(0,10).map(p=>({name:p.name,score:p.score,isMe:p.isMe}));serverWorld={players:allPlayers,foods:offlineState.foods,leaderboard:lb};}
 
-function startOffline(){gameMode='offline';if(offlineTickInterval){clearInterval(offlineTickInterval);offlineTickInterval=null;}serverWorld=null;_prevWorld=null;playIrisOpen(()=>{const{spawnX,spawnY}=initOffline();camX=spawnX-W/2;camY=spawnY-H/2;player=offlineState.player;document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});document.getElementById('gearBtn').style.display='none';document.getElementById('hud').style.display='block';document.getElementById('xpBarWrap').style.display='none';document.getElementById('bestMassWidget').style.display='none';document.getElementById('achBtn').style.display='none';document.getElementById('achPanel').classList.remove('open');achOpen=false;autopilotMode=false;document.getElementById('apBtn').classList.remove('active');running=true;surviveTimer=0;lastSurviveTick=performance.now();_xpFoodCounter=0;_foodCoinCounter=0;if(isMobile())showJoystick(true);offlineTickInterval=setInterval(offlineTick,33);trackAch('games',1);},null);}
+function startOffline(){gameMode='offline';if(offlineTickInterval){clearInterval(offlineTickInterval);offlineTickInterval=null;}serverWorld=null;_prevWorld=null;playIrisOpen(()=>{const{spawnX,spawnY}=initOffline();camX=spawnX-W/2;camY=spawnY-H/2;player=offlineState.player;document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});document.getElementById('gearBtn').style.display='none';document.getElementById('hud').style.display='block';document.getElementById('xpBarWrap').style.display='none';document.getElementById('bestMassWidget').style.display='none';document.getElementById('achBtn').style.display='none';document.getElementById('achPanel').classList.remove('open');const _sbOff=document.getElementById('serverPickBtn');if(_sbOff)_sbOff.style.display='none';achOpen=false;autopilotMode=false;document.getElementById('apBtn').classList.remove('active');running=true;surviveTimer=0;lastSurviveTick=performance.now();_xpFoodCounter=0;_foodCoinCounter=0;if(isMobile())showJoystick(true);offlineTickInterval=setInterval(offlineTick,33);trackAch('games',1);},null);}
 
 // ══════ СЕРВЕР ОНЛАЙН ══════
-const SERVER='wss://devourx-server.onrender.com';
+const SERVERS = [
+  { name:'Europe_1', url:'wss://devourx-server.onrender.com' },
+  { name:'Europe_2', url:'wss://devourx-server-production.up.railway.app' }
+];
+let _selServer = parseInt(localStorage.getItem('dvx_server')||'0');
+function getServerUrl(){ return SERVERS[_selServer]?.url || SERVERS[0].url; }
 let ws=null,wsConnecting=false;
 let _connectTimeout=null,_loadInterval=null;
 
-function connectWS(){if(wsConnecting)return;wsConnecting=true;gameMode='online';serverWorld=null;_prevWorld=null;if(ws){try{ws.close();}catch(e){}ws=null;}showLoading(t('connecting'));let loadPct=0;_loadInterval=setInterval(()=>{loadPct=Math.min(loadPct+3,85);document.getElementById('loadBarFill').style.width=loadPct+'%';},100);ws=new WebSocket(SERVER);_connectTimeout=setTimeout(()=>{if(!running){clearInterval(_loadInterval);wsConnecting=false;if(ws){try{ws.close();}catch(e){}ws=null;}setLoadStatus(t('no_server'),100);document.getElementById('loadBarFill').style.background='#e74c3c';setTimeout(()=>showMenu(),3000);}},8000);ws.onopen=()=>{clearInterval(_loadInterval);document.getElementById('loadBarFill').style.width='92%';setLoadStatus(t('auth'));const name=document.getElementById('nameInput').value.trim()||'Player';ws.send(JSON.stringify({type:'join',name,skinId:selSkin,skinColor:SKINS_DATA[selSkin].b[0]}));};ws.onmessage=(e)=>{try{const msg=JSON.parse(e.data);if(msg.type==='joined'){clearTimeout(_connectTimeout);wsConnecting=false;document.getElementById('loadBarFill').style.width='100%';setLoadStatus(t('ready'));if(msg.playerCount){document.getElementById('onlineNum').textContent=msg.playerCount;}pname=document.getElementById('nameInput').value.trim()||'Player';player={segs:[{x:msg.spawnX||WORLD/2,y:msg.spawnY||WORLD/2}],tAngle:0,angle:0,score:MIN_LEN,boosting:false,alive:true};camX=(msg.spawnX||WORLD/2)-W/2;camY=(msg.spawnY||WORLD/2)-H/2;playIrisOpen(()=>{document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});document.getElementById('gearBtn').style.display='none';document.getElementById('hud').style.display='block';document.getElementById('xpBarWrap').style.display='none';document.getElementById('bestMassWidget').style.display='none';document.getElementById('achBtn').style.display='none';document.getElementById('achPanel').classList.remove('open');achOpen=false;autopilotMode=false;document.getElementById('apBtn').classList.remove('active');running=true;surviveTimer=0;lastSurviveTick=performance.now();_xpFoodCounter=0;_prevScore=MIN_LEN;_foodCoinCounter=0;if(isMobile())showJoystick(true);},null);}if(msg.type==='world'){_prevWorld=serverWorld?{players:serverWorld.players,_segsMap:buildSegsMap(serverWorld)}:null;_worldRecvTime=performance.now();serverWorld=msg;if(msg.playerCount){document.getElementById('onlineNum').textContent=msg.playerCount;}if(serverWorld.players){const me=serverWorld.players.find(p=>p.isMe);if(me&&me.segs&&me.segs.length>0){const sh=me.segs[0];camX+=(sh.x-W/2-camX)*0.08;camY+=(sh.y-H/2-camY)*0.08;if(player){const gained=me.score-(player.score||MIN_LEN);if(gained>0){trackQuest('eat_food',gained);_xpFoodCounter+=gained;const xg=Math.floor(_xpFoodCounter/5);if(xg>0){_xpFoodCounter-=xg*5;addXP(xg);}}player.segs=me.segs;player.score=me.score||player.score;_prevScore=me.score;}}}}if(msg.type==='dead'){clearTimeout(_connectTimeout);const score=msg.score||0;document.getElementById('deathScore').textContent=t('mass')+': '+score;
+function connectWS(){if(wsConnecting)return;wsConnecting=true;gameMode='online';serverWorld=null;_prevWorld=null;if(ws){try{ws.close();}catch(e){}ws=null;}showLoading(t('connecting'));let loadPct=0;_loadInterval=setInterval(()=>{loadPct=Math.min(loadPct+3,85);document.getElementById('loadBarFill').style.width=loadPct+'%';},100);ws=new WebSocket(getServerUrl());_connectTimeout=setTimeout(()=>{if(!running){clearInterval(_loadInterval);wsConnecting=false;if(ws){try{ws.close();}catch(e){}ws=null;}setLoadStatus(t('no_server'),100);document.getElementById('loadBarFill').style.background='#e74c3c';setTimeout(()=>showMenu(),3000);}},8000);ws.onopen=()=>{clearInterval(_loadInterval);document.getElementById('loadBarFill').style.width='92%';setLoadStatus(t('auth'));const name=document.getElementById('nameInput').value.trim()||'Player';ws.send(JSON.stringify({type:'join',name,skinId:selSkin,skinColor:SKINS_DATA[selSkin].b[0]}));};ws.onmessage=(e)=>{try{const msg=JSON.parse(e.data);if(msg.type==='joined'){clearTimeout(_connectTimeout);wsConnecting=false;document.getElementById('loadBarFill').style.width='100%';setLoadStatus(t('ready'));if(msg.playerCount){document.getElementById('onlineNum').textContent=msg.playerCount;}pname=document.getElementById('nameInput').value.trim()||'Player';player={segs:[{x:msg.spawnX||WORLD/2,y:msg.spawnY||WORLD/2}],tAngle:0,angle:0,score:MIN_LEN,boosting:false,alive:true};camX=(msg.spawnX||WORLD/2)-W/2;camY=(msg.spawnY||WORLD/2)-H/2;playIrisOpen(()=>{document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});document.getElementById('gearBtn').style.display='none';document.getElementById('hud').style.display='block';document.getElementById('xpBarWrap').style.display='none';document.getElementById('bestMassWidget').style.display='none';document.getElementById('achBtn').style.display='none';document.getElementById('achPanel').classList.remove('open');achOpen=false;autopilotMode=false;document.getElementById('apBtn').classList.remove('active');const _sbOn=document.getElementById('serverPickBtn');if(_sbOn)_sbOn.style.display='none';running=true;surviveTimer=0;lastSurviveTick=performance.now();_xpFoodCounter=0;_prevScore=MIN_LEN;_foodCoinCounter=0;if(isMobile())showJoystick(true);},null);}if(msg.type==='world'){_prevWorld=serverWorld?{players:serverWorld.players,_segsMap:buildSegsMap(serverWorld)}:null;_worldRecvTime=performance.now();serverWorld=msg;if(msg.playerCount){document.getElementById('onlineNum').textContent=msg.playerCount;}if(serverWorld.players){const me=serverWorld.players.find(p=>p.isMe);if(me&&me.segs&&me.segs.length>0){const sh=me.segs[0];camX+=(sh.x-W/2-camX)*0.08;camY+=(sh.y-H/2-camY)*0.08;if(player){const gained=me.score-(player.score||MIN_LEN);if(gained>0){trackQuest('eat_food',gained);_xpFoodCounter+=gained;const xg=Math.floor(_xpFoodCounter/5);if(xg>0){_xpFoodCounter-=xg*5;addXP(xg);}}player.segs=me.segs;player.score=me.score||player.score;_prevScore=me.score;}}}}if(msg.type==='dead'){clearTimeout(_connectTimeout);const score=msg.score||0;document.getElementById('deathScore').textContent=t('mass')+': '+score;
 const causeEl=document.getElementById('deathCauseMsg');
 if(causeEl){const c=msg.deathCause;if(c==='wall')causeEl.textContent='🧱 Вы врезались в край карты';else if(c&&c.killerName)causeEl.textContent='💀 Вас подбил '+c.killerName;else causeEl.textContent='';}
 jbSaveScore(pname,score);clanUpdateScore(score);document.getElementById('hud').style.display='none';running=false;switchScreen('deathScreen',()=>{renderRecords(score);trackQuest('reach_mass',score);});}if(msg.type==='kill_reward'){essence=Math.min(9999999,essence+msg.coins);syncEss();showToast('💀 +'+msg.coins+' '+t('kill_reward'),'#ff6b6b');}if(msg.type==='coin_reward'){essence=Math.min(9999999,essence+msg.coins);syncEss();}}catch(err){console.warn('WS msg error',err);}};ws.onerror=()=>{clearTimeout(_connectTimeout);clearInterval(_loadInterval);wsConnecting=false;setLoadStatus(t('conn_err'),100);document.getElementById('loadBarFill').style.background='#e74c3c';setTimeout(()=>showMenu(),3000);};ws.onclose=()=>{wsConnecting=false;ws=null;serverWorld=null;_prevWorld=null;if(running&&gameMode==='online'){running=false;document.getElementById('hud').style.display='none';showMenu();}};}
@@ -2544,6 +2625,51 @@ async function loadClanChatTab() {
 }
 
 function showToast(msg,color='#fff'){const w=document.getElementById('toastWrap'),tt=document.createElement('div');tt.className='toast';tt.textContent=msg;tt.style.borderColor=color;tt.style.color=color;w.appendChild(tt);setTimeout(()=>tt.remove(),2300);}
+
+// ══════ ВЫБОР СЕРВЕРА ══════
+function openServerPick(){
+  document.getElementById('serverPickOverlay').classList.add('open');
+  measurePings();
+}
+function closeServerPick(){
+  document.getElementById('serverPickOverlay').classList.remove('open');
+}
+function selectServer(idx){
+  _selServer=idx;
+  localStorage.setItem('dvx_server',idx);
+  document.querySelectorAll('.srv-row').forEach((r,i)=>r.classList.toggle('selected',i===idx));
+  document.getElementById('spbName').textContent=SERVERS[idx].name;
+  closeServerPick();
+  showToast('Сервер: '+SERVERS[idx].name,'#2ecc71');
+}
+
+// Замеряем пинг — просто HTTP запрос и смотрим время ответа
+async function measurePings(){
+  for(let i=0;i<SERVERS.length;i++){
+    const el=document.getElementById('srvPing'+i);
+    if(!el)continue;
+    el.textContent='...';
+    const start=performance.now();
+    try{
+      const httpUrl=SERVERS[i].url.replace('wss://','https://').replace('ws://','http://');
+      await fetch(httpUrl,{mode:'no-cors',cache:'no-store'});
+      const ms=Math.round(performance.now()-start);
+      el.textContent=ms+'ms';
+      el.style.color=ms<150?'#2ecc71':ms<300?'#f9ca24':'#e74c3c';
+    }catch(e){el.textContent='—';}
+  }
+}
+
+// Скрываем кнопку сервера когда не в меню
+document.addEventListener('DOMContentLoaded',()=>{
+  const sb=document.getElementById('serverPickBtn');
+  if(sb){
+    sb.style.display='none';
+    document.getElementById('spbName').textContent=SERVERS[_selServer].name;
+    // Подсвечиваем выбранный сервер
+    document.querySelectorAll('.srv-row').forEach((r,i)=>r.classList.toggle('selected',i===_selServer));
+  }
+});
 </script>
 </body>
 </html>
