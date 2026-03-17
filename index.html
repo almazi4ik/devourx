@@ -2628,142 +2628,173 @@ async function loadClanChatTab() {
 }
 
 // ══════════════════════════════════════════
-// КАРТА КЛАНОВ — МАТЕРИКИ
+// КАРТА КЛАНОВ — ЗЕМЛЯ
 // ══════════════════════════════════════════
 let _mapZoom = 1, _mapCamX = 0, _mapCamY = 0;
-let _mapCells = [], _mapClanCells = {};
 let _mapIsDragging = false, _mapLastMx = 0, _mapLastMy = 0;
 let _mapCanvas = null, _mapCtx = null;
-let _mapClans = [];
-let _mapBuilt = false;
+let _mapClans = [], _mapClanCells = {};
 
-// Карта теперь 80x80 — большие красивые материки
-const MAP_GRID = 80;
 const MAP_COLORS = ['#ff6b9d','#f9ca24','#00e5cc','#ff9f43','#39ff14','#ff4e4e','#4db8ff','#c8a0ff','#a8ff78','#ffb347'];
-// Кэш для сглаженных контуров
-let _mapSmoothCache = null;
 
-function mapHexToRgb(hex) {
-  const r = parseInt(hex.slice(1,3),16);
-  const g = parseInt(hex.slice(3,5),16);
-  const b = parseInt(hex.slice(5,7),16);
-  return {r,g,b};
+function mapHexToRgb(hex){
+  return {r:parseInt(hex.slice(1,3),16),g:parseInt(hex.slice(3,5),16),b:parseInt(hex.slice(5,7),16)};
 }
 
-// Шум Перлина для органичных форм материков
-function mapNoise(x, y, seed) {
-  const n = Math.sin(x*127.1 + y*311.7 + seed*91.3) * 43758.5453;
-  return n - Math.floor(n);
-}
-function mapSmoothNoise(x, y, seed) {
-  const ix = Math.floor(x), iy = Math.floor(y);
-  const fx = x - ix, fy = y - iy;
-  const ux = fx*fx*(3-2*fx), uy = fy*fy*(3-2*fy);
-  const a = mapNoise(ix,iy,seed), b2 = mapNoise(ix+1,iy,seed);
-  const c = mapNoise(ix,iy+1,seed), d = mapNoise(ix+1,iy+1,seed);
-  return a + (b2-a)*ux + (c-a)*uy + (a-b2-c+d)*ux*uy;
-}
-function mapFractalNoise(x, y, seed, octaves=4) {
-  let v=0, amp=1, freq=1, max=0;
-  for(let i=0;i<octaves;i++){v+=mapSmoothNoise(x*freq,y*freq,seed+i*100)*amp;max+=amp;amp*=0.5;freq*=2.1;}
-  return v/max;
-}
+// ── Настоящая карта Земли в виде точек на сетке 120×60 ──
+// 1 = суша, 0 = океан
+// Каждый ряд — широта от 90° до -90°, каждый столбец — долгота от -180° до 180°
+const EARTH_W = 120, EARTH_H = 60;
+const EARTH_MAP = (function(){
+  // Закодированные полигоны континентов (x,y,w,h прямоугольники + поправки)
+  const grid = Array.from({length:EARTH_H}, () => Array(EARTH_W).fill(0));
+  function fill(x,y,w,h){for(let dy=0;dy<h;dy++)for(let dx=0;dx<w;dx++){const cx=(x+dx+EARTH_W)%EARTH_W,cy=y+dy;if(cy>=0&&cy<EARTH_H)grid[cy][cx]=1;}}
+  function dot(x,y){if(y>=0&&y<EARTH_H)grid[y][(x+EARTH_W)%EARTH_W]=1;}
 
-function mapBuildGrid(clans) {
-  _mapCells = [];
+  // ── СЕВЕРНАЯ АМЕРИКА ──
+  fill(10,5,8,4);   // Аляска
+  fill(10,8,20,18); // основа
+  fill(14,6,14,22); // центр
+  fill(16,4,10,6);  // север Канады
+  fill(18,24,8,10); // Мексика
+  fill(20,28,5,8);  // Центральная Америка
+  fill(12,10,5,3);  // залив Гудзона коррекция
+  // Флорида
+  fill(25,20,3,5);
+  // ── ЮЖНАЯ АМЕРИКА ──
+  fill(22,30,14,5);  // север
+  fill(20,33,16,8);  // центр
+  fill(19,38,14,10); // юг
+  fill(22,46,8,8);   // Патагония
+  // ── ЕВРОПА ──
+  fill(52,5,14,10);  // основа
+  fill(54,3,10,5);   // Скандинавия
+  fill(52,10,16,6);  // юг
+  fill(56,14,8,4);   // Балканы
+  fill(52,8,4,5);    // Пиренеи/Испания
+  // Британия
+  fill(50,7,3,4);
+  // Исландия
+  fill(44,6,3,2);
+  // ── АФРИКА ──
+  fill(52,15,18,6);  // север
+  fill(50,18,20,10); // запад
+  fill(54,20,18,15); // центр
+  fill(56,30,14,10); // юг
+  fill(58,38,8,8);   // южная часть
+  // Мадагаскар
+  fill(68,34,2,5);
+  // ── АЗИЯ ──
+  fill(66,4,40,10);  // Сибирь/север
+  fill(64,8,44,8);   // центр
+  fill(62,12,42,8);  // юг
+  fill(70,18,22,10); // Индия/ЮВА
+  fill(80,20,18,12); // Юго-Восточная
+  fill(86,10,14,8);  // Китай доп
+  fill(92,6,12,6);   // Дальний Восток
+  fill(96,8,8,8);    // Япония/Корея зона
+  // Индия
+  fill(70,20,8,10);
+  // Аравия
+  fill(64,18,10,8);
+  // ── АВСТРАЛИЯ ──
+  fill(88,32,14,10);
+  fill(86,36,16,8);
+  fill(88,40,12,6);
+  // Новая Зеландия
+  fill(102,40,2,4);
+  fill(103,43,2,3);
+  // ── ЯПОНИЯ ──
+  fill(96,12,3,6);
+  fill(97,10,2,3);
+  // ── ИНДОНЕЗИЯ / ФИЛИППИНЫ ──
+  fill(82,26,12,6);
+  fill(84,30,8,4);
+  // ── ГРЕНЛАНДИЯ ──
+  fill(28,3,8,8);
+  fill(30,4,6,6);
+  // ── АНТАРКТИДА (упрощённо) ──
+  fill(0,55,EARTH_W,5);
+  // Шри-Ланка, Тайвань и прочие острова
+  dot(75,22); dot(76,22); dot(97,18); dot(98,18);
+  // Карибы грубо
+  fill(25,22,6,3);
+  // Корсика/Сардиния
+  dot(54,14); dot(54,15);
+  // Ирландия
+  fill(49,8,2,3);
+
+  return grid;
+})();
+
+// Считаем суммарную площадь суши
+const EARTH_LAND_TOTAL = EARTH_MAP.reduce((s,row)=>s+row.reduce((a,v)=>a+v,0),0);
+
+// Строим список клеток суши
+let _earthLandCells = [];
+for(let y=0;y<EARTH_H;y++)
+  for(let x=0;x<EARTH_W;x++)
+    if(EARTH_MAP[y][x]) _earthLandCells.push({x,y});
+
+// Карта захвата: кому принадлежит каждая клетка суши
+let _earthOwner = {}; // "x_y" -> clanId
+
+function mapBuildEarth(clans) {
+  _earthOwner = {};
   _mapClanCells = {};
-  _mapSmoothCache = null;
-  const G = MAP_GRID;
-  const totalCells = G * G;
-  const totalMass = clans.reduce((s,c) => s+(c._mapMass||0), 0);
-  const grid = Array.from({length:G}, () => Array(G).fill(null));
 
-  // Стабильная позиция семени на основе тега
-  function seedPos(tag, idx) {
-    let h = 5381;
-    for(let i=0;i<tag.length;i++) h = ((h<<5)+h+tag.charCodeAt(i))&0xffffff;
-    h = (h + idx*73856) & 0xffffff;
-    const margin = Math.floor(G*0.15);
-    const x = margin + Math.floor((h & 0xfff) / 0xfff * (G - margin*2));
-    const y = margin + Math.floor(((h>>12)&0xfff) / 0xfff * (G - margin*2));
-    return {x, y};
-  }
-
-  // Сколько клеток у каждого клана (минимум чтобы было видно)
-  const allocations = {};
+  // 100 000 очков = 1% суши
+  // Суммарная суша = EARTH_LAND_TOTAL клеток
+  // 1% = EARTH_LAND_TOTAL * 0.01 клеток
   clans.forEach(c => {
-    const share = totalMass > 0 ? (c._mapMass||0)/totalMass : 1/clans.length;
-    // 1% карты = 1 процент = totalCells*0.01 клеток, но минимум 4 клетки
-    const minCells = Math.max(4, Math.floor(totalCells * 0.004));
-    allocations[c.id] = Math.max(minCells, Math.floor(share * totalCells * 0.78));
-  });
+    const cells = Math.max(0, Math.floor((c._mapMass||0) / 100000 * EARTH_LAND_TOTAL * 0.01));
+    _mapClanCells[c.id] = 0;
+    if(cells === 0) return;
 
-  // Размещаем семена, избегая столкновений
-  const seeds = [];
-  clans.forEach((c, i) => {
-    let pos = seedPos(c.tag, i);
-    // Проверяем что далеко от других семян
-    for(let attempt=0; attempt<30; attempt++){
-      let tooClose = false;
-      for(const s of seeds){
-        const d = Math.abs(s.x-pos.x) + Math.abs(s.y-pos.y);
-        if(d < G*0.18){tooClose=true;break;}
+    // Стабильная стартовая позиция из суши
+    let h = 5381;
+    for(let i=0;i<c.tag.length;i++) h=((h<<5)+h+c.tag.charCodeAt(i))&0xffffff;
+    const startIdx = Math.abs(h) % _earthLandCells.length;
+    const start = _earthLandCells[startIdx];
+
+    // BFS захват с шумом для органичных границ
+    const visited = new Set();
+    const pq = [{x:start.x, y:start.y, cost:0}];
+    const ns = c.tag.split('').reduce((a,ch)=>a+ch.charCodeAt(0),0);
+
+    while(pq.length > 0 && _mapClanCells[c.id] < cells) {
+      // Минимальная стоимость
+      let mi=0;
+      for(let i=1;i<pq.length;i++) if(pq[i].cost<pq[mi].cost) mi=i;
+      const {x,y,cost} = pq.splice(mi,1)[0];
+      const key = x+'_'+y;
+      if(visited.has(key)) continue;
+      if(!EARTH_MAP[y]||!EARTH_MAP[y][x]) continue;
+      if(_earthOwner[key]) continue;
+      visited.add(key);
+      _earthOwner[key] = c.id;
+      _mapClanCells[c.id]++;
+
+      const dirs = [{dx:-1,dy:0},{dx:1,dy:0},{dx:0,dy:-1},{dx:0,dy:1},{dx:-1,dy:-1},{dx:1,dy:-1},{dx:-1,dy:1},{dx:1,dy:1}];
+      for(const {dx,dy} of dirs) {
+        const nx=(x+dx+EARTH_W)%EARTH_W, ny=y+dy;
+        if(ny<0||ny>=EARTH_H) continue;
+        if(!EARTH_MAP[ny]||!EARTH_MAP[ny][nx]) continue;
+        const nk=nx+'_'+ny;
+        if(visited.has(nk)||_earthOwner[nk]) continue;
+        // Органичный шум
+        const noise = Math.sin(nx*0.7+ns)*0.5+Math.cos(ny*0.9+ns*0.3)*0.5;
+        pq.push({x:nx, y:ny, cost:cost+0.6+noise*0.5});
       }
-      if(!tooClose) break;
-      pos = seedPos(c.tag+attempt, i+attempt*7);
     }
-    seeds.push({...pos, id:c.id});
-    grid[pos.y][pos.x] = c.id;
-    _mapClanCells[c.id] = 1;
   });
-
-  // Воронообразное расширение — каждый клан расширяется от своего центра
-  // с органичным шумом чтобы границы были неровные
-  const dirs8 = [{dx:0,dy:-1},{dx:1,dy:0},{dx:0,dy:1},{dx:-1,dy:0},{dx:1,dy:-1},{dx:1,dy:1},{dx:-1,dy:1},{dx:-1,dy:-1}];
-  
-  // Приоритетная очередь: сначала клетки ближе к центру с шумом
-  const pq = [];
-  seeds.forEach(s => {
-    const clan = clans.find(c=>c.id===s.id);
-    const noiseSeed = s.id.split('').reduce((a,ch)=>a+ch.charCodeAt(0),0);
-    pq.push({x:s.x, y:s.y, id:s.id, cost:0, noiseSeed});
-  });
-
-  let iter = 0;
-  while(pq.length > 0 && iter < 50000) {
-    iter++;
-    // Берём элемент с минимальной стоимостью
-    let minI = 0;
-    for(let i=1;i<pq.length;i++) if(pq[i].cost < pq[minI].cost) minI=i;
-    const {x, y, id, cost, noiseSeed} = pq.splice(minI,1)[0];
-    if((_mapClanCells[id]||0) >= allocations[id]) continue;
-
-    const shuffled = [...dirs8].sort(()=>Math.random()-0.5);
-    for(const {dx,dy} of shuffled){
-      const nx=x+dx, ny=y+dy;
-      if(nx<0||nx>=G||ny<0||ny>=G) continue;
-      if(grid[ny][nx]!==null) continue;
-      // Органичный шум для неровных краёв
-      const noise = mapFractalNoise(nx*0.18, ny*0.18, noiseSeed, 3);
-      const edgeNoise = mapFractalNoise(nx*0.35, ny*0.35, noiseSeed+50, 2)*0.4;
-      const newCost = cost + 0.5 + noise*0.8 + edgeNoise;
-      grid[ny][nx] = id;
-      _mapClanCells[id] = (_mapClanCells[id]||0)+1;
-      pq.push({x:nx, y:ny, id, cost:newCost, noiseSeed});
-      if((_mapClanCells[id]||0) >= allocations[id]) break;
-    }
-  }
-
-  for(let y=0;y<G;y++)
-    for(let x=0;x<G;x++)
-      _mapCells.push({x, y, clanId:grid[y][x]});
 }
 
 async function renderClanMap() {
   const sec = document.getElementById('cpSecMap');
   sec.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-      <span style="font-family:'Fredoka One',cursive;font-size:16px;color:#a29bfe;letter-spacing:2px;">🗺️ ТЕРРИТОРИИ КЛАНОВ</span>
+      <span style="font-family:'Fredoka One',cursive;font-size:16px;color:#a29bfe;letter-spacing:2px;">🌍 КАРТА МИРА</span>
       <div style="display:flex;gap:6px;">
         <button id="mapZoomIn"  style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:16px;width:30px;height:30px;cursor:pointer;font-family:'Fredoka One',cursive;">+</button>
         <button id="mapZoomOut" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:16px;width:30px;height:30px;cursor:pointer;font-family:'Fredoka One',cursive;">−</button>
@@ -2771,39 +2802,32 @@ async function renderClanMap() {
       </div>
     </div>
     <div style="position:relative;border-radius:14px;overflow:hidden;border:1px solid rgba(162,155,254,0.25);">
-      <canvas id="clanMapCv" style="display:block;width:100%;cursor:grab;"></canvas>
-      <div id="mapTooltip" style="position:absolute;display:none;background:rgba(8,12,10,0.97);border:1px solid rgba(162,155,254,0.4);border-radius:12px;padding:8px 12px;pointer-events:none;z-index:10;"></div>
+      <canvas id="clanMapCv" style="display:block;width:100%;cursor:grab;image-rendering:pixelated;"></canvas>
+      <div id="mapTooltip" style="position:absolute;display:none;background:rgba(8,12,10,0.97);border:1px solid rgba(162,155,254,0.4);border-radius:12px;padding:8px 12px;pointer-events:none;z-index:10;max-width:200px;"></div>
     </div>
-    <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px;font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;" id="mapLegend"></div>
-    <div style="margin-top:6px;font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;color:rgba(255,255,255,0.2);text-align:center;">100 000 очков = 1% карты • тяни чтобы перемещать • колёсико/щипок для зума</div>`;
+    <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;" id="mapLegend"></div>
+    <div style="margin-top:6px;font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;color:rgba(255,255,255,0.2);text-align:center;">100 000 очков = 1% суши • тяни чтобы перемещать • колёсико для зума</div>`;
 
-  // Загружаем кланы из JSONBin
   let clans = [];
   try { clans = await clanLoadAll(); } catch(e) {}
-  if (!clans.length) {
-    sec.innerHTML += '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:13px;font-family:\'Nunito\',sans-serif;font-weight:800;">Кланов пока нет</div>';
+  if(!clans.length){
+    sec.querySelector('#mapLegend').textContent='Кланов пока нет';
     return;
   }
 
-  // Назначаем цвета и считаем массу
-  _mapClans = clans.map((c, i) => {
+  _mapClans = clans.map((c,i)=>{
     const isMe = c.id === myClanId;
     const color = isMe ? '#a29bfe' : MAP_COLORS[i % MAP_COLORS.length];
-    const totalMass = c.members.reduce((s,m) => s+(m.bestScore||0), 0);
-    return {...c, color, isMe, _mapMass: totalMass};
+    const clanMass = c.members.reduce((s,m)=>s+(m.bestScore||0),0);
+    return {...c, color, isMe, _mapMass:clanMass};
   });
 
-  // Строим карту (с рандомом — но стабильным для одного набора кланов)
-  const seed = clans.map(c=>c.tag).join('');
-  Math.seedrandom ? Math.seedrandom(seed) : null;
-  _mapBuilt = false;
-  mapBuildGrid(_mapClans);
-  _mapBuilt = true;
+  mapBuildEarth(_mapClans);
 
   // Легенда
   const legend = document.getElementById('mapLegend');
-  legend.innerHTML = _mapClans.map(c => {
-    const pct = c._mapMass > 0 ? (c._mapMass/100000).toFixed(1) : '0';
+  legend.innerHTML = _mapClans.map(c=>{
+    const pct = (c._mapMass/100000).toFixed(1);
     const rgb = mapHexToRgb(c.color);
     return `<div style="display:flex;align-items:center;gap:5px;background:rgba(${rgb.r},${rgb.g},${rgb.b},0.12);border:1px solid rgba(${rgb.r},${rgb.g},${rgb.b},0.3);border-radius:8px;padding:3px 8px;">
       <div style="width:10px;height:10px;border-radius:2px;background:${c.color};flex-shrink:0;"></div>
@@ -2812,315 +2836,243 @@ async function renderClanMap() {
     </div>`;
   }).join('') + `<div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:3px 8px;">
     <div style="width:10px;height:10px;border-radius:2px;background:rgba(255,255,255,0.08);flex-shrink:0;border:1px solid rgba(255,255,255,0.15);"></div>
-    <span style="color:rgba(255,255,255,0.3);">Свободно</span>
+    <span style="color:rgba(255,255,255,0.3);">Суша</span>
   </div>`;
 
-  // Инициализируем canvas
+  _mapZoom = 1; _mapCamX = 0; _mapCamY = 0;
   _mapCanvas = document.getElementById('clanMapCv');
   _mapCtx = _mapCanvas.getContext('2d');
-  _mapZoom = 1; _mapCamX = 0; _mapCamY = 0;
 
-  function mapResize() {
-    const dpr = Math.min(window.devicePixelRatio||1, 2);
-    const w = _mapCanvas.parentElement.clientWidth;
-    const h = Math.round(Math.min(w * 0.85, 340));
-    _mapCanvas.width = w * dpr;
-    _mapCanvas.height = h * dpr;
-    _mapCanvas.style.height = h + 'px';
-    _mapCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    mapDraw();
-  }
-
-  function mapCellSize() {
-    return (_mapCanvas.clientWidth / MAP_GRID) * _mapZoom;
-  }
-
-  function mapOffset() {
-    const cs = mapCellSize();
+  function cellSize() { return Math.max(2, (_mapCanvas.clientWidth / EARTH_W) * _mapZoom); }
+  function mapOff() {
+    const cs = cellSize();
     return {
-      ox: _mapCanvas.clientWidth/2  - (cs*MAP_GRID)/2 + _mapCamX,
-      oy: _mapCanvas.clientHeight/2 - (cs*MAP_GRID)/2 + _mapCamY
+      ox: _mapCanvas.clientWidth/2  - (cs*EARTH_W)/2 + _mapCamX,
+      oy: _mapCanvas.clientHeight/2 - (cs*EARTH_H)/2 + _mapCamY
     };
   }
 
   function mapDraw() {
-    if (!_mapCanvas || !_mapCtx) return;
-    const w = _mapCanvas.clientWidth, h = _mapCanvas.clientHeight;
+    if(!_mapCanvas||!_mapCtx) return;
+    const w=_mapCanvas.clientWidth, h=_mapCanvas.clientHeight;
     _mapCtx.clearRect(0,0,w,h);
 
-    // Фон — глубокий океан
-    const oceanGrad = _mapCtx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.max(w,h)*0.7);
-    oceanGrad.addColorStop(0,'#0a1520');
-    oceanGrad.addColorStop(1,'#040810');
-    _mapCtx.fillStyle = oceanGrad;
+    // Океан
+    const og = _mapCtx.createLinearGradient(0,0,0,h);
+    og.addColorStop(0,'#071828');
+    og.addColorStop(0.5,'#0a2035');
+    og.addColorStop(1,'#050e18');
+    _mapCtx.fillStyle = og;
     _mapCtx.fillRect(0,0,w,h);
 
-    const cs = mapCellSize();
-    const {ox,oy} = mapOffset();
-    const G = MAP_GRID;
+    const cs = cellSize();
+    const {ox,oy} = mapOff();
 
-    // Строим lookup для быстрого доступа
-    const gridLookup = {};
-    for(const cell of _mapCells) gridLookup[cell.x+'_'+cell.y] = cell.clanId;
+    // Рисуем карту попиксельно через ImageData для скорости
+    const imgW = Math.ceil(EARTH_W * cs), imgH = Math.ceil(EARTH_H * cs);
+    const offCv = document.createElement('canvas');
+    offCv.width = imgW; offCv.height = imgH;
+    const offCtx = offCv.getContext('2d');
 
-    function getClan(x,y) {
-      if(x<0||x>=G||y<0||y>=G) return null;
-      const id = gridLookup[x+'_'+y];
-      return id ? _mapClans.find(c=>c.id===id)||null : null;
-    }
+    // Фон оффскрина — прозрачный
+    offCtx.clearRect(0,0,imgW,imgH);
 
-    // Рисуем сначала "воду" между клетками для эффекта береговой линии
-    // Фоновая сетка лёгкая
-    if(cs > 2) {
-      _mapCtx.strokeStyle = 'rgba(0,150,200,0.04)';
-      _mapCtx.lineWidth = 0.5;
-      for(let x=0;x<=G;x++){
-        const px=ox+x*cs;
-        if(px<-cs||px>w+cs) continue;
-        _mapCtx.beginPath();_mapCtx.moveTo(px,oy);_mapCtx.lineTo(px,oy+G*cs);_mapCtx.stroke();
-      }
-      for(let y=0;y<=G;y++){
-        const py=oy+y*cs;
-        if(py<-cs||py>h+cs) continue;
-        _mapCtx.beginPath();_mapCtx.moveTo(ox,py);_mapCtx.lineTo(ox+G*cs,py);_mapCtx.stroke();
-      }
-    }
+    // Сначала суша (нейтральная)
+    for(let y=0;y<EARTH_H;y++){
+      for(let x=0;x<EARTH_W;x++){
+        if(!EARTH_MAP[y][x]) continue;
+        const px=Math.floor(x*cs), py=Math.floor(y*cs);
+        const pw=Math.max(1,Math.floor((x+1)*cs)-px);
+        const ph=Math.max(1,Math.floor((y+1)*cs)-py);
+        const key=x+'_'+y;
+        const clanId=_earthOwner[key];
+        if(clanId){
+          const clan=_mapClans.find(c=>c.id===clanId);
+          if(clan){
+            const rgb=mapHexToRgb(clan.color);
+            const al=clan.isMe?0.75:0.55;
+            offCtx.fillStyle=`rgba(${rgb.r},${rgb.g},${rgb.b},${al})`;
+          } else {
+            offCtx.fillStyle='rgba(80,100,70,0.6)';
+          }
+        } else {
+          // Нейтральная суша — зеленовато-серая
+          offCtx.fillStyle='rgba(60,80,55,0.55)';
+        }
+        offCtx.fillRect(px,py,pw,ph);
 
-    // Рисуем материки: каждая клетка со скруглёнными углами
-    // Угол скругления зависит от соседей — создаёт органичный вид
-    for(const cell of _mapCells) {
-      const px = ox + cell.x*cs, py = oy + cell.y*cs;
-      if(px>w+cs*2||px<-cs*2||py>h+cs*2||py<-cs*2) continue;
-
-      const clan = cell.clanId ? _mapClans.find(c=>c.id===cell.clanId) : null;
-
-      if(!clan) {
-        // Свободная территория — тёмная с лёгким свечением
-        _mapCtx.fillStyle = 'rgba(0,100,150,0.06)';
-        _mapCtx.fillRect(px, py, cs, cs);
-        continue;
-      }
-
-      const rgb = mapHexToRgb(clan.color);
-
-      // Проверяем соседей того же клана
-      const top    = getClan(cell.x, cell.y-1)?.id === clan.id;
-      const bottom = getClan(cell.x, cell.y+1)?.id === clan.id;
-      const left   = getClan(cell.x-1, cell.y)?.id === clan.id;
-      const right  = getClan(cell.x+1, cell.y)?.id === clan.id;
-      const tl = getClan(cell.x-1,cell.y-1)?.id===clan.id;
-      const tr = getClan(cell.x+1,cell.y-1)?.id===clan.id;
-      const bl = getClan(cell.x-1,cell.y+1)?.id===clan.id;
-      const br = getClan(cell.x+1,cell.y+1)?.id===clan.id;
-
-      // Основной цвет — ярче для своего клана
-      const alpha = clan.isMe ? 0.72 : 0.52;
-      _mapCtx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${alpha})`;
-
-      // Рисуем с закруглёнными углами только там где нет соседа
-      const r = Math.max(1, cs * 0.38);
-      const x1=px, y1=py, x2=px+cs, y2=py+cs;
-
-      _mapCtx.beginPath();
-      // Верхний левый угол
-      if(!top && !left && !tl) {
-        _mapCtx.moveTo(x1+r, y1);
-        _mapCtx.arcTo(x1,y1, x1,y1+r, r);
-      } else { _mapCtx.moveTo(x1,y1); }
-      // Нижний левый
-      if(!bottom && !left && !bl) {
-        _mapCtx.lineTo(x1, y2-r);
-        _mapCtx.arcTo(x1,y2, x1+r,y2, r);
-      } else { _mapCtx.lineTo(x1,y2); }
-      // Нижний правый
-      if(!bottom && !right && !br) {
-        _mapCtx.lineTo(x2-r, y2);
-        _mapCtx.arcTo(x2,y2, x2,y2-r, r);
-      } else { _mapCtx.lineTo(x2,y2); }
-      // Верхний правый
-      if(!top && !right && !tr) {
-        _mapCtx.lineTo(x2, y1+r);
-        _mapCtx.arcTo(x2,y1, x2-r,y1, r);
-      } else { _mapCtx.lineTo(x2,y1); }
-      _mapCtx.closePath();
-      _mapCtx.fill();
-
-      // Подсветка сверху для 3D эффекта (только внешние клетки)
-      const isEdge = !top||!bottom||!left||!right;
-      if(isEdge && cs > 3) {
-        _mapCtx.fillStyle = `rgba(255,255,255,${clan.isMe?0.18:0.10})`;
-        _mapCtx.beginPath();
-        if(!top) { _mapCtx.fillRect(px+cs*0.1, py, cs*0.8, Math.max(1,cs*0.12)); }
-        _mapCtx.fill();
-      }
-
-      // Тонкая обводка только на краях
-      if(isEdge && cs > 4) {
-        _mapCtx.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${clan.isMe?0.9:0.55})`;
-        _mapCtx.lineWidth = clan.isMe ? Math.max(0.8,cs*0.06) : Math.max(0.5,cs*0.04);
-        _mapCtx.stroke();
+        // Лёгкая текстура — чуть светлее пиксели по краям клетки
+        if(cs>=3){
+          offCtx.fillStyle='rgba(255,255,255,0.06)';
+          offCtx.fillRect(px,py,pw,1);
+          offCtx.fillRect(px,py,1,ph);
+        }
       }
     }
 
-    // Теги кланов в центре территорий с красивым фоном
-    const centers = {};
-    for(const cell of _mapCells) {
-      if(!cell.clanId) continue;
-      if(!centers[cell.clanId]) centers[cell.clanId]={sx:0,sy:0,n:0};
-      centers[cell.clanId].sx+=cell.x;
-      centers[cell.clanId].sy+=cell.y;
-      centers[cell.clanId].n++;
+    // Береговые линии — тонкая обводка суши
+    if(cs>=2){
+      const dirs4=[{dx:-1,dy:0},{dx:1,dy:0},{dx:0,dy:-1},{dx:0,dy:1}];
+      for(let y=0;y<EARTH_H;y++){
+        for(let x=0;x<EARTH_W;x++){
+          if(!EARTH_MAP[y][x]) continue;
+          let isCoast=false;
+          for(const {dx,dy} of dirs4){
+            const nx=(x+dx+EARTH_W)%EARTH_W,ny=y+dy;
+            if(ny<0||ny>=EARTH_H||!EARTH_MAP[ny]||!EARTH_MAP[ny][nx]){isCoast=true;break;}
+          }
+          if(!isCoast) continue;
+          const px=Math.floor(x*cs),py=Math.floor(y*cs);
+          const pw=Math.max(1,Math.floor((x+1)*cs)-px);
+          const ph=Math.max(1,Math.floor((y+1)*cs)-py);
+          const key=x+'_'+y;
+          const clanId=_earthOwner[key];
+          if(clanId){
+            const clan=_mapClans.find(c=>c.id===clanId);
+            if(clan){
+              const rgb=mapHexToRgb(clan.color);
+              offCtx.strokeStyle=`rgba(${rgb.r},${rgb.g},${rgb.b},0.9)`;
+              offCtx.lineWidth=Math.max(0.5,cs*0.15);
+              offCtx.strokeRect(px+0.5,py+0.5,pw-1,ph-1);
+            }
+          } else {
+            offCtx.strokeStyle='rgba(120,150,100,0.4)';
+            offCtx.lineWidth=0.5;
+            offCtx.strokeRect(px+0.5,py+0.5,pw-1,ph-1);
+          }
+        }
+      }
     }
-    for(const [id,c] of Object.entries(centers)) {
-      const clan = _mapClans.find(cl=>cl.id===id);
+
+    // Рисуем оффскрин на основной канвас
+    _mapCtx.drawImage(offCv, ox, oy);
+
+    // Названия кланов над их территориями
+    const centers={};
+    for(const [key,clanId] of Object.entries(_earthOwner)){
+      const [x,y]=key.split('_').map(Number);
+      if(!centers[clanId]) centers[clanId]={sx:0,sy:0,n:0};
+      centers[clanId].sx+=x; centers[clanId].sy+=y; centers[clanId].n++;
+    }
+    for(const [id,c] of Object.entries(centers)){
+      if(c.n<3) continue;
+      const clan=_mapClans.find(cl=>cl.id===id);
       if(!clan) continue;
-      const cx = ox + (c.sx/c.n+0.5)*cs;
-      const cy = oy + (c.sy/c.n+0.5)*cs;
-      if(cx<-50||cx>w+50||cy<-20||cy>h+20) continue;
-      const fs = Math.max(7, Math.min(cs*1.8, 22));
-      if(fs < 7) continue;
-      const rgb = mapHexToRgb(clan.color);
-      const label = '['+clan.tag+']';
-
-      // Подложка под текст
-      _mapCtx.font = `900 ${fs}px 'Fredoka One',cursive`;
-      const tw = _mapCtx.measureText(label).width;
-      const pad2 = fs*0.4;
-      _mapCtx.fillStyle = `rgba(0,0,0,0.65)`;
-      const bw=tw+pad2*2, bh=fs+pad2;
-      const bx=cx-bw/2, by=cy-bh/2;
-      const br2=bh/2;
+      const cx=ox+(c.sx/c.n+0.5)*cs;
+      const cy=oy+(c.sy/c.n+0.5)*cs;
+      if(cx<-40||cx>w+40||cy<-15||cy>h+15) continue;
+      const fs=Math.max(8,Math.min(cs*2.2,20));
+      const rgb=mapHexToRgb(clan.color);
+      const label='['+clan.tag+']';
+      _mapCtx.font=`900 ${fs}px 'Fredoka One',cursive`;
+      const tw=_mapCtx.measureText(label).width;
+      const pad=fs*0.35;
+      // Подложка
+      _mapCtx.fillStyle='rgba(0,0,0,0.7)';
       _mapCtx.beginPath();
-      _mapCtx.roundRect(bx,by,bw,bh,br2);
+      _mapCtx.roundRect(cx-tw/2-pad,cy-fs/2-pad*0.6,tw+pad*2,fs+pad*1.2,(fs+pad*1.2)/2);
       _mapCtx.fill();
-      // Обводка подложки цветом клана
-      _mapCtx.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},0.6)`;
-      _mapCtx.lineWidth = 1;
+      _mapCtx.strokeStyle=`rgba(${rgb.r},${rgb.g},${rgb.b},0.7)`;
+      _mapCtx.lineWidth=1;
       _mapCtx.stroke();
-
-      // Текст
-      _mapCtx.fillStyle = clan.isMe ? '#fff' : clan.color;
-      _mapCtx.textAlign = 'center';
-      _mapCtx.textBaseline = 'middle';
-      _mapCtx.shadowColor = 'rgba(0,0,0,0.8)';
-      _mapCtx.shadowBlur = 3;
-      _mapCtx.fillText(label, cx, cy);
-      _mapCtx.shadowBlur = 0;
+      _mapCtx.fillStyle=clan.isMe?'#fff':clan.color;
+      _mapCtx.textAlign='center';
+      _mapCtx.textBaseline='middle';
+      _mapCtx.fillText(label,cx,cy);
     }
 
-    // Рамка карты
-    const mw=cs*G, mh=cs*G;
-    _mapCtx.strokeStyle = 'rgba(162,155,254,0.35)';
-    _mapCtx.lineWidth = 1.5;
-    _mapCtx.strokeRect(ox,oy,mw,mh);
-    // Угловые засечки
-    _mapCtx.strokeStyle = 'rgba(162,155,254,0.7)';
-    _mapCtx.lineWidth = 2;
-    const cn=12;
-    [[ox,oy,1,1],[ox+mw,oy,-1,1],[ox,oy+mh,1,-1],[ox+mw,oy+mh,-1,-1]].forEach(([x,y,sx,sy])=>{
-      _mapCtx.beginPath();_mapCtx.moveTo(x+sx*cn,y);_mapCtx.lineTo(x,y);_mapCtx.lineTo(x,y+sy*cn);_mapCtx.stroke();
-    });
+    // Рамка
+    _mapCtx.strokeStyle='rgba(162,155,254,0.4)';
+    _mapCtx.lineWidth=1.5;
+    _mapCtx.strokeRect(ox,oy,EARTH_W*cs,EARTH_H*cs);
   }
 
-  // Тултип при наведении
-  function mapShowTooltip(e) {
-    const rect = _mapCanvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
-    const cs = mapCellSize();
-    const {ox,oy} = mapOffset();
-    const gx = Math.floor((mx-ox)/cs);
-    const gy = Math.floor((my-oy)/cs);
-    const cell = _mapCells.find(c=>c.x===gx&&c.y===gy);
-    const tt = document.getElementById('mapTooltip');
-    if (cell && cell.clanId) {
-      const clan = _mapClans.find(c=>c.id===cell.clanId);
-      if (clan) {
-        const pct = (clan._mapMass/100000).toFixed(2);
-        const cellCnt = _mapClanCells[clan.id]||0;
-        const totalCells = MAP_GRID*MAP_GRID;
-        tt.innerHTML = `<div style="font-family:'Fredoka One',cursive;font-size:16px;color:${clan.color};">[${clan.tag}] ${clan.name}</div>
-          <div style="font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;margin-top:5px;display:flex;flex-direction:column;gap:3px;">
+  function mapShowTooltip(e){
+    const rect=_mapCanvas.getBoundingClientRect();
+    const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+    const cs=cellSize();
+    const {ox,oy}=mapOff();
+    const gx=Math.floor((mx-ox)/cs);
+    const gy=Math.floor((my-oy)/cs);
+    const tt=document.getElementById('mapTooltip');
+    if(!tt) return;
+    if(gx<0||gx>=EARTH_W||gy<0||gy>=EARTH_H){tt.style.display='none';return;}
+    if(!EARTH_MAP[gy]||!EARTH_MAP[gy][gx]){tt.style.display='none';return;}
+    const key=gx+'_'+gy;
+    const clanId=_earthOwner[key];
+    if(clanId){
+      const clan=_mapClans.find(c=>c.id===clanId);
+      if(clan){
+        const pct=(clan._mapMass/100000).toFixed(2);
+        const cnt=_mapClanCells[clan.id]||0;
+        tt.innerHTML=`<div style="font-family:'Fredoka One',cursive;font-size:15px;color:${clan.color};">[${clan.tag}] ${clan.name}</div>
+          <div style="font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;margin-top:4px;display:flex;flex-direction:column;gap:3px;">
             <span style="color:#f9ca24;">💰 ${clan._mapMass.toLocaleString()} очков</span>
-            <span style="color:#a29bfe;">🗺️ ${pct}% карты (${cellCnt}/${totalCells} клеток)</span>
+            <span style="color:#a29bfe;">🌍 ${pct}% суши</span>
             <span style="color:rgba(168,230,192,0.7);">👥 ${clan.members.length} участников</span>
-            ${clan.isMe?'<span style="color:#2ecc71;">⭐ Это твой клан!</span>':''}
+            ${clan.isMe?'<span style="color:#2ecc71;">⭐ Твой клан</span>':''}
           </div>`;
-        tt.style.display = 'block';
-        const ttx = Math.min(mx + 12, _mapCanvas.clientWidth - 180);
-        const tty = Math.max(my - 10, 5);
-        tt.style.left = ttx + 'px';
-        tt.style.top = tty + 'px';
+        tt.style.display='block';
+        tt.style.left=Math.min(mx+12,rect.width-180)+'px';
+        tt.style.top=Math.max(my-10,5)+'px';
         return;
       }
+    } else {
+      tt.innerHTML=`<div style="font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;color:rgba(168,230,192,0.5);">🌿 Свободная территория</div>`;
+      tt.style.display='block';
+      tt.style.left=Math.min(mx+12,rect.width-160)+'px';
+      tt.style.top=Math.max(my-10,5)+'px';
+      return;
     }
-    tt.style.display = 'none';
+    tt.style.display='none';
   }
 
-  // Зум колёсиком
-  _mapCanvas.addEventListener('wheel', e => {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? 0.85 : 1.18;
-    _mapZoom = Math.max(0.4, Math.min(6, _mapZoom * delta));
+  function mapResize(){
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    const w=_mapCanvas.parentElement.clientWidth;
+    const h=Math.round(w*(EARTH_H/EARTH_W));
+    _mapCanvas.width=w*dpr; _mapCanvas.height=h*dpr;
+    _mapCanvas.style.height=h+'px';
+    _mapCtx.setTransform(dpr,0,0,dpr,0,0);
     mapDraw();
-  }, {passive:false});
+  }
 
-  // Перетаскивание мышью
-  _mapCanvas.addEventListener('mousedown', e => {
-    _mapIsDragging = true;
-    _mapLastMx = e.clientX; _mapLastMy = e.clientY;
-    _mapCanvas.style.cursor = 'grabbing';
-  });
-  window.addEventListener('mousemove', e => {
-    if (_mapIsDragging && _mapCanvas) {
-      _mapCamX += e.clientX - _mapLastMx;
-      _mapCamY += e.clientY - _mapLastMy;
-      _mapLastMx = e.clientX; _mapLastMy = e.clientY;
-      mapDraw();
-    }
-    if (_mapCanvas && document.getElementById('mapTooltip')) mapShowTooltip(e);
-  });
-  window.addEventListener('mouseup', () => {
-    _mapIsDragging = false;
-    if (_mapCanvas) _mapCanvas.style.cursor = 'grab';
-  });
-
-  // Touch-зум и перетаскивание
-  let _mapLastTouchDist = 0;
-  _mapCanvas.addEventListener('touchstart', e => {
-    if (e.touches.length === 1) {
-      _mapIsDragging = true;
-      _mapLastMx = e.touches[0].clientX; _mapLastMy = e.touches[0].clientY;
-    } else if (e.touches.length === 2) {
-      _mapLastTouchDist = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
-    }
-  },{passive:true});
-  _mapCanvas.addEventListener('touchmove', e => {
+  // Колёсико зума
+  _mapCanvas.addEventListener('wheel',e=>{
     e.preventDefault();
-    if (e.touches.length === 1 && _mapIsDragging) {
-      _mapCamX += e.touches[0].clientX - _mapLastMx;
-      _mapCamY += e.touches[0].clientY - _mapLastMy;
-      _mapLastMx = e.touches[0].clientX; _mapLastMy = e.touches[0].clientY;
-      mapDraw();
-    } else if (e.touches.length === 2) {
-      const d = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
-      _mapZoom = Math.max(0.4, Math.min(6, _mapZoom * (d/_mapLastTouchDist)));
-      _mapLastTouchDist = d;
-      mapDraw();
-    }
+    _mapZoom=Math.max(0.5,Math.min(8,_mapZoom*(e.deltaY>0?0.85:1.18)));
+    mapDraw();
   },{passive:false});
-  _mapCanvas.addEventListener('touchend', () => { _mapIsDragging = false; });
 
-  // Кнопки зума и сброса
-  document.getElementById('mapZoomIn').onclick  = () => { _mapZoom = Math.min(6, _mapZoom*1.35); mapDraw(); };
-  document.getElementById('mapZoomOut').onclick = () => { _mapZoom = Math.max(0.4, _mapZoom/1.35); mapDraw(); };
-  document.getElementById('mapReset').onclick   = () => { _mapZoom=1; _mapCamX=0; _mapCamY=0; mapDraw(); };
+  // Перетаскивание
+  _mapCanvas.addEventListener('mousedown',e=>{_mapIsDragging=true;_mapLastMx=e.clientX;_mapLastMy=e.clientY;_mapCanvas.style.cursor='grabbing';});
+  window.addEventListener('mousemove',e=>{
+    if(_mapIsDragging&&_mapCanvas){_mapCamX+=e.clientX-_mapLastMx;_mapCamY+=e.clientY-_mapLastMy;_mapLastMx=e.clientX;_mapLastMy=e.clientY;mapDraw();}
+    if(_mapCanvas&&document.getElementById('mapTooltip')) mapShowTooltip(e);
+  });
+  window.addEventListener('mouseup',()=>{_mapIsDragging=false;if(_mapCanvas)_mapCanvas.style.cursor='grab';});
+
+  // Touch
+  let _ltd=0;
+  _mapCanvas.addEventListener('touchstart',e=>{
+    if(e.touches.length===1){_mapIsDragging=true;_mapLastMx=e.touches[0].clientX;_mapLastMy=e.touches[0].clientY;}
+    else if(e.touches.length===2) _ltd=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+  },{passive:true});
+  _mapCanvas.addEventListener('touchmove',e=>{
+    e.preventDefault();
+    if(e.touches.length===1&&_mapIsDragging){_mapCamX+=e.touches[0].clientX-_mapLastMx;_mapCamY+=e.touches[0].clientY-_mapLastMy;_mapLastMx=e.touches[0].clientX;_mapLastMy=e.touches[0].clientY;mapDraw();}
+    else if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);_mapZoom=Math.max(0.5,Math.min(8,_mapZoom*(d/_ltd)));_ltd=d;mapDraw();}
+  },{passive:false});
+  _mapCanvas.addEventListener('touchend',()=>{_mapIsDragging=false;});
+
+  document.getElementById('mapZoomIn').onclick=()=>{_mapZoom=Math.min(8,_mapZoom*1.35);mapDraw();};
+  document.getElementById('mapZoomOut').onclick=()=>{_mapZoom=Math.max(0.5,_mapZoom/1.35);mapDraw();};
+  document.getElementById('mapReset').onclick=()=>{_mapZoom=1;_mapCamX=0;_mapCamY=0;mapDraw();};
 
   mapResize();
-  const _ro = new ResizeObserver(mapResize);
+  const _ro=new ResizeObserver(mapResize);
   _ro.observe(_mapCanvas.parentElement);
 }
-
 function showToast(msg,color='#fff'){const w=document.getElementById('toastWrap'),tt=document.createElement('div');tt.className='toast';tt.textContent=msg;tt.style.borderColor=color;tt.style.color=color;w.appendChild(tt);setTimeout(()=>tt.remove(),2300);}
 
 // ══════ ВЫБОР СЕРВЕРА ══════
