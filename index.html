@@ -2628,7 +2628,7 @@ async function loadClanChatTab() {
 }
 
 // ══════════════════════════════════════════
-// КАРТА КЛАНОВ
+// КАРТА КЛАНОВ — МАТЕРИКИ
 // ══════════════════════════════════════════
 let _mapZoom = 1, _mapCamX = 0, _mapCamY = 0;
 let _mapCells = [], _mapClanCells = {};
@@ -2637,8 +2637,11 @@ let _mapCanvas = null, _mapCtx = null;
 let _mapClans = [];
 let _mapBuilt = false;
 
-const MAP_GRID = 20;
+// Карта теперь 80x80 — большие красивые материки
+const MAP_GRID = 80;
 const MAP_COLORS = ['#ff6b9d','#f9ca24','#00e5cc','#ff9f43','#39ff14','#ff4e4e','#4db8ff','#c8a0ff','#a8ff78','#ffb347'];
+// Кэш для сглаженных контуров
+let _mapSmoothCache = null;
 
 function mapHexToRgb(hex) {
   const r = parseInt(hex.slice(1,3),16);
@@ -2647,68 +2650,113 @@ function mapHexToRgb(hex) {
   return {r,g,b};
 }
 
+// Шум Перлина для органичных форм материков
+function mapNoise(x, y, seed) {
+  const n = Math.sin(x*127.1 + y*311.7 + seed*91.3) * 43758.5453;
+  return n - Math.floor(n);
+}
+function mapSmoothNoise(x, y, seed) {
+  const ix = Math.floor(x), iy = Math.floor(y);
+  const fx = x - ix, fy = y - iy;
+  const ux = fx*fx*(3-2*fx), uy = fy*fy*(3-2*fy);
+  const a = mapNoise(ix,iy,seed), b2 = mapNoise(ix+1,iy,seed);
+  const c = mapNoise(ix,iy+1,seed), d = mapNoise(ix+1,iy+1,seed);
+  return a + (b2-a)*ux + (c-a)*uy + (a-b2-c+d)*ux*uy;
+}
+function mapFractalNoise(x, y, seed, octaves=4) {
+  let v=0, amp=1, freq=1, max=0;
+  for(let i=0;i<octaves;i++){v+=mapSmoothNoise(x*freq,y*freq,seed+i*100)*amp;max+=amp;amp*=0.5;freq*=2.1;}
+  return v/max;
+}
+
 function mapBuildGrid(clans) {
   _mapCells = [];
   _mapClanCells = {};
-  const totalCells = MAP_GRID * MAP_GRID;
-  const totalMass = clans.reduce((s,c) => s + (c._mapMass||0), 0);
-  const grid = Array.from({length:MAP_GRID}, () => Array(MAP_GRID).fill(null));
+  _mapSmoothCache = null;
+  const G = MAP_GRID;
+  const totalCells = G * G;
+  const totalMass = clans.reduce((s,c) => s+(c._mapMass||0), 0);
+  const grid = Array.from({length:G}, () => Array(G).fill(null));
 
-  // Псевдослучайные но стабильные стартовые точки на основе тега клана
+  // Стабильная позиция семени на основе тега
   function seedPos(tag, idx) {
-    let h = 0;
-    for (let i = 0; i < tag.length; i++) h = (h * 31 + tag.charCodeAt(i)) & 0xffff;
-    h = (h + idx * 1337) & 0xffff;
-    const x = Math.floor((h % MAP_GRID));
-    const y = Math.floor(((h >> 4) % MAP_GRID));
-    return {x: Math.max(1, Math.min(MAP_GRID-2, x)), y: Math.max(1, Math.min(MAP_GRID-2, y))};
+    let h = 5381;
+    for(let i=0;i<tag.length;i++) h = ((h<<5)+h+tag.charCodeAt(i))&0xffffff;
+    h = (h + idx*73856) & 0xffffff;
+    const margin = Math.floor(G*0.15);
+    const x = margin + Math.floor((h & 0xfff) / 0xfff * (G - margin*2));
+    const y = margin + Math.floor(((h>>12)&0xfff) / 0xfff * (G - margin*2));
+    return {x, y};
   }
 
-  // Сколько клеток у каждого клана
+  // Сколько клеток у каждого клана (минимум чтобы было видно)
   const allocations = {};
-  clans.forEach((c, i) => {
-    const share = totalMass > 0 ? (c._mapMass||0) / totalMass : 0;
-    allocations[c.id] = Math.max(1, Math.floor(share * totalCells * 0.72));
+  clans.forEach(c => {
+    const share = totalMass > 0 ? (c._mapMass||0)/totalMass : 1/clans.length;
+    // 1% карты = 1 процент = totalCells*0.01 клеток, но минимум 4 клетки
+    const minCells = Math.max(4, Math.floor(totalCells * 0.004));
+    allocations[c.id] = Math.max(minCells, Math.floor(share * totalCells * 0.78));
   });
 
-  // BFS от стартовых точек
-  const queue = [];
+  // Размещаем семена, избегая столкновений
+  const seeds = [];
   clans.forEach((c, i) => {
-    const pos = seedPos(c.tag, i);
-    // Ищем свободную ячейку рядом если занята
-    let {x, y} = pos;
-    for (let d = 0; d < 5; d++) {
-      if (!grid[y][x]) break;
-      x = (x + 3) % MAP_GRID; y = (y + 3) % MAP_GRID;
+    let pos = seedPos(c.tag, i);
+    // Проверяем что далеко от других семян
+    for(let attempt=0; attempt<30; attempt++){
+      let tooClose = false;
+      for(const s of seeds){
+        const d = Math.abs(s.x-pos.x) + Math.abs(s.y-pos.y);
+        if(d < G*0.18){tooClose=true;break;}
+      }
+      if(!tooClose) break;
+      pos = seedPos(c.tag+attempt, i+attempt*7);
     }
-    grid[y][x] = c.id;
-    if (!_mapClanCells[c.id]) _mapClanCells[c.id] = 0;
-    _mapClanCells[c.id]++;
-    queue.push({x, y, id: c.id, pri: -(c._mapMass||0)});
+    seeds.push({...pos, id:c.id});
+    grid[pos.y][pos.x] = c.id;
+    _mapClanCells[c.id] = 1;
   });
 
-  // Сортируем очередь по приоритету (больше масса — быстрее растёт)
-  queue.sort((a,b) => a.pri - b.pri);
+  // Воронообразное расширение — каждый клан расширяется от своего центра
+  // с органичным шумом чтобы границы были неровные
+  const dirs8 = [{dx:0,dy:-1},{dx:1,dy:0},{dx:0,dy:1},{dx:-1,dy:0},{dx:1,dy:-1},{dx:1,dy:1},{dx:-1,dy:1},{dx:-1,dy:-1}];
+  
+  // Приоритетная очередь: сначала клетки ближе к центру с шумом
+  const pq = [];
+  seeds.forEach(s => {
+    const clan = clans.find(c=>c.id===s.id);
+    const noiseSeed = s.id.split('').reduce((a,ch)=>a+ch.charCodeAt(0),0);
+    pq.push({x:s.x, y:s.y, id:s.id, cost:0, noiseSeed});
+  });
 
-  const dirs = [{dx:0,dy:-1},{dx:1,dy:0},{dx:0,dy:1},{dx:-1,dy:0}];
-  let qi = 0;
-  while (qi < queue.length) {
-    const {x, y, id} = queue[qi++];
-    if ((_mapClanCells[id]||0) >= allocations[id]) continue;
-    const shuffled = [...dirs].sort(() => Math.random() - 0.49);
-    for (const {dx,dy} of shuffled) {
-      const nx = x+dx, ny = y+dy;
-      if (nx<0||nx>=MAP_GRID||ny<0||ny>=MAP_GRID) continue;
-      if (grid[ny][nx] !== null) continue;
+  let iter = 0;
+  while(pq.length > 0 && iter < 50000) {
+    iter++;
+    // Берём элемент с минимальной стоимостью
+    let minI = 0;
+    for(let i=1;i<pq.length;i++) if(pq[i].cost < pq[minI].cost) minI=i;
+    const {x, y, id, cost, noiseSeed} = pq.splice(minI,1)[0];
+    if((_mapClanCells[id]||0) >= allocations[id]) continue;
+
+    const shuffled = [...dirs8].sort(()=>Math.random()-0.5);
+    for(const {dx,dy} of shuffled){
+      const nx=x+dx, ny=y+dy;
+      if(nx<0||nx>=G||ny<0||ny>=G) continue;
+      if(grid[ny][nx]!==null) continue;
+      // Органичный шум для неровных краёв
+      const noise = mapFractalNoise(nx*0.18, ny*0.18, noiseSeed, 3);
+      const edgeNoise = mapFractalNoise(nx*0.35, ny*0.35, noiseSeed+50, 2)*0.4;
+      const newCost = cost + 0.5 + noise*0.8 + edgeNoise;
       grid[ny][nx] = id;
-      _mapClanCells[id] = (_mapClanCells[id]||0) + 1;
-      queue.push({x:nx, y:ny, id, pri:0});
+      _mapClanCells[id] = (_mapClanCells[id]||0)+1;
+      pq.push({x:nx, y:ny, id, cost:newCost, noiseSeed});
+      if((_mapClanCells[id]||0) >= allocations[id]) break;
     }
   }
 
-  for (let y=0;y<MAP_GRID;y++)
-    for (let x=0;x<MAP_GRID;x++)
-      _mapCells.push({x, y, clanId: grid[y][x]});
+  for(let y=0;y<G;y++)
+    for(let x=0;x<G;x++)
+      _mapCells.push({x, y, clanId:grid[y][x]});
 }
 
 async function renderClanMap() {
@@ -2799,71 +2847,176 @@ async function renderClanMap() {
     if (!_mapCanvas || !_mapCtx) return;
     const w = _mapCanvas.clientWidth, h = _mapCanvas.clientHeight;
     _mapCtx.clearRect(0,0,w,h);
-    _mapCtx.fillStyle = '#060c09';
+
+    // Фон — глубокий океан
+    const oceanGrad = _mapCtx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.max(w,h)*0.7);
+    oceanGrad.addColorStop(0,'#0a1520');
+    oceanGrad.addColorStop(1,'#040810');
+    _mapCtx.fillStyle = oceanGrad;
     _mapCtx.fillRect(0,0,w,h);
 
     const cs = mapCellSize();
     const {ox,oy} = mapOffset();
-    const pad = Math.max(0.5, cs*0.03);
+    const G = MAP_GRID;
 
-    // Клетки
-    for (const cell of _mapCells) {
-      const px = ox + cell.x*cs, py = oy + cell.y*cs;
-      if (px>w+cs||px<-cs||py>h+cs||py<-cs) continue;
-      const clan = cell.clanId ? _mapClans.find(c=>c.id===cell.clanId) : null;
-      if (clan) {
-        const rgb = mapHexToRgb(clan.color);
-        const a = clan.isMe ? 0.5 : 0.28;
-        _mapCtx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${a})`;
-        _mapCtx.fillRect(px+pad, py+pad, cs-pad*2, cs-pad*2);
-        _mapCtx.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},0.2)`;
-        _mapCtx.lineWidth = 0.5;
-        _mapCtx.strokeRect(px+pad, py+pad, cs-pad*2, cs-pad*2);
-      } else {
-        _mapCtx.fillStyle = 'rgba(255,255,255,0.03)';
-        _mapCtx.fillRect(px+pad, py+pad, cs-pad*2, cs-pad*2);
-        _mapCtx.strokeStyle = 'rgba(255,255,255,0.05)';
-        _mapCtx.lineWidth = 0.5;
-        _mapCtx.strokeRect(px+pad, py+pad, cs-pad*2, cs-pad*2);
+    // Строим lookup для быстрого доступа
+    const gridLookup = {};
+    for(const cell of _mapCells) gridLookup[cell.x+'_'+cell.y] = cell.clanId;
+
+    function getClan(x,y) {
+      if(x<0||x>=G||y<0||y>=G) return null;
+      const id = gridLookup[x+'_'+y];
+      return id ? _mapClans.find(c=>c.id===id)||null : null;
+    }
+
+    // Рисуем сначала "воду" между клетками для эффекта береговой линии
+    // Фоновая сетка лёгкая
+    if(cs > 2) {
+      _mapCtx.strokeStyle = 'rgba(0,150,200,0.04)';
+      _mapCtx.lineWidth = 0.5;
+      for(let x=0;x<=G;x++){
+        const px=ox+x*cs;
+        if(px<-cs||px>w+cs) continue;
+        _mapCtx.beginPath();_mapCtx.moveTo(px,oy);_mapCtx.lineTo(px,oy+G*cs);_mapCtx.stroke();
+      }
+      for(let y=0;y<=G;y++){
+        const py=oy+y*cs;
+        if(py<-cs||py>h+cs) continue;
+        _mapCtx.beginPath();_mapCtx.moveTo(ox,py);_mapCtx.lineTo(ox+G*cs,py);_mapCtx.stroke();
       }
     }
 
-    // Теги кланов в центре территорий
-    if (cs >= 14) {
-      const centers = {};
-      for (const cell of _mapCells) {
-        if (!cell.clanId) continue;
-        if (!centers[cell.clanId]) centers[cell.clanId] = {sx:0,sy:0,n:0};
-        centers[cell.clanId].sx += cell.x;
-        centers[cell.clanId].sy += cell.y;
-        centers[cell.clanId].n++;
+    // Рисуем материки: каждая клетка со скруглёнными углами
+    // Угол скругления зависит от соседей — создаёт органичный вид
+    for(const cell of _mapCells) {
+      const px = ox + cell.x*cs, py = oy + cell.y*cs;
+      if(px>w+cs*2||px<-cs*2||py>h+cs*2||py<-cs*2) continue;
+
+      const clan = cell.clanId ? _mapClans.find(c=>c.id===cell.clanId) : null;
+
+      if(!clan) {
+        // Свободная территория — тёмная с лёгким свечением
+        _mapCtx.fillStyle = 'rgba(0,100,150,0.06)';
+        _mapCtx.fillRect(px, py, cs, cs);
+        continue;
       }
-      for (const [id, c] of Object.entries(centers)) {
-        const clan = _mapClans.find(cl=>cl.id===id);
-        if (!clan) continue;
-        const cx = ox + (c.sx/c.n + 0.5)*cs;
-        const cy = oy + (c.sy/c.n + 0.5)*cs;
-        const fs = Math.max(9, Math.min(cs*0.42, 18));
-        _mapCtx.shadowColor = 'rgba(0,0,0,0.95)';
-        _mapCtx.shadowBlur = 5;
-        _mapCtx.fillStyle = clan.color;
-        _mapCtx.font = `900 ${fs}px 'Fredoka One',cursive`;
-        _mapCtx.textAlign = 'center';
-        _mapCtx.textBaseline = 'middle';
-        _mapCtx.fillText('['+clan.tag+']', cx, cy);
-        _mapCtx.shadowBlur = 0;
+
+      const rgb = mapHexToRgb(clan.color);
+
+      // Проверяем соседей того же клана
+      const top    = getClan(cell.x, cell.y-1)?.id === clan.id;
+      const bottom = getClan(cell.x, cell.y+1)?.id === clan.id;
+      const left   = getClan(cell.x-1, cell.y)?.id === clan.id;
+      const right  = getClan(cell.x+1, cell.y)?.id === clan.id;
+      const tl = getClan(cell.x-1,cell.y-1)?.id===clan.id;
+      const tr = getClan(cell.x+1,cell.y-1)?.id===clan.id;
+      const bl = getClan(cell.x-1,cell.y+1)?.id===clan.id;
+      const br = getClan(cell.x+1,cell.y+1)?.id===clan.id;
+
+      // Основной цвет — ярче для своего клана
+      const alpha = clan.isMe ? 0.72 : 0.52;
+      _mapCtx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${alpha})`;
+
+      // Рисуем с закруглёнными углами только там где нет соседа
+      const r = Math.max(1, cs * 0.38);
+      const x1=px, y1=py, x2=px+cs, y2=py+cs;
+
+      _mapCtx.beginPath();
+      // Верхний левый угол
+      if(!top && !left && !tl) {
+        _mapCtx.moveTo(x1+r, y1);
+        _mapCtx.arcTo(x1,y1, x1,y1+r, r);
+      } else { _mapCtx.moveTo(x1,y1); }
+      // Нижний левый
+      if(!bottom && !left && !bl) {
+        _mapCtx.lineTo(x1, y2-r);
+        _mapCtx.arcTo(x1,y2, x1+r,y2, r);
+      } else { _mapCtx.lineTo(x1,y2); }
+      // Нижний правый
+      if(!bottom && !right && !br) {
+        _mapCtx.lineTo(x2-r, y2);
+        _mapCtx.arcTo(x2,y2, x2,y2-r, r);
+      } else { _mapCtx.lineTo(x2,y2); }
+      // Верхний правый
+      if(!top && !right && !tr) {
+        _mapCtx.lineTo(x2, y1+r);
+        _mapCtx.arcTo(x2,y1, x2-r,y1, r);
+      } else { _mapCtx.lineTo(x2,y1); }
+      _mapCtx.closePath();
+      _mapCtx.fill();
+
+      // Подсветка сверху для 3D эффекта (только внешние клетки)
+      const isEdge = !top||!bottom||!left||!right;
+      if(isEdge && cs > 3) {
+        _mapCtx.fillStyle = `rgba(255,255,255,${clan.isMe?0.18:0.10})`;
+        _mapCtx.beginPath();
+        if(!top) { _mapCtx.fillRect(px+cs*0.1, py, cs*0.8, Math.max(1,cs*0.12)); }
+        _mapCtx.fill();
       }
+
+      // Тонкая обводка только на краях
+      if(isEdge && cs > 4) {
+        _mapCtx.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${clan.isMe?0.9:0.55})`;
+        _mapCtx.lineWidth = clan.isMe ? Math.max(0.8,cs*0.06) : Math.max(0.5,cs*0.04);
+        _mapCtx.stroke();
+      }
+    }
+
+    // Теги кланов в центре территорий с красивым фоном
+    const centers = {};
+    for(const cell of _mapCells) {
+      if(!cell.clanId) continue;
+      if(!centers[cell.clanId]) centers[cell.clanId]={sx:0,sy:0,n:0};
+      centers[cell.clanId].sx+=cell.x;
+      centers[cell.clanId].sy+=cell.y;
+      centers[cell.clanId].n++;
+    }
+    for(const [id,c] of Object.entries(centers)) {
+      const clan = _mapClans.find(cl=>cl.id===id);
+      if(!clan) continue;
+      const cx = ox + (c.sx/c.n+0.5)*cs;
+      const cy = oy + (c.sy/c.n+0.5)*cs;
+      if(cx<-50||cx>w+50||cy<-20||cy>h+20) continue;
+      const fs = Math.max(7, Math.min(cs*1.8, 22));
+      if(fs < 7) continue;
+      const rgb = mapHexToRgb(clan.color);
+      const label = '['+clan.tag+']';
+
+      // Подложка под текст
+      _mapCtx.font = `900 ${fs}px 'Fredoka One',cursive`;
+      const tw = _mapCtx.measureText(label).width;
+      const pad2 = fs*0.4;
+      _mapCtx.fillStyle = `rgba(0,0,0,0.65)`;
+      const bw=tw+pad2*2, bh=fs+pad2;
+      const bx=cx-bw/2, by=cy-bh/2;
+      const br2=bh/2;
+      _mapCtx.beginPath();
+      _mapCtx.roundRect(bx,by,bw,bh,br2);
+      _mapCtx.fill();
+      // Обводка подложки цветом клана
+      _mapCtx.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},0.6)`;
+      _mapCtx.lineWidth = 1;
+      _mapCtx.stroke();
+
+      // Текст
+      _mapCtx.fillStyle = clan.isMe ? '#fff' : clan.color;
+      _mapCtx.textAlign = 'center';
+      _mapCtx.textBaseline = 'middle';
+      _mapCtx.shadowColor = 'rgba(0,0,0,0.8)';
+      _mapCtx.shadowBlur = 3;
+      _mapCtx.fillText(label, cx, cy);
+      _mapCtx.shadowBlur = 0;
     }
 
     // Рамка карты
-    const mw = cs*MAP_GRID, mh = cs*MAP_GRID;
-    _mapCtx.strokeStyle = 'rgba(162,155,254,0.4)';
+    const mw=cs*G, mh=cs*G;
+    _mapCtx.strokeStyle = 'rgba(162,155,254,0.35)';
     _mapCtx.lineWidth = 1.5;
-    _mapCtx.strokeRect(ox, oy, mw, mh);
-    // Угловые метки
+    _mapCtx.strokeRect(ox,oy,mw,mh);
+    // Угловые засечки
     _mapCtx.strokeStyle = 'rgba(162,155,254,0.7)';
     _mapCtx.lineWidth = 2;
-    const cn = 10;
+    const cn=12;
     [[ox,oy,1,1],[ox+mw,oy,-1,1],[ox,oy+mh,1,-1],[ox+mw,oy+mh,-1,-1]].forEach(([x,y,sx,sy])=>{
       _mapCtx.beginPath();_mapCtx.moveTo(x+sx*cn,y);_mapCtx.lineTo(x,y);_mapCtx.lineTo(x,y+sy*cn);_mapCtx.stroke();
     });
