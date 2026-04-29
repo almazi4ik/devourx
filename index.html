@@ -2194,16 +2194,22 @@ async function jbUpdateName(name) {
   if(_nameUpdateTimer) clearTimeout(_nameUpdateTimer);
   _nameUpdateTimer = setTimeout(async () => {
     try {
-      const id = await jbEnsureBin();
       const scores = await jbLoadScores();
       const existing = scores.findIndex(s => s.pid === _playerId);
       if(existing >= 0 && scores[existing].name !== name) {
         scores[existing].name = name;
-        await fetch(`https://api.jsonbin.io/v3/b/${id}`, {method:'PUT', headers:{'Content-Type':'application/json','X-Master-Key':JB_KEY}, body:JSON.stringify({scores})});
+        await fetch(`${UPSTASH_URL}/set/scores`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${UPSTASH_TOKEN}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(JSON.stringify(scores))
+        });
         updateBestMassWidget(scores);
       }
     } catch(e) {}
-  }, 1500); // дебаунс 1.5 сек — не спамим запросами при каждом символе
+  }, 1500);
 }
 
 // Обновляем имя в клане
