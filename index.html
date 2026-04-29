@@ -53,6 +53,23 @@ body { background:#0d2b15; overflow:hidden; font-family:'Nunito',sans-serif; use
 .btn-quests-menu { background:linear-gradient(180deg,#a29bfe 0%,#6c5ce7 100%); border:none; border-radius:60px; color:#fff; font-family:'Fredoka One',cursive; font-size:22px; letter-spacing:2px; padding:13px 0; width:100%; cursor:pointer; box-shadow:0 5px 0 #4a2cb0; transition:transform .1s; }
 .btn-quests-menu:hover{transform:translateY(-2px)}
 
+/* ═══ MODE CARD MAZE ═══ */
+.mode-card-maze {
+  background:linear-gradient(160deg,#1a1a2e,#0f0f1a);
+  border-color:rgba(108,92,231,0.45);
+  box-shadow:0 8px 32px rgba(108,92,231,0.15);
+}
+.mode-card-maze:hover {
+  box-shadow:0 16px 44px rgba(108,92,231,0.45), 0 0 30px rgba(108,92,231,0.15);
+  border-color:#6c5ce7;
+}
+.mode-card-maze .mode-label { color:#6c5ce7; }
+.mode-badge-maze {
+  background:rgba(108,92,231,0.15);
+  color:#6c5ce7;
+  border:1px solid rgba(108,92,231,0.4);
+}
+
 /* ═══ ACHIEVEMENTS PANEL ═══ */
 #achPanel {
   position:fixed; bottom:150px; left:50%;
@@ -98,7 +115,7 @@ body { background:#0d2b15; overflow:hidden; font-family:'Nunito',sans-serif; use
 .mode-logo { font-family:'Fredoka One',cursive; font-size:52px; line-height:1; margin-bottom:10px; filter:drop-shadow(0 0 24px #39ff1455); }
 .mode-logo .ld{color:#ff4e4e}.mode-logo .le{color:#ff9f43}.mode-logo .lv{color:#f9ca24}.mode-logo .lo{color:#2ecc71}.mode-logo .lu{color:#00e5cc}.mode-logo .lr{color:#a29bfe}.mode-logo .lx{color:#ff6b9d}
 .mode-title { font-family:'Fredoka One',cursive; font-size:28px; color:#a8d8b8; letter-spacing:3px; margin-bottom:40px; }
-.mode-btns { display:flex; gap:22px; align-items:stretch; }
+.mode-btns { display:flex; gap:22px; align-items:stretch; flex-wrap:wrap; justify-content:center; }
 .mode-card {
   width:190px; border-radius:28px; padding:30px 16px 26px;
   display:flex; flex-direction:column; align-items:center; gap:12px;
@@ -650,6 +667,13 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
       <div class="mode-label" data-i18n="online_btn">ОНЛАЙН</div>
       <div class="mode-desc" data-i18n="online_desc">Сражайся с реальными<br>игроками</div>
     </div>
+    <!-- ═══ НОВЫЙ РЕЖИМ ЛАБИРИНТ ═══ -->
+ <div class="mode-card mode-card-maze" id="mazeBtn">
+  <span class="mode-badge mode-badge-maze">🌀</span>
+  <div class="mode-icon">🏛️</div>
+  <div class="mode-label" data-i18n="maze">ЛАБИРИНТ</div>
+  <div class="mode-desc" data-i18n="maze_desc">Узкие коридоры<br>и тупики</div>
+</div>
   </div>
   <button class="mode-back" id="modeBackBtn" data-i18n="back">← Назад</button>
   <button id="serverPickBtn" onclick="openServerPick()" style="margin-top:8px;background:transparent;border:2px solid rgba(255,255,255,0.15);border-radius:50px;padding:9px 40px;cursor:pointer;font-family:'Fredoka One',cursive;font-size:14px;color:rgba(255,255,255,0.4);display:none;align-items:center;justify-content:center;gap:6px;pointer-events:all;letter-spacing:1px;transition:all .15s;">
@@ -1074,6 +1098,7 @@ const LANGS = {
     sk_forest:'Лес',sk_storm:'Буря',sk_sand:'Песок',sk_venom:'Яд',
     sk_candy:'Конфетка',sk_obsidian:'Обсидиан',sk_grass:'Трава',sk_earth:'Земля',sk_snow:'Снег',sk_sunset2:'Закат X',sk_ocean:'Океан',sk_cherry:'Вишня',sk_ukraine:'Украина',sk_russia:'Россия',sk_germany:'Германия',sk_france:'Франция',sk_brazil:'Бразилия',
     rating:'🏆 РЕЙТИНГ',global_rating:'🏆 ГЛОБАЛЬНЫЙ РЕЙТИНГ',best_mass:'Самая большая масса',
+    maze:'ЛАБИРИНТ',maze_desc:'Узкие коридоры<br>и тупики',
     tips:['Зажми ЛКМ — ускорение!','Заставь врага врезаться в хвост!','Убивай игроков — монеты!','Минимум 10 массы для ускорения','A — автопилот']
   },
   en:{code:'en',name:'English',
@@ -1099,14 +1124,15 @@ const LANGS = {
     sk_forest:'Forest',sk_storm:'Storm',sk_sand:'Sand',sk_venom:'Venom',
     sk_candy:'Candy',sk_obsidian:'Obsidian',
     rating:'🏆 RATING',global_rating:'🏆 GLOBAL RATING',best_mass:'Best Mass',
+    maze:'MAZE',maze_desc:'Narrow corridors<br>and dead ends',
     tips:['Hold LMB — speed boost!','Make enemies hit your tail!','Kill players — earn coins!','Need 10+ mass to boost','A — autopilot']
   },
-  de:{code:'de',name:'Deutsch',play:'SPIELEN',skins:'SKINS',achievements:'ERFOLGE',music_on:'🔊 MUSIK: AN',music_off:'🔇 MUSIK: AUS',connecting:'Verbinden',auth:'Autorisierung',ready:'Fertig!',no_server:'Keine Verbindung. Später versuchen.',conn_err:'Verbindungsfehler',respawn:'Respawn',mass:'Masse',place:'Rang',autopilot:'AUTOPILOT',killed:'TOT!',your_score:'Dein Ergebnis',again:'Nochmal!',main_menu:'Hauptmenu',top_records:'TOP REKORDE',top:'TOP',online:'Online',all:'Alle',standard:'Standard',rare:'Selten',legendary:'Legendar',back:'Zuruck',task_done:'Aufgabe erledigt!',kill_reward:'Munzen fur Kill!',equipped:'Ausgerustet',equip:'Ausrusten',need_coins:'Brauche',coins:'Munzen',choose_mode:'MODUS WAHLEN',offline:'OFFLINE',online_btn:'ONLINE',offline_desc:'Spiele gegen Bots, kein Internet notig',online_desc:'Kampfe gegen echte Spieler',bots:'BOTS',live:'LIVE',sk_green:'Grun',sk_red:'Rot',sk_blue:'Blau',sk_gold:'Gold',sk_violet:'Violett',sk_pink:'Rosa',sk_teal:'Turkis',sk_orange:'Orange',sk_fire:'Feuer',sk_ice:'Eis',sk_neon:'Neon',sk_galaxy:'Galaxie',sk_dark:'Dunkel',sk_goldx:'Gold X',sk_rainbow:'Regenbogen',sk_darkx:'Dunkel X',sk_lava:'Lava',sk_mint:'Minze',sk_coral:'Koralle',sk_cobalt:'Kobalt',sk_lime:'Limette',sk_rose:'Rose',sk_cyber:'Cyber',sk_sunset:'Sonnenuntergang',sk_forest:'Wald',sk_storm:'Sturm',sk_sand:'Sand',sk_venom:'Gift',sk_candy:'Sussigkeit',sk_obsidian:'Obsidian',sk_grass:'Grass',sk_earth:'Earth',sk_snow:'Snow',sk_sunset2:'Sunset X',sk_ocean:'Ocean',sk_cherry:'Cherry',sk_ukraine:'Ukraine',sk_russia:'Russia',sk_germany:'Germany',sk_france:'France',sk_brazil:'Brazil',rating:'🏆 RANGLISTE',global_rating:'🏆 GLOBALE RANGLISTE',best_mass:'Beste Masse',tips:['LMB halten — Boost!','Feinde in deinen Schwanz lenken!','Spieler toten — Munzen!','Min. 10 Masse fur Boost','A — Autopilot']},
-  fr:{code:'fr',name:'Français',play:'JOUER',skins:'SKINS',achievements:'SUCCES',music_on:'🔊 MUSIQUE: ON',music_off:'🔇 MUSIQUE: OFF',connecting:'Connexion',auth:'Autorisation',ready:'Pret!',no_server:'Pas de connexion. Reessayez.',conn_err:'Erreur de connexion',respawn:'Reapparition',mass:'Masse',place:'Rang',autopilot:'PILOTE AUTO',killed:'MORT!',your_score:'Ton score',again:'Encore!',main_menu:'Menu Principal',top_records:'TOP RECORDS',top:'TOP',online:'En ligne',all:'Tous',standard:'Standard',rare:'Rare',legendary:'Legendaire',back:'Retour',task_done:'Quete accomplie!',kill_reward:'pieces pour kill!',equipped:'Equipe',equip:'Equiper',need_coins:'Besoin de',coins:'pieces',choose_mode:'CHOISIR LE MODE',offline:'HORS LIGNE',online_btn:'EN LIGNE',offline_desc:'Joue contre des bots sans internet',online_desc:'Combats de vrais joueurs',bots:'BOTS',live:'LIVE',sk_green:'Vert',sk_red:'Rouge',sk_blue:'Bleu',sk_gold:'Or',sk_violet:'Violet',sk_pink:'Rose',sk_teal:'Cyan',sk_orange:'Orange',sk_fire:'Feu',sk_ice:'Glace',sk_neon:'Neon',sk_galaxy:'Galaxie',sk_dark:'Sombre',sk_goldx:'Or X',sk_rainbow:'Arc-en-ciel',sk_darkx:'Sombre X',sk_lava:'Lave',sk_mint:'Menthe',sk_coral:'Corail',sk_cobalt:'Cobalt',sk_lime:'Citron',sk_rose:'Rose',sk_cyber:'Cyber',sk_sunset:'Coucher de soleil',sk_forest:'Foret',sk_storm:'Tempete',sk_sand:'Sable',sk_venom:'Venin',sk_candy:'Bonbon',sk_obsidian:'Obsidienne',sk_grass:'Herbe',sk_earth:'Terre',sk_snow:'Neige',sk_sunset2:'Coucher X',sk_ocean:'Ocean',sk_cherry:'Cerise',sk_ukraine:'Ukraine',sk_russia:'Russie',sk_germany:'Allemagne',sk_france:'France',sk_brazil:'Bresil',rating:'🏆 CLASSEMENT',global_rating:'🏆 CLASSEMENT MONDIAL',best_mass:'Meilleure Masse',tips:['Maintenir clic — boost!','Faites heurter les ennemis!','Tuez pour des pieces!','10+ masse pour booster','A — pilote automatique']},
-  es:{code:'es',name:'Español',play:'JUGAR',skins:'SKINS',achievements:'LOGROS',music_on:'🔊 MUSICA: ON',music_off:'🔇 MUSICA: OFF',connecting:'Conectando',auth:'Autorizando',ready:'Listo!',no_server:'Sin conexion. Intenta mas tarde.',conn_err:'Error de conexion',respawn:'Reapareciendo',mass:'Masa',place:'Rango',autopilot:'AUTOPILOTO',killed:'MUERTO!',your_score:'Tu puntuacion',again:'Otra vez!',main_menu:'Menu Principal',top_records:'TOP RECORDS',top:'TOP',online:'En linea',all:'Todos',standard:'Estandar',rare:'Raro',legendary:'Legendario',back:'Volver',task_done:'Mision completa!',kill_reward:'monedas por matar!',equipped:'Equipado',equip:'Equipar',need_coins:'Necesitas',coins:'monedas',choose_mode:'ELIGE MODO',offline:'SIN CONEXION',online_btn:'EN LINEA',offline_desc:'Juega contra bots sin internet',online_desc:'Lucha contra jugadores reales',bots:'BOTS',live:'LIVE',sk_green:'Verde',sk_red:'Rojo',sk_blue:'Azul',sk_gold:'Oro',sk_violet:'Violeta',sk_pink:'Rosa',sk_teal:'Cian',sk_orange:'Naranja',sk_fire:'Fuego',sk_ice:'Hielo',sk_neon:'Neon',sk_galaxy:'Galaxia',sk_dark:'Oscuro',sk_goldx:'Oro X',sk_rainbow:'Arcoiris',sk_darkx:'Oscuro X',sk_lava:'Lava',sk_mint:'Menta',sk_coral:'Coral',sk_cobalt:'Cobalto',sk_lime:'Lima',sk_rose:'Rosa',sk_cyber:'Cyber',sk_sunset:'Atardecer',sk_forest:'Bosque',sk_storm:'Tormenta',sk_sand:'Arena',sk_venom:'Veneno',sk_candy:'Caramelo',sk_obsidian:'Obsidiana',sk_grass:'Hierba',sk_earth:'Tierra',sk_snow:'Nieve',sk_sunset2:'Atardecer X',sk_ocean:'Oceano',sk_cherry:'Cereza',sk_ukraine:'Ucrania',sk_russia:'Rusia',sk_germany:'Alemania',sk_france:'Francia',sk_brazil:'Brasil',rating:'🏆 CLASIFICACIÓN',global_rating:'🏆 CLASIFICACIÓN GLOBAL',best_mass:'Mejor Masa',tips:['Mantener clic — boost!','Haz que enemigos choquen!','Mata — gana monedas!','10+ masa para boost','A — autopiloto']},
-  pt:{code:'pt',name:'Português',play:'JOGAR',skins:'SKINS',achievements:'CONQUISTAS',music_on:'🔊 MUSICA: ON',music_off:'🔇 MUSICA: OFF',connecting:'Conectando',auth:'Autorizando',ready:'Pronto!',no_server:'Sem conexao. Tente mais tarde.',conn_err:'Erro de conexao',respawn:'Renascendo',mass:'Massa',place:'Rank',autopilot:'AUTOPILOTO',killed:'MORTO!',your_score:'Sua pontuacao',again:'De novo!',main_menu:'Menu Principal',top_records:'TOP RECORDES',top:'TOP',online:'Online',all:'Todos',standard:'Padrao',rare:'Raro',legendary:'Lendario',back:'Voltar',task_done:'Missao completa!',kill_reward:'moedas por matar!',equipped:'Equipado',equip:'Equipar',need_coins:'Precisa de',coins:'moedas',choose_mode:'ESCOLHER MODO',offline:'OFFLINE',online_btn:'ONLINE',offline_desc:'Jogue contra bots sem internet',online_desc:'Lute contra jogadores reais',bots:'BOTS',live:'LIVE',sk_green:'Verde',sk_red:'Vermelho',sk_blue:'Azul',sk_gold:'Ouro',sk_violet:'Violeta',sk_pink:'Rosa',sk_teal:'Ciano',sk_orange:'Laranja',sk_fire:'Fogo',sk_ice:'Gelo',sk_neon:'Neon',sk_galaxy:'Galaxia',sk_dark:'Escuro',sk_goldx:'Ouro X',sk_rainbow:'Arco-iris',sk_darkx:'Escuro X',sk_lava:'Lava',sk_mint:'Hortela',sk_coral:'Coral',sk_cobalt:'Cobalto',sk_lime:'Lima',sk_rose:'Rosa',sk_cyber:'Cyber',sk_sunset:'Por do sol',sk_forest:'Floresta',sk_storm:'Tempestade',sk_sand:'Areia',sk_venom:'Veneno',sk_candy:'Doce',sk_obsidian:'Obsidiana',sk_grass:'Grama',sk_earth:'Terra',sk_snow:'Neve',sk_sunset2:'Por do sol X',sk_ocean:'Oceano',sk_cherry:'Cereja',sk_ukraine:'Ucrania',sk_russia:'Russia',sk_germany:'Alemanha',sk_france:'Franca',sk_brazil:'Brasil',rating:'🏆 CLASSIFICAÇÃO',global_rating:'🏆 CLASSIFICAÇÃO GLOBAL',best_mass:'Melhor Massa',tips:['Segure clique — boost!','Faca inimigos baterem!','Mate — ganhe moedas!','10+ massa para boost','A — autopiloto']},
-  tr:{code:'tr',name:'Türkçe',play:'OYNA',skins:'SKINLER',achievements:'BASARIMLAR',music_on:'🔊 MUZIK: ACIK',music_off:'🔇 MUZIK: KAPALI',connecting:'Baglanıyor',auth:'Yetkilendirme',ready:'Hazir!',no_server:'Baglanti yok. Sonra dene.',conn_err:'Baglanti hatasi',respawn:'Yeniden doguyor',mass:'Kutle',place:'Sıra',autopilot:'OTOPILOT',killed:'OLDUN!',your_score:'Skorun',again:'Tekrar!',main_menu:'Ana Menu',top_records:'TOP REKORLAR',top:'TOP',online:'Cevrimici',all:'Hepsi',standard:'Standart',rare:'Nadir',legendary:'Efsanevi',back:'Geri',task_done:'Gorev tamamlandı!',kill_reward:'oldurme icin para!',equipped:'Giyildi',equip:'Giy',need_coins:'Gerekli',coins:'para',choose_mode:'MOD SEC',offline:'CEVRIMDISI',online_btn:'CEVRIMICI',offline_desc:'Internetsiz botlara karsi oyna',online_desc:'Gercek oyunculara karsi savas',bots:'BOTLAR',live:'LIVE',sk_green:'Yesil',sk_red:'Kirmizi',sk_blue:'Mavi',sk_gold:'Altin',sk_violet:'Mor',sk_pink:'Pembe',sk_teal:'Camgobegi',sk_orange:'Turuncu',sk_fire:'Ates',sk_ice:'Buz',sk_neon:'Neon',sk_galaxy:'Galaksi',sk_dark:'Karanlik',sk_goldx:'Altin X',sk_rainbow:'Gokkusagi',sk_darkx:'Karanlik X',sk_lava:'Lav',sk_mint:'Nane',sk_coral:'Mercan',sk_cobalt:'Kobalt',sk_lime:'Limon',sk_rose:'Gul',sk_cyber:'Siber',sk_sunset:'Gun batimi',sk_forest:'Orman',sk_storm:'Firtina',sk_sand:'Kum',sk_venom:'Zehir',sk_candy:'Seker',sk_obsidian:'Obsidyen',sk_grass:'Cimen',sk_earth:'Toprak',sk_snow:'Kar',sk_sunset2:'Gun batimi X',sk_ocean:'Okyanus',sk_cherry:'Kiraz',sk_ukraine:'Ukrayna',sk_russia:'Rusya',sk_germany:'Almanya',sk_france:'Fransa',sk_brazil:'Brezilya',rating:'🏆 SIRALAMA',global_rating:'🏆 GLOBAL SIRALAMA',best_mass:'En İyi Kütle',tips:['Sol tikla tut — boost!','Dusmanlari kuyruğuna carp!','Oldur — para kazan!','Boost icin 10+ kutle','A — otopilot']},
-  uk:{code:'uk',name:'Українська',play:'ГРАТИ',skins:'СКІНИ',achievements:'ДОСЯГНЕННЯ',music_on:'🔊 МУЗИКА: УВК',music_off:'🔇 МУЗИКА: ВИКЛ',connecting:'Підключення',auth:'Авторизація',ready:'Готово!',no_server:"Немає зв'язку. Спробуй пізніше.",conn_err:'Помилка підключення',respawn:'Відродження',mass:'Маса',place:'Місце',autopilot:'АВТОПІЛОТ',killed:'ВБИТИЙ!',your_score:'Твій результат',again:'Знову!',main_menu:'Головне меню',top_records:'ТОП РЕКОРДІВ',top:'ТОП',online:'Онлайн',all:'Всі',standard:'Стандартні',rare:'Рідкісні',legendary:'Легендарні',back:'Назад',task_done:'Завдання виконано!',kill_reward:'монети за вбивство!',equipped:'Надіто',equip:'Надіти',need_coins:'Потрібно',coins:'монет',choose_mode:'ОБЕРИ РЕЖИМ',offline:'ОФЛАЙН',online_btn:'ОНЛАЙН',offline_desc:'Грай проти ботів без інтернету',online_desc:'Змагайся з реальними гравцями',bots:'БОТИ',live:'LIVE',sk_green:'Зелений',sk_red:'Червоний',sk_blue:'Синій',sk_gold:'Золотий',sk_violet:'Фіолет',sk_pink:'Рожевий',sk_teal:'Бірюза',sk_orange:'Помаранч',sk_fire:'Вогонь',sk_ice:'Лід',sk_neon:'Неон',sk_galaxy:'Галактика',sk_dark:'Темрява',sk_goldx:'Золото X',sk_rainbow:'Веселка',sk_darkx:'Темний X',sk_lava:'Лава',sk_mint:'М\'ята',sk_coral:'Корал',sk_cobalt:'Кобальт',sk_lime:'Лайм',sk_rose:'Рожевий X',sk_cyber:'Кібер',sk_sunset:'Захід',sk_forest:'Ліс',sk_storm:'Буря',sk_sand:'Пісок',sk_venom:'Отрута',sk_candy:'Цукерка',sk_obsidian:'Обсидіан',sk_grass:'Трава',sk_earth:'Земля',sk_snow:'Сніг',sk_sunset2:'Захід X',sk_ocean:'Океан',sk_cherry:'Вишня',sk_ukraine:'Україна',sk_russia:'Росія',sk_germany:'Німеччина',sk_france:'Франція',sk_brazil:'Бразилія',rating:'🏆 РЕЙТИНГ',global_rating:'🏆 ГЛОБАЛЬНИЙ РЕЙТИНГ',best_mass:'Найбільша маса',tips:['Затисни ЛКМ — прискорення!','Змусь ворога врізатись!','Вбивай гравців — монети!','Мін. 10 маси для буста','A — автопілот']},
+  de:{code:'de',name:'Deutsch',play:'SPIELEN',skins:'SKINS',achievements:'ERFOLGE',music_on:'🔊 MUSIK: AN',music_off:'🔇 MUSIK: AUS',connecting:'Verbinden',auth:'Autorisierung',ready:'Fertig!',no_server:'Keine Verbindung. Später versuchen.',conn_err:'Verbindungsfehler',respawn:'Respawn',mass:'Masse',place:'Rang',autopilot:'AUTOPILOT',killed:'TOT!',your_score:'Dein Ergebnis',again:'Nochmal!',main_menu:'Hauptmenu',top_records:'TOP REKORDE',top:'TOP',online:'Online',all:'Alle',standard:'Standard',rare:'Selten',legendary:'Legendar',back:'Zuruck',task_done:'Aufgabe erledigt!',kill_reward:'Munzen fur Kill!',equipped:'Ausgerustet',equip:'Ausrusten',need_coins:'Brauche',coins:'Munzen',choose_mode:'MODUS WAHLEN',offline:'OFFLINE',online_btn:'ONLINE',offline_desc:'Spiele gegen Bots, kein Internet notig',online_desc:'Kampfe gegen echte Spieler',bots:'BOTS',live:'LIVE',sk_green:'Grun',sk_red:'Rot',sk_blue:'Blau',sk_gold:'Gold',sk_violet:'Violett',sk_pink:'Rosa',sk_teal:'Turkis',sk_orange:'Orange',sk_fire:'Feuer',sk_ice:'Eis',sk_neon:'Neon',sk_galaxy:'Galaxie',sk_dark:'Dunkel',sk_goldx:'Gold X',sk_rainbow:'Regenbogen',sk_darkx:'Dunkel X',sk_lava:'Lava',sk_mint:'Minze',sk_coral:'Koralle',sk_cobalt:'Kobalt',sk_lime:'Limette',sk_rose:'Rose',sk_cyber:'Cyber',sk_sunset:'Sonnenuntergang',sk_forest:'Wald',sk_storm:'Sturm',sk_sand:'Sand',sk_venom:'Gift',sk_candy:'Sussigkeit',sk_obsidian:'Obsidian',sk_grass:'Grass',sk_earth:'Earth',sk_snow:'Snow',sk_sunset2:'Sunset X',sk_ocean:'Ocean',sk_cherry:'Cherry',sk_ukraine:'Ukraine',sk_russia:'Russia',sk_germany:'Germany',sk_france:'France',sk_brazil:'Brazil',rating:'🏆 RANGLISTE',global_rating:'🏆 GLOBALE RANGLISTE',best_mass:'Beste Masse',maze:'LABYRINTH',maze_desc:'Enge Gänge<br>und Sackgassen',tips:['LMB halten — Boost!','Feinde in deinen Schwanz lenken!','Spieler toten — Munzen!','Min. 10 Masse fur Boost','A — Autopilot']},
+  fr:{code:'fr',name:'Français',play:'JOUER',skins:'SKINS',achievements:'SUCCES',music_on:'🔊 MUSIQUE: ON',music_off:'🔇 MUSIQUE: OFF',connecting:'Connexion',auth:'Autorisation',ready:'Pret!',no_server:'Pas de connexion. Reessayez.',conn_err:'Erreur de connexion',respawn:'Reapparition',mass:'Masse',place:'Rang',autopilot:'PILOTE AUTO',killed:'MORT!',your_score:'Ton score',again:'Encore!',main_menu:'Menu Principal',top_records:'TOP RECORDS',top:'TOP',online:'En ligne',all:'Tous',standard:'Standard',rare:'Rare',legendary:'Legendaire',back:'Retour',task_done:'Quete accomplie!',kill_reward:'pieces pour kill!',equipped:'Equipe',equip:'Equiper',need_coins:'Besoin de',coins:'pieces',choose_mode:'CHOISIR LE MODE',offline:'HORS LIGNE',online_btn:'EN LIGNE',offline_desc:'Joue contre des bots sans internet',online_desc:'Combats de vrais joueurs',bots:'BOTS',live:'LIVE',sk_green:'Vert',sk_red:'Rouge',sk_blue:'Bleu',sk_gold:'Or',sk_violet:'Violet',sk_pink:'Rose',sk_teal:'Cyan',sk_orange:'Orange',sk_fire:'Feu',sk_ice:'Glace',sk_neon:'Neon',sk_galaxy:'Galaxie',sk_dark:'Sombre',sk_goldx:'Or X',sk_rainbow:'Arc-en-ciel',sk_darkx:'Sombre X',sk_lava:'Lave',sk_mint:'Menthe',sk_coral:'Corail',sk_cobalt:'Cobalt',sk_lime:'Citron',sk_rose:'Rose',sk_cyber:'Cyber',sk_sunset:'Coucher de soleil',sk_forest:'Foret',sk_storm:'Tempete',sk_sand:'Sable',sk_venom:'Venin',sk_candy:'Bonbon',sk_obsidian:'Obsidienne',sk_grass:'Herbe',sk_earth:'Terre',sk_snow:'Neige',sk_sunset2:'Coucher X',sk_ocean:'Ocean',sk_cherry:'Cerise',sk_ukraine:'Ukraine',sk_russia:'Russie',sk_germany:'Allemagne',sk_france:'France',sk_brazil:'Bresil',rating:'🏆 CLASSEMENT',global_rating:'🏆 CLASSEMENT MONDIAL',best_mass:'Meilleure Masse',maze:'LABYRINTHE',maze_desc:'Couloirs étroits<br>et impasses',tips:['Maintenir clic — boost!','Faites heurter les ennemis!','Tuez pour des pieces!','10+ masse pour booster','A — pilote automatique']},
+  es:{code:'es',name:'Español',play:'JUGAR',skins:'SKINS',achievements:'LOGROS',music_on:'🔊 MUSICA: ON',music_off:'🔇 MUSICA: OFF',connecting:'Conectando',auth:'Autorizando',ready:'Listo!',no_server:'Sin conexion. Intenta mas tarde.',conn_err:'Error de conexion',respawn:'Reapareciendo',mass:'Masa',place:'Rango',autopilot:'AUTOPILOTO',killed:'MUERTO!',your_score:'Tu puntuacion',again:'Otra vez!',main_menu:'Menu Principal',top_records:'TOP RECORDS',top:'TOP',online:'En linea',all:'Todos',standard:'Estandar',rare:'Raro',legendary:'Legendario',back:'Volver',task_done:'Mision completa!',kill_reward:'monedas por matar!',equipped:'Equipado',equip:'Equipar',need_coins:'Necesitas',coins:'monedas',choose_mode:'ELIGE MODO',offline:'SIN CONEXION',online_btn:'EN LINEA',offline_desc:'Juega contra bots sin internet',online_desc:'Lucha contra jugadores reales',bots:'BOTS',live:'LIVE',sk_green:'Verde',sk_red:'Rojo',sk_blue:'Azul',sk_gold:'Oro',sk_violet:'Violeta',sk_pink:'Rosa',sk_teal:'Cian',sk_orange:'Naranja',sk_fire:'Fuego',sk_ice:'Hielo',sk_neon:'Neon',sk_galaxy:'Galaxia',sk_dark:'Oscuro',sk_goldx:'Oro X',sk_rainbow:'Arcoiris',sk_darkx:'Oscuro X',sk_lava:'Lava',sk_mint:'Menta',sk_coral:'Coral',sk_cobalt:'Cobalto',sk_lime:'Lima',sk_rose:'Rosa',sk_cyber:'Cyber',sk_sunset:'Atardecer',sk_forest:'Bosque',sk_storm:'Tormenta',sk_sand:'Arena',sk_venom:'Veneno',sk_candy:'Caramelo',sk_obsidian:'Obsidiana',sk_grass:'Hierba',sk_earth:'Tierra',sk_snow:'Nieve',sk_sunset2:'Atardecer X',sk_ocean:'Oceano',sk_cherry:'Cereza',sk_ukraine:'Ucrania',sk_russia:'Rusia',sk_germany:'Alemania',sk_france:'Francia',sk_brazil:'Brasil',rating:'🏆 CLASIFICACIÓN',global_rating:'🏆 CLASIFICACIÓN GLOBAL',best_mass:'Mejor Masa',maze:'LABERINTO',maze_desc:'Pasillos estrechos<br>y callejones sin salida',tips:['Mantener clic — boost!','Haz que enemigos choquen!','Mata — gana monedas!','10+ masa para boost','A — autopiloto']},
+  pt:{code:'pt',name:'Português',play:'JOGAR',skins:'SKINS',achievements:'CONQUISTAS',music_on:'🔊 MUSICA: ON',music_off:'🔇 MUSICA: OFF',connecting:'Conectando',auth:'Autorizando',ready:'Pronto!',no_server:'Sem conexao. Tente mais tarde.',conn_err:'Erro de conexao',respawn:'Renascendo',mass:'Massa',place:'Rank',autopilot:'AUTOPILOTO',killed:'MORTO!',your_score:'Sua pontuacao',again:'De novo!',main_menu:'Menu Principal',top_records:'TOP RECORDES',top:'TOP',online:'Online',all:'Todos',standard:'Padrao',rare:'Raro',legendary:'Lendario',back:'Voltar',task_done:'Missao completa!',kill_reward:'moedas por matar!',equipped:'Equipado',equip:'Equipar',need_coins:'Precisa de',coins:'moedas',choose_mode:'ESCOLHER MODO',offline:'OFFLINE',online_btn:'ONLINE',offline_desc:'Jogue contra bots sem internet',online_desc:'Lute contra jogadores reais',bots:'BOTS',live:'LIVE',sk_green:'Verde',sk_red:'Vermelho',sk_blue:'Azul',sk_gold:'Ouro',sk_violet:'Violeta',sk_pink:'Rosa',sk_teal:'Ciano',sk_orange:'Laranja',sk_fire:'Fogo',sk_ice:'Gelo',sk_neon:'Neon',sk_galaxy:'Galaxia',sk_dark:'Escuro',sk_goldx:'Ouro X',sk_rainbow:'Arco-iris',sk_darkx:'Escuro X',sk_lava:'Lava',sk_mint:'Hortela',sk_coral:'Coral',sk_cobalt:'Cobalto',sk_lime:'Lima',sk_rose:'Rosa',sk_cyber:'Cyber',sk_sunset:'Por do sol',sk_forest:'Floresta',sk_storm:'Tempestade',sk_sand:'Areia',sk_venom:'Veneno',sk_candy:'Doce',sk_obsidian:'Obsidiana',sk_grass:'Grama',sk_earth:'Terra',sk_snow:'Neve',sk_sunset2:'Por do sol X',sk_ocean:'Oceano',sk_cherry:'Cereja',sk_ukraine:'Ucrania',sk_russia:'Russia',sk_germany:'Alemanha',sk_france:'Franca',sk_brazil:'Brasil',rating:'🏆 CLASSIFICAÇÃO',global_rating:'🏆 CLASSIFICAÇÃO GLOBAL',best_mass:'Melhor Massa',maze:'LABIRINTO',maze_desc:'Corredores estreitos<br>e becos sem saída',tips:['Segure clique — boost!','Faca inimigos baterem!','Mate — ganhe moedas!','10+ massa para boost','A — autopiloto']},
+  tr:{code:'tr',name:'Türkçe',play:'OYNA',skins:'SKINLER',achievements:'BASARIMLAR',music_on:'🔊 MUZIK: ACIK',music_off:'🔇 MUZIK: KAPALI',connecting:'Baglanıyor',auth:'Yetkilendirme',ready:'Hazir!',no_server:'Baglanti yok. Sonra dene.',conn_err:'Baglanti hatasi',respawn:'Yeniden doguyor',mass:'Kutle',place:'Sıra',autopilot:'OTOPILOT',killed:'OLDUN!',your_score:'Skorun',again:'Tekrar!',main_menu:'Ana Menu',top_records:'TOP REKORLAR',top:'TOP',online:'Cevrimici',all:'Hepsi',standard:'Standart',rare:'Nadir',legendary:'Efsanevi',back:'Geri',task_done:'Gorev tamamlandı!',kill_reward:'oldurme icin para!',equipped:'Giyildi',equip:'Giy',need_coins:'Gerekli',coins:'para',choose_mode:'MOD SEC',offline:'CEVRIMDISI',online_btn:'CEVRIMICI',offline_desc:'Internetsiz botlara karsi oyna',online_desc:'Gercek oyunculara karsi savas',bots:'BOTLAR',live:'LIVE',sk_green:'Yesil',sk_red:'Kirmizi',sk_blue:'Mavi',sk_gold:'Altin',sk_violet:'Mor',sk_pink:'Pembe',sk_teal:'Camgobegi',sk_orange:'Turuncu',sk_fire:'Ates',sk_ice:'Buz',sk_neon:'Neon',sk_galaxy:'Galaksi',sk_dark:'Karanlik',sk_goldx:'Altin X',sk_rainbow:'Gokkusagi',sk_darkx:'Karanlik X',sk_lava:'Lav',sk_mint:'Nane',sk_coral:'Mercan',sk_cobalt:'Kobalt',sk_lime:'Limon',sk_rose:'Gul',sk_cyber:'Siber',sk_sunset:'Gun batimi',sk_forest:'Orman',sk_storm:'Firtina',sk_sand:'Kum',sk_venom:'Zehir',sk_candy:'Seker',sk_obsidian:'Obsidyen',sk_grass:'Cimen',sk_earth:'Toprak',sk_snow:'Kar',sk_sunset2:'Gun batimi X',sk_ocean:'Okyanus',sk_cherry:'Kiraz',sk_ukraine:'Ukrayna',sk_russia:'Rusya',sk_germany:'Almanya',sk_france:'Fransa',sk_brazil:'Brezilya',rating:'🏆 SIRALAMA',global_rating:'🏆 GLOBAL SIRALAMA',best_mass:'En İyi Kütle',maze:'LABIRENT',maze_desc:'Dar koridorlar<br>ve çıkmaz sokaklar',tips:['Sol tikla tut — boost!','Dusmanlari kuyruğuna carp!','Oldur — para kazan!','Boost icin 10+ kutle','A — otopilot']},
+  uk:{code:'uk',name:'Українська',play:'ГРАТИ',skins:'СКІНИ',achievements:'ДОСЯГНЕННЯ',music_on:'🔊 МУЗИКА: УВК',music_off:'🔇 МУЗИКА: ВИКЛ',connecting:'Підключення',auth:'Авторизація',ready:'Готово!',no_server:"Немає зв'язку. Спробуй пізніше.",conn_err:'Помилка підключення',respawn:'Відродження',mass:'Маса',place:'Місце',autopilot:'АВТОПІЛОТ',killed:'ВБИТИЙ!',your_score:'Твій результат',again:'Знову!',main_menu:'Головне меню',top_records:'ТОП РЕКОРДІВ',top:'ТОП',online:'Онлайн',all:'Всі',standard:'Стандартні',rare:'Рідкісні',legendary:'Легендарні',back:'Назад',task_done:'Завдання виконано!',kill_reward:'монети за вбивство!',equipped:'Надіто',equip:'Надіти',need_coins:'Потрібно',coins:'монет',choose_mode:'ОБЕРИ РЕЖИМ',offline:'ОФЛАЙН',online_btn:'ОНЛАЙН',offline_desc:'Грай проти ботів без інтернету',online_desc:'Змагайся з реальними гравцями',bots:'БОТИ',live:'LIVE',sk_green:'Зелений',sk_red:'Червоний',sk_blue:'Синій',sk_gold:'Золотий',sk_violet:'Фіолет',sk_pink:'Рожевий',sk_teal:'Бірюза',sk_orange:'Помаранч',sk_fire:'Вогонь',sk_ice:'Лід',sk_neon:'Неон',sk_galaxy:'Галактика',sk_dark:'Темрява',sk_goldx:'Золото X',sk_rainbow:'Веселка',sk_darkx:'Темний X',sk_lava:'Лава',sk_mint:'М\'ята',sk_coral:'Корал',sk_cobalt:'Кобальт',sk_lime:'Лайм',sk_rose:'Рожевий X',sk_cyber:'Кібер',sk_sunset:'Захід',sk_forest:'Ліс',sk_storm:'Буря',sk_sand:'Пісок',sk_venom:'Отрута',sk_candy:'Цукерка',sk_obsidian:'Обсидіан',sk_grass:'Трава',sk_earth:'Земля',sk_snow:'Сніг',sk_sunset2:'Захід X',sk_ocean:'Океан',sk_cherry:'Вишня',sk_ukraine:'Україна',sk_russia:'Росія',sk_germany:'Німеччина',sk_france:'Франція',sk_brazil:'Бразилія',rating:'🏆 РЕЙТИНГ',global_rating:'🏆 ГЛОБАЛЬНИЙ РЕЙТИНГ',best_mass:'Найбільша маса',maze:'ЛАБІРИНТ',maze_desc:'Вузькі коридори<br>і глухі кути',tips:['Затисни ЛКМ — прискорення!','Змусь ворога врізатись!','Вбивай гравців — монети!','Мін. 10 маси для буста','A — автопілот']},
 };
 const LANG_FLAGS={ru:'🇷🇺',en:'🇺🇸',de:'🇩🇪',fr:'🇫🇷',es:'🇪🇸',pt:'🇧🇷',tr:'🇹🇷',uk:'🇺🇦'};
 
@@ -1124,6 +1150,8 @@ function applyLang(){
   const lbBtn=document.getElementById('lbMenuBtn');if(lbBtn)lbBtn.textContent=L.rating||'🏆 RATING';
   const lbPT=document.getElementById('lbPanelTitle');if(lbPT)lbPT.textContent=L.global_rating||'🏆 GLOBAL RATING';
   const bmL=document.getElementById('bmLabel');if(bmL)bmL.textContent=L.best_mass||'Best Mass';
+  const mazeEl=document.querySelector('[data-i18n="maze"]');if(mazeEl)mazeEl.textContent=L.maze||'ЛАБИРИНТ';
+  const mazeDescEl=document.querySelector('[data-i18n="maze_desc"]');if(mazeDescEl)mazeDescEl.innerHTML=L.maze_desc||'Узкие коридоры<br>и тупики';
   TIPS.length=0;L.tips.forEach(tip=>TIPS.push(tip));
   renderLangPanel();
 }
@@ -1396,7 +1424,7 @@ function buildSegsMap(world){const map={};if(!world||!world.players)return map;f
 
 // ══════ OFFLINE БОТЫ ══════
 const OFFLINE_BOTS_COUNT=14,OFFLINE_FOOD_COUNT=600;
-let offlineState=null,offlineTickInterval=null;
+let offlineState=null,offlineTickInterval=null,mazeBreakTimeout=null;
 const BOT_NAMES=['Cobra','Viper','Noodle','Slimy','Zigzag','Mamba','Python','Adder','Taipan','Boa','Asp','Racer','Krait','Sidewinder','Copperhead','Rattler','Anaconda','Diamondback'];
 
 function mkOfflineFood(){const rnd=Math.random();let size,r;if(rnd<0.75){size='small';r=3+Math.random()*2;}else if(rnd<0.95){size='medium';r=5+Math.random()*2;}else{size='big';r=8+Math.random()*2;}return{x:200+Math.random()*(WORLD-400),y:200+Math.random()*(WORLD-400),r,color:`hsl(${Math.floor(Math.random()*360)},90%,65%)`,size,p:Math.random()*Math.PI*2};}
@@ -1408,27 +1436,28 @@ function initOffline(){const spawnX=300+Math.random()*(WORLD-600),spawnY=300+Mat
 function offlineGetR(score){return 6+(Math.min(score,1000)/1000)*22;}
 function offlineGetTurnSpeed(score){const t=Math.min(score,1000)/1000;return 0.18-t*0.125;}
 
-function offlineUpdateSnake(sn,ts){if(!sn.alive)return;let da=sn.tAngle-sn.angle;while(da>Math.PI)da-=Math.PI*2;while(da<-Math.PI)da+=Math.PI*2;sn.angle+=da*offlineGetTurnSpeed(sn.score);const spd=sn.boosting?sn.speed*1.85:sn.speed;const hx=sn.segs[0].x+Math.cos(sn.angle)*spd;const hy=sn.segs[0].y+Math.sin(sn.angle)*spd;if(hx<=10||hx>=WORLD-10||hy<=10||hy>=WORLD-10){offlineKill(sn);return;}sn.segs.unshift({x:hx,y:hy});while(sn.segs.length>sn.length)sn.segs.pop();const segDist=8;for(let i=1;i<sn.segs.length;i++){const prev=sn.segs[i-1];const curr=sn.segs[i];const dx=prev.x-curr.x;const dy=prev.y-curr.y;const dist=Math.sqrt(dx*dx+dy*dy);if(dist>segDist){const ratio=(dist-segDist)/dist;curr.x+=dx*ratio;curr.y+=dy*ratio;}}}
+function offlineUpdateSnake(sn,ts){if(!sn.alive)return;let da=sn.tAngle-sn.angle;while(da>Math.PI)da-=Math.PI*2;while(da<-Math.PI)da+=Math.PI*2;sn.angle+=da*offlineGetTurnSpeed(sn.score);const spd=sn.boosting?sn.speed*1.85:sn.speed;const hx=sn.segs[0].x+Math.cos(sn.angle)*spd;const hy=sn.segs[0].y+Math.sin(sn.angle)*spd;if(hx<=10||hx>=WORLD-10||hy<=10||hy>=WORLD-10){offlineKill(sn);return;}if(gameMode==='maze'&&mazeState&&mazeState.walls){const r=offlineGetR(sn.score);if(checkMazeWallCollision(hx,hy,r)){offlineKill(sn);return;}}sn.segs.unshift({x:hx,y:hy});while(sn.segs.length>sn.length)sn.segs.pop();const segDist=8;for(let i=1;i<sn.segs.length;i++){const prev=sn.segs[i-1];const curr=sn.segs[i];const dx=prev.x-curr.x;const dy=prev.y-curr.y;const dist=Math.sqrt(dx*dx+dy*dy);if(dist>segDist){const ratio=(dist-segDist)/dist;curr.x+=dx*ratio;curr.y+=dy*ratio;}}}
 
-function offlineEatFood(sn){const h=sn.segs[0],r=offlineGetR(sn.score);for(let i=offlineState.foods.length-1;i>=0;i--){const f=offlineState.foods[i];const dx=h.x-f.x,dy=h.y-f.y;const er=(f.size==='big'?f.r+10:f.size==='medium'?f.r+7:f.r+5)+r;if(dx*dx+dy*dy<er*er){const g=f.size==='big'?10:f.size==='medium'?5:2;sn.score+=g;if(sn.length<MAX_BODY){if(sn.length<750){sn.length=Math.min(750,sn.length+g);}else{sn._growBuf=(sn._growBuf||0)+g;if(sn._growBuf>=2){const add=Math.floor(sn._growBuf/2);sn._growBuf-=add*2;sn.length=Math.min(MAX_BODY,sn.length+add);}}}if(sn.isMe){sn.foodEaten=(sn.foodEaten||0)+1;if(sn.foodEaten>=3){sn.foodEaten-=3;essence=Math.min(9999999,essence+1);syncEss();}trackAch('eat',1);_xpFoodCounter+=g;const xg=Math.floor(_xpFoodCounter/5);if(xg>0){_xpFoodCounter-=xg*5;addXP(xg);}}offlineState.foods[i]=mkOfflineFood();}}}
+function offlineEatFood(sn){const h=sn.segs[0],r=offlineGetR(sn.score);const foodList=(gameMode==='maze'&&mazeState)?mazeState.foods:offlineState.foods;for(let i=foodList.length-1;i>=0;i--){const f=foodList[i];const dx=h.x-f.x,dy=h.y-f.y;const er=(f.size==='big'?f.r+10:f.size==='medium'?f.r+7:f.r+5)+r;if(dx*dx+dy*dy<er*er){const g=f.size==='big'?10:f.size==='medium'?5:2;sn.score+=g;if(sn.length<MAX_BODY){if(sn.length<750){sn.length=Math.min(750,sn.length+g);}else{sn._growBuf=(sn._growBuf||0)+g;if(sn._growBuf>=2){const add=Math.floor(sn._growBuf/2);sn._growBuf-=add*2;sn.length=Math.min(MAX_BODY,sn.length+add);}}}if(sn.isMe){sn.foodEaten=(sn.foodEaten||0)+1;if(sn.foodEaten>=3){sn.foodEaten-=3;essence=Math.min(9999999,essence+1);syncEss();}trackAch('eat',1);_xpFoodCounter+=g;const xg=Math.floor(_xpFoodCounter/5);if(xg>0){_xpFoodCounter-=xg*5;addXP(xg);}}foodList[i]=(gameMode==='maze')?mkMazeFood():mkOfflineFood();}}}
 
-function offlineKill(sn){if(!sn.alive)return;sn.alive=false;const dropCount=Math.max(1,Math.min(200,Math.floor(sn.score/2)));const totalSegs=sn.segs.length;for(let i=0;i<dropCount;i++){const idx=Math.floor((i/dropCount)*totalSegs),s=sn.segs[Math.min(idx,totalSegs-1)];offlineState.foods.push({x:Math.max(50,Math.min(WORLD-50,s.x+(Math.random()-.5)*20)),y:Math.max(50,Math.min(WORLD-50,s.y+(Math.random()-.5)*20)),r:9+Math.random()*3,color:`hsl(${Math.floor(Math.random()*360)},90%,65%)`,size:'big',drop:true,p:0});}if(offlineState.foods.length>OFFLINE_FOOD_COUNT+200)offlineState.foods.splice(0,offlineState.foods.length-(OFFLINE_FOOD_COUNT+200));}
+function offlineKill(sn){if(!sn.alive)return;sn.alive=false;const dropCount=Math.max(1,Math.min(200,Math.floor(sn.score/2)));const totalSegs=sn.segs.length;const targetList=(gameMode==='maze'&&mazeState)?mazeState.foods:offlineState.foods;for(let i=0;i<dropCount;i++){const idx=Math.floor((i/dropCount)*totalSegs),s=sn.segs[Math.min(idx,totalSegs-1)];targetList.push({x:Math.max(50,Math.min(WORLD-50,s.x+(Math.random()-.5)*20)),y:Math.max(50,Math.min(WORLD-50,s.y+(Math.random()-.5)*20)),r:9+Math.random()*3,color:`hsl(${Math.floor(Math.random()*360)},90%,65%)`,size:'big',drop:true,p:0});}const maxFood=(gameMode==='maze')?MAZE_FOOD_COUNT:OFFLINE_FOOD_COUNT;if(targetList.length>maxFood+200)targetList.splice(0,targetList.length-(maxFood+200));}
 
-function offlineBotAI(bot){bot._thinkTimer=(bot._thinkTimer||0)-1;if(bot._thinkTimer>0)return;bot._thinkTimer=3+Math.floor(Math.random()*5);const h=bot.segs[0];const margin=180;const allSnakes=[offlineState.player,...offlineState.bots];if(h.x<margin||h.x>WORLD-margin||h.y<margin||h.y>WORLD-margin){bot.tAngle=Math.atan2(WORLD/2-h.y,WORLD/2-h.x)+(Math.random()-.5)*0.5;bot.boosting=false;return;}function danger(tx,ty){for(const other of allSnakes){if(!other||!other.alive||other===bot||!other.segs)continue;for(let i=1;i<Math.min(other.segs.length,30);i++){const s=other.segs[i],dx=tx-s.x,dy=ty-s.y;if(dx*dx+dy*dy<90*90)return true;}}return tx<150||tx>WORLD-150||ty<150||ty>WORLD-150;}let victim=null,victimDist=Infinity;for(const other of allSnakes){if(!other||!other.alive||other===bot||!other.segs)continue;const dx=other.segs[0].x-h.x,dy=other.segs[0].y-h.y;const d=dx*dx+dy*dy;if(other.length<bot.length*0.85&&d<400*400&&d<victimDist){victimDist=d;victim=other;}}if(victim){const vh=victim.segs[0];const vAngle=victim.angle;const intercept=80;const tx=vh.x+Math.cos(vAngle)*intercept;const ty=vh.y+Math.sin(vAngle)*intercept;let angle=Math.atan2(ty-h.y,tx-h.x);const ax=h.x+Math.cos(angle)*100,ay=h.y+Math.sin(angle)*100;if(danger(ax,ay)){angle+=(Math.random()>0.5?1:-1)*(Math.PI/3+Math.random()*0.3);}bot.tAngle=angle+(Math.random()-.5)*0.08;bot.boosting=victimDist<200*200&&bot.length>15;return;}let best=Infinity,tgt=null;for(let i=0;i<offlineState.foods.length;i++){const f=offlineState.foods[i];if(!f)continue;const dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;if(d<best&&!danger(f.x,f.y)){best=d;tgt=f;}}if(!tgt){for(let i=0;i<offlineState.foods.length;i++){const f=offlineState.foods[i];if(!f)continue;const dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;if(d<best){best=d;tgt=f;}}}if(tgt){let angle=Math.atan2(tgt.y-h.y,tgt.x-h.x);const ax=h.x+Math.cos(angle)*120,ay=h.y+Math.sin(angle)*120;if(danger(ax,ay)){const left=angle-Math.PI/3,right=angle+Math.PI/3;const alx=h.x+Math.cos(left)*120,aly=h.y+Math.sin(left)*120;const arx=h.x+Math.cos(right)*120,ary=h.y+Math.sin(right)*120;if(!danger(alx,aly))angle=left;else if(!danger(arx,ary))angle=right;else angle+=Math.PI*(0.8+Math.random()*0.4);}bot.tAngle=angle+(Math.random()-.5)*0.12;}bot.boosting=best<100*100&&bot.length>20;}
+function offlineBotAI(bot){bot._thinkTimer=(bot._thinkTimer||0)-1;if(bot._thinkTimer>0)return;bot._thinkTimer=3+Math.floor(Math.random()*5);const h=bot.segs[0];const margin=180;const state=(gameMode==='maze'&&mazeState)?mazeState:offlineState;const allSnakes=state?[state.player,...state.bots]:[offlineState.player,...offlineState.bots];if(h.x<margin||h.x>WORLD-margin||h.y<margin||h.y>WORLD-margin){bot.tAngle=Math.atan2(WORLD/2-h.y,WORLD/2-h.x)+(Math.random()-.5)*0.5;bot.boosting=false;return;}function danger(tx,ty){if(gameMode==='maze'&&mazeState&&mazeState.walls&&checkMazeWallCollision(tx,ty,offlineGetR(bot.score)))return true;for(const other of allSnakes){if(!other||!other.alive||other===bot||!other.segs)continue;for(let i=1;i<Math.min(other.segs.length,30);i++){const s=other.segs[i],dx=tx-s.x,dy=ty-s.y;if(dx*dx+dy*dy<90*90)return true;}}return tx<150||tx>WORLD-150||ty<150||ty>WORLD-150;}let victim=null,victimDist=Infinity;for(const other of allSnakes){if(!other||!other.alive||other===bot||!other.segs)continue;const dx=other.segs[0].x-h.x,dy=other.segs[0].y-h.y;const d=dx*dx+dy*dy;if(other.length<bot.length*0.85&&d<400*400&&d<victimDist){victimDist=d;victim=other;}}if(victim){const vh=victim.segs[0];const vAngle=victim.angle;const intercept=80;const tx=vh.x+Math.cos(vAngle)*intercept;const ty=vh.y+Math.sin(vAngle)*intercept;let angle=Math.atan2(ty-h.y,tx-h.x);const ax=h.x+Math.cos(angle)*100,ay=h.y+Math.sin(angle)*100;if(danger(ax,ay)){angle+=(Math.random()>0.5?1:-1)*(Math.PI/3+Math.random()*0.3);}bot.tAngle=angle+(Math.random()-.5)*0.08;bot.boosting=victimDist<200*200&&bot.length>15;return;}let best=Infinity,tgt=null;const fl=state?state.foods:offlineState.foods;for(let i=0;i<fl.length;i++){const f=fl[i];if(!f)continue;const dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;if(d<best&&!danger(f.x,f.y)){best=d;tgt=f;}}if(!tgt){for(let i=0;i<fl.length;i++){const f=fl[i];if(!f)continue;const dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;if(d<best){best=d;tgt=f;}}}if(tgt){let angle=Math.atan2(tgt.y-h.y,tgt.x-h.x);const ax=h.x+Math.cos(angle)*120,ay=h.y+Math.sin(angle)*120;if(danger(ax,ay)){const left=angle-Math.PI/3,right=angle+Math.PI/3;const alx=h.x+Math.cos(left)*120,aly=h.y+Math.sin(left)*120;const arx=h.x+Math.cos(right)*120,ary=h.y+Math.sin(right)*120;if(!danger(alx,aly))angle=left;else if(!danger(arx,ary))angle=right;else angle+=Math.PI*(0.8+Math.random()*0.4);}bot.tAngle=angle+(Math.random()-.5)*0.12;}bot.boosting=best<100*100&&bot.length>20;}
 
-function offlineCheckCollisions(){const alive=[offlineState.player,...offlineState.bots].filter(s=>s.alive);for(const sn of alive){if(!sn.alive)continue;const h=sn.segs[0],r=offlineGetR(sn.score);for(const other of alive){if(!other.alive||other===sn)continue;for(let i=2;i<other.segs.length;i++){const s=other.segs[i],dx=h.x-s.x,dy=h.y-s.y;const otherR=offlineGetR(other.score)*0.55;if(dx*dx+dy*dy<(r*0.85+otherR)**2){offlineKill(sn);if(!sn.isMe&&other.isMe){essence=Math.min(9999999,essence+3);syncEss();showToast('💀 +3 '+t('kill_reward'),'#ff6b6b');trackAch('kills',1);}break;}}if(!sn.alive)break;}}}
+function offlineCheckCollisions(){const state=(gameMode==='maze'&&mazeState)?mazeState:offlineState;const alive=state?[state.player,...state.bots].filter(s=>s.alive):[offlineState.player,...offlineState.bots].filter(s=>s.alive);for(const sn of alive){if(!sn.alive)continue;const h=sn.segs[0],r=offlineGetR(sn.score);for(const other of alive){if(!other.alive||other===sn)continue;for(let i=2;i<other.segs.length;i++){const s=other.segs[i],dx=h.x-s.x,dy=h.y-s.y;const otherR=offlineGetR(other.score)*0.55;if(dx*dx+dy*dy<(r*0.85+otherR)**2){offlineKill(sn);if(!sn.isMe&&other.isMe){essence=Math.min(9999999,essence+3);syncEss();showToast('💀 +3 '+t('kill_reward'),'#ff6b6b');trackAch('kills',1);}break;}}if(!sn.alive)break;}}}
 
-function offlineRespawnBots(){for(let i=0;i<offlineState.bots.length;i++){if(!offlineState.bots[i].alive){const name=BOT_NAMES[Math.floor(Math.random()*BOT_NAMES.length)];offlineState.bots[i]=mkBot(name,Math.floor(Math.random()*3));}}}
+function offlineRespawnBots(){const state=(gameMode==='maze'&&mazeState)?mazeState:offlineState;if(!state)return;for(let i=0;i<state.bots.length;i++){if(!state.bots[i].alive){const name=BOT_NAMES[Math.floor(Math.random()*BOT_NAMES.length)];state.bots[i]=mkBot(name,Math.floor(Math.random()*3));}}}
 
-function offlineTick(){if(!running||gameMode!=='offline'||!offlineState)return;const me=offlineState.player;if(!me.alive){if(!me._deathHandled){me._deathHandled=true;clearInterval(offlineTickInterval);offlineTickInterval=null;running=false;const score=me.score||0;document.getElementById('deathScore').textContent=t('mass')+': '+score;jbSaveScore(pname,score);clanUpdateScore(score);document.getElementById('hud').style.display='none';switchScreen('deathScreen',()=>{renderRecords(score);trackAch('mass',score);trackAch('survive',surviveTimer);});}return;}if(!autopilotMode){me.tAngle=Math.atan2(my-H/2,mx-W/2);me.boosting=boosting&&me.score>MIN_LEN;}else{
+function offlineTick(){if(!running||(gameMode!=='offline'&&gameMode!=='maze')||!offlineState)return;const state=(gameMode==='maze'&&mazeState)?mazeState:offlineState;const me=state.player;if(!me.alive){if(!me._deathHandled){me._deathHandled=true;if(offlineTickInterval){clearInterval(offlineTickInterval);offlineTickInterval=null;}if(mazeBreakTimeout){clearTimeout(mazeBreakTimeout);mazeBreakTimeout=null;}running=false;const score=me.score||0;const deathMsg=gameMode==='maze'?'🧱 Вы врезались в стену лабиринта!':'';document.getElementById('deathCauseMsg').textContent=deathMsg;document.getElementById('deathScore').textContent=t('mass')+': '+score;jbSaveScore(pname,score);clanUpdateScore(score);document.getElementById('hud').style.display='none';switchScreen('deathScreen',()=>{renderRecords(score);trackAch('mass',score);trackAch('survive',surviveTimer);});}return;}if(!autopilotMode){me.tAngle=Math.atan2(my-H/2,mx-W/2);me.boosting=boosting&&me.score>MIN_LEN;}else{
   const h=me.segs[0];
-  const allSnakes=[...offlineState.bots].filter(b=>b.alive);
+  const allSnakes=state.bots.filter(b=>b.alive);
   const dangerSegs=[];
   for(const b of allSnakes){for(let i=0;i<b.segs.length;i++)dangerSegs.push(b.segs[i]);}
   if(me.segs.length>5)for(let i=3;i<me.segs.length;i++)dangerSegs.push(me.segs[i]);
   const DANGER_R=120,STEPS=3,STEP_DIST=80;
   function offDanger(tx,ty){
     if(tx<250||tx>WORLD-250||ty<250||ty>WORLD-250)return 999;
+    if(gameMode==='maze'&&mazeState&&mazeState.walls&&checkMazeWallCollision(tx,ty,offlineGetR(me.score)))return 0;
     let minD=Infinity;
     for(const s of dangerSegs){const dx=tx-s.x,dy=ty-s.y,d=dx*dx+dy*dy;if(d<minD)minD=d;}
     return Math.sqrt(minD);
@@ -1439,11 +1468,11 @@ function offlineTick(){if(!running||gameMode!=='offline'||!offlineState)return;c
     return true;
   }
   let best=Infinity,tgt=null;
-  for(const f of offlineState.foods){
+  for(const f of state.foods){
     const dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;
     if(d<best){const ang=Math.atan2(dy,dx);if(offPathSafe(ang)){best=d;tgt=f;}}
   }
-  if(!tgt){for(const f of offlineState.foods){const dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;if(d<best){best=d;tgt=f;}}}
+  if(!tgt){for(const f of state.foods){const dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;if(d<best){best=d;tgt=f;}}}
   let angle=tgt?Math.atan2(tgt.y-h.y,tgt.x-h.x):me.tAngle;
   if(!offPathSafe(angle)){
     let bestAng=null,bestScore=-Infinity;
@@ -1457,9 +1486,220 @@ function offlineTick(){if(!running||gameMode!=='offline'||!offlineState)return;c
     if(bestAng!==null)angle=bestAng;
   }
   me.tAngle=angle;me.boosting=false;
-}if(me.boosting&&me.length>MIN_LEN&&Math.random()<0.05){me.length=Math.max(MIN_LEN,me.length-1);me.score=Math.max(MIN_LEN,me.score-1);}offlineUpdateSnake(me,0.18);offlineEatFood(me);if(me.segs.length>0){camX+=(me.segs[0].x-W/2-camX)*0.12;camY+=(me.segs[0].y-H/2-camY)*0.12;}const now=performance.now();if(now-lastSurviveTick>=1000){surviveTimer++;lastSurviveTick=now;trackQuest('survive_time',1);}for(const bot of offlineState.bots){if(!bot.alive)continue;offlineBotAI(bot);if(bot.boosting&&bot.length>MIN_LEN&&Math.random()<0.05){bot.length=Math.max(MIN_LEN,bot.length-1);bot.score=Math.max(MIN_LEN,bot.score-1);}offlineUpdateSnake(bot,0.13);offlineEatFood(bot);}offlineCheckCollisions();offlineRespawnBots();const allPlayers=[me,...offlineState.bots].filter(p=>p.alive).map(p=>({name:p.name,skinId:p.skinId,score:p.score,segs:p.segs.slice(0,750),boosting:p.boosting,isMe:p.isMe}));const lb=[...allPlayers].sort((a,b)=>b.score-a.score).slice(0,10).map(p=>({name:p.name,score:p.score,isMe:p.isMe}));serverWorld={players:allPlayers,foods:offlineState.foods,leaderboard:lb};}
+}if(me.boosting&&me.length>MIN_LEN&&Math.random()<0.05){me.length=Math.max(MIN_LEN,me.length-1);me.score=Math.max(MIN_LEN,me.score-1);}offlineUpdateSnake(me,0.18);offlineEatFood(me);if(me.segs.length>0){camX+=(me.segs[0].x-W/2-camX)*0.12;camY+=(me.segs[0].y-H/2-camY)*0.12;}const now=performance.now();if(now-lastSurviveTick>=1000){surviveTimer++;lastSurviveTick=now;trackQuest('survive_time',1);}for(const bot of state.bots){if(!bot.alive)continue;offlineBotAI(bot);if(bot.boosting&&bot.length>MIN_LEN&&Math.random()<0.05){bot.length=Math.max(MIN_LEN,bot.length-1);bot.score=Math.max(MIN_LEN,bot.score-1);}offlineUpdateSnake(bot,0.13);offlineEatFood(bot);}offlineCheckCollisions();offlineRespawnBots();const allPlayers=[me,...state.bots].filter(p=>p.alive).map(p=>({name:p.name,skinId:p.skinId,score:p.score,segs:p.segs.slice(0,750),boosting:p.boosting,isMe:p.isMe}));const lb=[...allPlayers].sort((a,b)=>b.score-a.score).slice(0,10).map(p=>({name:p.name,score:p.score,isMe:p.isMe}));serverWorld={players:allPlayers,foods:state.foods,leaderboard:lb};}
 
-function startOffline(){gameMode='offline';if(offlineTickInterval){clearInterval(offlineTickInterval);offlineTickInterval=null;}serverWorld=null;_prevWorld=null;playIrisOpen(()=>{const{spawnX,spawnY}=initOffline();camX=spawnX-W/2;camY=spawnY-H/2;player=offlineState.player;document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});document.getElementById('gearBtn').style.display='none';document.getElementById('hud').style.display='block';document.getElementById('xpBarWrap').style.display='none';document.getElementById('bestMassWidget').style.display='none';document.getElementById('achBtn').style.display='none';document.getElementById('achPanel').classList.remove('open');const _sbOff=document.getElementById('serverPickBtn');if(_sbOff)_sbOff.style.display='none';achOpen=false;autopilotMode=false;document.getElementById('apBtn').classList.remove('active');running=true;surviveTimer=0;lastSurviveTick=performance.now();_xpFoodCounter=0;_foodCoinCounter=0;if(isMobile())showJoystick(true);offlineTickInterval=setInterval(offlineTick,33);trackAch('games',1);},null);}
+function startOffline(){gameMode='offline';if(offlineTickInterval){clearInterval(offlineTickInterval);offlineTickInterval=null;}if(mazeBreakTimeout){clearTimeout(mazeBreakTimeout);mazeBreakTimeout=null;}mazeState=null;serverWorld=null;_prevWorld=null;playIrisOpen(()=>{const{spawnX,spawnY}=initOffline();camX=spawnX-W/2;camY=spawnY-H/2;player=offlineState.player;document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});document.getElementById('gearBtn').style.display='none';document.getElementById('hud').style.display='block';document.getElementById('xpBarWrap').style.display='none';document.getElementById('bestMassWidget').style.display='none';document.getElementById('achBtn').style.display='none';document.getElementById('achPanel').classList.remove('open');const _sbOff=document.getElementById('serverPickBtn');if(_sbOff)_sbOff.style.display='none';achOpen=false;autopilotMode=false;document.getElementById('apBtn').classList.remove('active');running=true;surviveTimer=0;lastSurviveTick=performance.now();_xpFoodCounter=0;_foodCoinCounter=0;if(isMobile())showJoystick(true);offlineTickInterval=setInterval(offlineTick,33);trackAch('games',1);},null);}
+
+// ══════ РЕЖИМ ЛАБИРИНТ ══════
+const MAZE_BOTS_COUNT=8;
+const MAZE_FOOD_COUNT=400;
+const MAZE_CELL=160;
+const MAZE_WALL_W=28;
+const MAZE_BREAK_TIME=90000;
+
+function mkMazeFood(){return mkOfflineFood();}
+
+function generateMazeWalls() {
+  const walls=[];
+  const cols=Math.floor(WORLD/MAZE_CELL);
+  const rows=Math.floor(WORLD/MAZE_CELL);
+  // Внешние стены с проходами
+  const outerGaps=[];
+  for(let i=0;i<4;i++)outerGaps.push(1+Math.floor(Math.random()*(cols-2)));
+  for(let c=0;c<cols;c++){
+    const isGap=outerGaps.includes(c);
+    if(!isGap){
+      walls.push({x:c*MAZE_CELL,y:0,w:MAZE_CELL,h:MAZE_WALL_W});
+      walls.push({x:c*MAZE_CELL,y:WORLD-MAZE_WALL_W,w:MAZE_CELL,h:MAZE_WALL_W});
+    }
+  }
+  for(let r=0;r<rows;r++){
+    const isGap=outerGaps.includes(r);
+    if(!isGap){
+      walls.push({x:0,y:r*MAZE_CELL,w:MAZE_WALL_W,h:MAZE_CELL});
+      walls.push({x:WORLD-MAZE_WALL_W,y:r*MAZE_CELL,w:MAZE_WALL_W,h:MAZE_CELL});
+    }
+  }
+  // Внутренние стены (рекурсивное деление)
+  function divide(x,y,w,h){
+    if(w<3||h<3)return;
+    const horizontal=Math.random()<0.5;
+    if(horizontal){
+      const wy=y+1+Math.floor(Math.random()*(h-2));
+      const passage=x+Math.floor(Math.random()*w);
+      for(let i=x;i<x+w;i++){
+        if(i!==passage){
+          walls.push({x:i*MAZE_CELL,y:wy*MAZE_CELL,w:MAZE_CELL,h:MAZE_WALL_W});
+        }
+      }
+      divide(x,y,w,wy-y);
+      divide(x,wy+1,w,y+h-wy-1);
+    }else{
+      const wx=x+1+Math.floor(Math.random()*(w-2));
+      const passage=y+Math.floor(Math.random()*h);
+      for(let i=y;i<y+h;i++){
+        if(i!==passage){
+          walls.push({x:wx*MAZE_CELL,y:i*MAZE_CELL,w:MAZE_WALL_W,h:MAZE_CELL});
+        }
+      }
+      divide(x,y,wx-x,h);
+      divide(wx+1,y,x+w-wx-1,h);
+    }
+  }
+  divide(1,1,cols-2,rows-2);
+  return walls;
+}
+
+function checkMazeWallCollision(x,y,r){
+  if(!mazeState||!mazeState.walls)return false;
+  for(const wall of mazeState.walls){
+    if(x+r>wall.x&&x-r<wall.x+wall.w&&y+r>wall.y&&y-r<wall.y+wall.h)return true;
+  }
+  return false;
+}
+
+function drawWalls(cx,cy){
+  if(!mazeState||!mazeState.walls)return;
+  for(const wall of mazeState.walls){
+    const wx=wall.x-cx,wy=wall.y-cy;
+    if(wx>W+100||wx+wall.w<-100||wy>H+100||wy+wall.h<-100)continue;
+    
+    // Тень от стены
+    ctx.fillStyle='rgba(0,0,0,0.4)';
+    ctx.fillRect(wx+3,wy+3,wall.w,wall.h);
+    
+    // Основной серый бетон
+    const grad=ctx.createLinearGradient(wx,wy,wx+wall.w,wy+wall.h);
+    grad.addColorStop(0,'#6b6b6b');
+    grad.addColorStop(0.3,'#808080');
+    grad.addColorStop(0.6,'#757575');
+    grad.addColorStop(1,'#5a5a5a');
+    ctx.fillStyle=grad;
+    ctx.fillRect(wx,wy,wall.w,wall.h);
+    
+    // Внешняя обводка
+    ctx.strokeStyle='#4a4a4a';
+    ctx.lineWidth=2;
+    ctx.strokeRect(wx,wy,wall.w,wall.h);
+    
+    // Трещины/текстура бетона
+    ctx.strokeStyle='rgba(0,0,0,0.15)';
+    ctx.lineWidth=1;
+    // Горизонтальные трещины
+    ctx.beginPath();
+    ctx.moveTo(wx+4,wy+wall.h*0.3);
+    ctx.lineTo(wx+wall.w*0.6,wy+wall.h*0.3);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(wx+wall.w*0.2,wy+wall.h*0.7);
+    ctx.lineTo(wx+wall.w-4,wy+wall.h*0.7);
+    ctx.stroke();
+    // Вертикальные трещины
+    ctx.beginPath();
+    ctx.moveTo(wx+wall.w*0.3,wy+4);
+    ctx.lineTo(wx+wall.w*0.3,wy+wall.h*0.5);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(wx+wall.w*0.7,wy+wall.h*0.4);
+    ctx.lineTo(wx+wall.w*0.7,wy+wall.h-4);
+    ctx.stroke();
+    
+    // Маленькие сколы (точки)
+    ctx.fillStyle='rgba(0,0,0,0.2)';
+    ctx.beginPath();
+    ctx.arc(wx+wall.w*0.15,wy+wall.h*0.25,1.5,0,Math.PI*2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(wx+wall.w*0.8,wy+wall.h*0.6,1.2,0,Math.PI*2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(wx+wall.w*0.5,wy+wall.h*0.8,1,0,Math.PI*2);
+    ctx.fill();
+    
+    // Блик сверху
+    ctx.fillStyle='rgba(255,255,255,0.08)';
+    ctx.fillRect(wx+2,wy+1,wall.w-4,2);
+  }
+}
+function startMazeMode(){
+  gameMode='maze';
+  if(offlineTickInterval){clearInterval(offlineTickInterval);offlineTickInterval=null;}
+  if(mazeBreakTimeout){clearTimeout(mazeBreakTimeout);mazeBreakTimeout=null;}
+  mazeState=null;serverWorld=null;_prevWorld=null;
+  playIrisOpen(()=>{
+    const walls=generateMazeWalls();
+    const spawn=findSafeMazeSpawn(walls);
+    const angle=Math.random()*Math.PI*2;
+    const playerSegs=[];
+    for(let i=0;i<MIN_LEN;i++)playerSegs.push({x:spawn.x-Math.cos(angle)*i*14,y:spawn.y-Math.sin(angle)*i*14});
+    const startM=getStartMass();
+    const me={x:spawn.x,y:spawn.y,name:pname,skinId:selSkin,angle,tAngle:angle,speed:2.8,boosting:false,alive:true,length:startM,score:startM,segs:playerSegs,isMe:true,_growBuf:0,foodEaten:0,_deathHandled:false};
+    const usedNames=[...BOT_NAMES].sort(()=>Math.random()-.5).slice(0,MAZE_BOTS_COUNT);
+    const bots=usedNames.map((n,i)=>{
+      const sp=findSafeMazeSpawn(walls);
+      return mkBotAt(sp.x,sp.y,n,i%3);
+    });
+    const foods=[];
+    for(let i=0;i<MAZE_FOOD_COUNT;i++){
+      const f=mkMazeFood();
+      if(!checkMazeWallCollisionDirect(f.x,f.y,f.r,walls))foods.push(f);
+      else foods.push(mkMazeFood());
+    }
+    mazeState={walls,foods,bots,player:me};
+    offlineState=mazeState;
+    camX=spawn.x-W/2;camY=spawn.y-H/2;
+    player=me;
+    document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});
+    document.getElementById('gearBtn').style.display='none';
+    document.getElementById('hud').style.display='block';
+    document.getElementById('xpBarWrap').style.display='none';
+    document.getElementById('bestMassWidget').style.display='none';
+    document.getElementById('achBtn').style.display='none';
+    document.getElementById('achPanel').classList.remove('open');
+    const _sbM=document.getElementById('serverPickBtn');if(_sbM)_sbM.style.display='none';
+    achOpen=false;autopilotMode=false;
+    document.getElementById('apBtn').classList.remove('active');
+    running=true;surviveTimer=0;lastSurviveTick=performance.now();
+    _xpFoodCounter=0;_foodCoinCounter=0;
+    if(isMobile())showJoystick(true);
+    offlineTickInterval=setInterval(offlineTick,33);
+    trackAch('games',1);
+    mazeBreakTimeout=setTimeout(()=>{
+      if(gameMode==='maze'&&mazeState&&mazeState.walls){
+        const breakCount=Math.floor(mazeState.walls.length*0.3);
+        for(let i=0;i<breakCount;i++){
+          const idx=Math.floor(Math.random()*mazeState.walls.length);
+          mazeState.walls.splice(idx,1);
+        }
+        showToast('🌀 Стены разрушаются!','#6c5ce7');
+      }
+    },MAZE_BREAK_TIME);
+  },null);
+}
+
+function findSafeMazeSpawn(walls){
+  for(let attempts=0;attempts<100;attempts++){
+    const x=300+Math.random()*(WORLD-600);
+    const y=300+Math.random()*(WORLD-600);
+    if(!checkMazeWallCollisionDirect(x,y,40,walls))return{x,y};
+  }
+  return{x:WORLD/2,y:WORLD/2};
+}
+
+function checkMazeWallCollisionDirect(x,y,r,walls){
+  if(!walls)return false;
+  for(const wall of walls){
+    if(x+r>wall.x&&x-r<wall.x+wall.w&&y+r>wall.y&&y-r<wall.y+wall.h)return true;
+  }
+  return false;
+}
+
+function mkBotAt(x,y,name,skinId){
+  const angle=Math.random()*Math.PI*2;
+  const segs=[];
+  for(let i=0;i<MIN_LEN;i++)segs.push({x:x-Math.cos(angle)*i*14,y:y-Math.sin(angle)*i*14});
+  return{x,y,name,skinId:skinId||Math.floor(Math.random()*3),angle,tAngle:angle,speed:2.4+Math.random()*0.6,boosting:false,alive:true,length:MIN_LEN,score:MIN_LEN,segs,isMe:false,_growBuf:0,_thinkTimer:0,foodEaten:0};
+}
 
 // ══════ СЕРВЕР ОНЛАЙН ══════
 const SERVERS = [
@@ -1562,8 +1802,52 @@ function runAutopilot(){
 
 function updHUD(){if(gameMode==='online'){if(ws&&ws.readyState===WebSocket.OPEN&&player&&running){if(!autopilotMode){player.tAngle=Math.atan2(my-H/2,mx-W/2);player.boosting=boosting&&player.score>MIN_LEN;}else runAutopilot();ws.send(JSON.stringify({type:'input',angle:player.tAngle,boost:player.boosting}));}}if(serverWorld){if(serverWorld.leaderboard){let h='';let meInTop=false;serverWorld.leaderboard.forEach((s,i)=>{const lv=s.isMe?(getLevel(playerXP)+1):Math.min(50,Math.max(1,Math.floor(s.score/80)+1));if(s.isMe)meInTop=true;h+=`<div class="lb-row${s.isMe?' me':''}"><span class="lb-rank">${i+1}</span><span class="lb-lvl">${lv}</span><span class="lb-name">${s.name}</span><span class="lb-score">${s.score}</span></div>`;});if(!meInTop&&serverWorld.players){const me=serverWorld.players.find(p=>p.isMe);if(me){const allSorted=[...serverWorld.players].filter(p=>p.score!==undefined).sort((a,b)=>b.score-a.score);const myPos=allSorted.findIndex(p=>p.isMe)+1;const lv=getLevel(playerXP)+1;h+=`<div class="lb-sep"></div><div class="lb-row me"><span class="lb-rank">${myPos||'?'}</span><span class="lb-lvl">${lv}</span><span class="lb-name">${me.name}</span><span class="lb-score">${me.score}</span></div>`;}}document.getElementById('lbList').innerHTML=h;}const me=serverWorld.players?serverWorld.players.find(p=>p.isMe):null;const myScore=me?me.score:(player?player.score:0);const myRank=serverWorld.leaderboard?(serverWorld.leaderboard.findIndex(s=>s.isMe)+1||'?'):'?';document.getElementById('hudLen').textContent=myScore;document.getElementById('hudRank').textContent=myRank==='?'?'#?':'#'+myRank;if(me&&gameMode==='online'){const r=serverWorld.leaderboard?serverWorld.leaderboard.findIndex(s=>s.isMe)+1:99;if(r>=1&&r<=3&&serverWorld.leaderboard&&serverWorld.leaderboard.length>=4)trackQuest('top3',1);}}}
 
-function drawMM(){mctx.clearRect(0,0,108,108);const sc=108/WORLD;const heads=(serverWorld&&serverWorld.allHeads)||(serverWorld&&serverWorld.players||[]).map(p=>({x:p.segs&&p.segs[0]&&p.segs[0].x,y:p.segs&&p.segs[0]&&p.segs[0].y,isMe:p.isMe}));for(const h of heads){if(h.x==null)continue;mctx.beginPath();mctx.arc(h.x*sc,h.y*sc,h.isMe?5:3,0,Math.PI*2);mctx.fillStyle=h.isMe?'#ff4e4e':'rgba(255,255,255,0.6)';mctx.fill();}}
-
+function drawMM(){
+  mctx.clearRect(0,0,108,108);
+  
+  // Фон миникарты (тёмный)
+  mctx.fillStyle='rgba(0,0,0,0.6)';
+  mctx.fillRect(0,0,108,108);
+  
+  // Отрисовка стен лабиринта на миникарте
+  if(gameMode==='maze'&&mazeState&&mazeState.walls){
+    const sc=108/WORLD;
+    mctx.fillStyle='rgba(128,128,128,0.8)'; // Серый цвет стен
+    for(const wall of mazeState.walls){
+      const mx=wall.x*sc;
+      const my=wall.y*sc;
+      const mw=Math.max(1,wall.w*sc);
+      const mh=Math.max(1,wall.h*sc);
+      mctx.fillRect(mx,my,mw,mh);
+    }
+    // Обводка стен поярче
+    mctx.strokeStyle='rgba(180,180,180,0.6)';
+    mctx.lineWidth=0.5;
+    for(const wall of mazeState.walls){
+      const mx=wall.x*sc;
+      const my=wall.y*sc;
+      const mw=Math.max(1,wall.w*sc);
+      const mh=Math.max(1,wall.h*sc);
+      mctx.strokeRect(mx,my,mw,mh);
+    }
+  }
+  
+  // Отрисовка голов змеек
+  const sc=108/WORLD;
+  const heads=(serverWorld&&serverWorld.allHeads)||(serverWorld&&serverWorld.players||[]).map(p=>({x:p.segs&&p.segs[0]&&p.segs[0].x,y:p.segs&&p.segs[0]&&p.segs[0].y,isMe:p.isMe}));
+  for(const h of heads){
+    if(h.x==null)continue;
+    mctx.beginPath();
+    mctx.arc(h.x*sc,h.y*sc,h.isMe?5:3,0,Math.PI*2);
+    mctx.fillStyle=h.isMe?'#ff4e4e':'rgba(255,255,255,0.6)';
+    mctx.fill();
+  }
+  
+  // Рамка миникарты
+  mctx.strokeStyle='rgba(46,204,113,0.3)';
+  mctx.lineWidth=1;
+  mctx.strokeRect(0,0,108,108);
+}
 function drawBackground(cx,cy){if(!running){if(currentBG==='space')drawSpaceBackground();else if(currentBG==='water')drawWaterBackground();else{ctx.fillStyle='#0d2b15';ctx.fillRect(0,0,W,H);}return;}const bgColors={'classic':'#0d2b15','space':'#03020d','water':'#020e1a'};ctx.fillStyle=bgColors[currentBG]||'#0d2b15';ctx.fillRect(0,0,W,H);const gridColors={'classic':'rgba(46,204,113,0.055)','space':'rgba(120,100,255,0.06)','water':'rgba(0,160,220,0.055)'};ctx.strokeStyle=gridColors[currentBG]||gridColors.classic;ctx.lineWidth=1;for(let x=Math.floor(cx/CELL)*CELL;x<cx+W+CELL;x+=CELL){ctx.beginPath();ctx.moveTo(x-cx,0);ctx.lineTo(x-cx,H);ctx.stroke();}for(let y=Math.floor(cy/CELL)*CELL;y<cy+H+CELL;y+=CELL){ctx.beginPath();ctx.moveTo(0,y-cy);ctx.lineTo(W,y-cy);ctx.stroke();}ctx.strokeStyle='rgba(231,76,60,0.5)';ctx.lineWidth=8;ctx.strokeRect(-cx,-cy,WORLD,WORLD);}
 
 function drawFoodList(fl,cx,cy){for(const f of fl){const fx=f.x-cx,fy=f.y-cy;if(fx<-20||fx>W+20||fy<-20||fy>H+20)continue;if(f.p!==undefined)f.p+=.05;const pr=f.r*(f.size==='big'?1:.85+.15*Math.sin(f.p||0));ctx.beginPath();ctx.arc(fx,fy,pr,0,Math.PI*2);ctx.fillStyle=f.color||'#2ecc71';ctx.fill();ctx.beginPath();ctx.arc(fx-pr*.3,fy-pr*.3,pr*.27,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.28)';ctx.fill();}}
@@ -1587,7 +1871,7 @@ const FLAG_PREVIEW={
 function getFlagColor(skinId,i,total){const cols=FLAG_SKINS[skinId];if(!cols)return null;const stripe=Math.floor((1-i/total)*cols.length);return cols[Math.min(stripe,cols.length-1)];}
 function drawServerSnake(p,cx,cy){let segs=p.segs;if(gameMode==='online'&&_prevWorld&&_prevWorld._segsMap){const prevSegs=_prevWorld._segsMap[p.name];if(prevSegs&&prevSegs.length===segs.length){const elapsed=performance.now()-_worldRecvTime;const tt=Math.min(elapsed/INTERP_DURATION,1.2);segs=interpSegs(prevSegs,segs,Math.min(tt,1));}}if(!segs||segs.length<2)return;const hd0=segs[0],hsx=hd0.x-cx,hsy=hd0.y-cy;if(hsx<-500||hsx>W+500||hsy<-500||hsy>H+500)return;const sk=SKINS_DATA[p.skinId%SKINS_DATA.length]||SKINS_DATA[0];const isFlag=!!FLAG_SKINS[p.skinId];const r=6+(Math.min(p.score||10,1000)/1000)*22;if(p.boosting)ctx.globalAlpha=0.72;for(let i=segs.length-1;i>=1;i--){const s=segs[i],sx=s.x-cx,sy=s.y-cy;if(sx<-150||sx>W+150||sy<-150||sy>H+150)continue;const tt=i/segs.length;ctx.beginPath();ctx.arc(sx,sy,r*(.72+.28*(1-tt)),0,Math.PI*2);ctx.fillStyle=isFlag?getFlagColor(p.skinId,i,segs.length):(i%2===0?sk.b[0]:sk.b[1]);ctx.fill();}ctx.globalAlpha=1;const hx=hd0.x-cx,hy=hd0.y-cy;if(p.isMe){ctx.beginPath();ctx.arc(hx,hy,r+9,0,Math.PI*2);ctx.fillStyle='rgba(57,255,20,0.11)';ctx.fill();}ctx.beginPath();ctx.arc(hx,hy,r,0,Math.PI*2);ctx.fillStyle=isFlag?(FLAG_HEADS[p.skinId]||sk.h):sk.h;ctx.fill();const ang=segs.length>1?Math.atan2(segs[0].y-segs[1].y,segs[0].x-segs[1].x):0;[ang-.48,ang+.48].forEach(a=>{const ex=hx+Math.cos(a)*r*.5,ey=hy+Math.sin(a)*r*.5,er=r*.33;ctx.beginPath();ctx.arc(ex,ey,er,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.beginPath();ctx.arc(ex+Math.cos(ang)*er*.5,ey+Math.sin(ang)*er*.5,er*.5,0,Math.PI*2);ctx.fillStyle='#111';ctx.fill();});ctx.font='bold '+(9+r)+'px Nunito';ctx.textAlign='center';ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillText(p.name,hx+1,hy-r-8+1);ctx.fillStyle=p.isMe?'#f9ca24':'#fff';ctx.fillText(p.name,hx,hy-r-8);}
 
-function draw(cx,cy){drawBackground(cx,cy);if(!running){updateParticles();drawParticles();return;}if(serverWorld){drawFoodList(serverWorld.foods||[],cx,cy);for(const p of(serverWorld.players||[]))drawServerSnake(p,cx,cy);}}
+function draw(cx,cy){drawBackground(cx,cy);if(!running){updateParticles();drawParticles();return;}if(gameMode==='maze'){drawWalls(cx,cy);}if(serverWorld){drawFoodList(serverWorld.foods||[],cx,cy);for(const p of(serverWorld.players||[]))drawServerSnake(p,cx,cy);}}
 
 let lastT=0;
 function loop(ts){const dt=Math.min((ts-lastT)/16,3);lastT=ts;if(running)updHUD();draw(camX,camY);if(running)drawMM();requestAnimationFrame(loop);}
@@ -1597,8 +1881,9 @@ requestAnimationFrame(loop);
 document.getElementById('playBtn').onclick=()=>{pname=document.getElementById('nameInput').value.trim()||'Player';showModeSelect();};
 document.getElementById('offlineBtn').onclick=()=>{pname=document.getElementById('nameInput').value.trim()||'Player';startOffline();};
 document.getElementById('onlineBtn').onclick=()=>{pname=document.getElementById('nameInput').value.trim()||'Player';connectWS();};
-document.getElementById('restartBtn').onclick=()=>{if(gameMode==='offline'){startOffline();}else{if(ws&&ws.readyState===WebSocket.OPEN){running=false;serverWorld=null;_prevWorld=null;showLoading(t('respawn'));ws.send(JSON.stringify({type:'respawn'}));}else connectWS();}};
-document.getElementById('menuBackBtn').onclick=()=>{if(offlineTickInterval){clearInterval(offlineTickInterval);offlineTickInterval=null;}if(ws){try{ws.close();}catch(e){}ws=null;}wsConnecting=false;serverWorld=null;_prevWorld=null;running=false;offlineState=null;showMenu();};
+document.getElementById('mazeBtn').onclick=()=>{pname=document.getElementById('nameInput').value.trim()||'Player';startMazeMode();};
+document.getElementById('restartBtn').onclick=()=>{if(gameMode==='offline'){startOffline();}else if(gameMode==='maze'){startMazeMode();}else{if(ws&&ws.readyState===WebSocket.OPEN){running=false;serverWorld=null;_prevWorld=null;showLoading(t('respawn'));ws.send(JSON.stringify({type:'respawn'}));}else connectWS();}};
+document.getElementById('menuBackBtn').onclick=()=>{if(offlineTickInterval){clearInterval(offlineTickInterval);offlineTickInterval=null;}if(mazeBreakTimeout){clearTimeout(mazeBreakTimeout);mazeBreakTimeout=null;}if(ws){try{ws.close();}catch(e){}ws=null;}wsConnecting=false;serverWorld=null;_prevWorld=null;running=false;offlineState=null;mazeState=null;showMenu();};
 document.getElementById('nameInput').addEventListener('keydown',e=>{if(e.key==='Enter'){pname=document.getElementById('nameInput').value.trim()||'Player';showModeSelect();}});
 
 function drawRobotIcon(){const c=document.getElementById('icRobot');if(!c)return;const x=c.getContext('2d');x.clearRect(0,0,36,36);x.fillStyle='#00e5cc';x.beginPath();x.roundRect(8,4,20,16,3);x.fill();x.fillStyle='#0a1a0f';x.fillRect(11,9,5,5);x.fillRect(20,9,5,5);x.strokeStyle='#00e5cc';x.lineWidth=2;x.beginPath();x.moveTo(18,4);x.lineTo(18,1);x.stroke();x.fillStyle='#f9ca24';x.beginPath();x.arc(18,1,2,0,Math.PI*2);x.fill();x.fillStyle='rgba(0,229,204,0.7)';x.beginPath();x.roundRect(10,22,16,10,2);x.fill();x.fillStyle='#00e5cc';x.fillRect(5,23,5,6);x.fillRect(26,23,5,6);x.fillRect(11,32,5,4);x.fillRect(20,32,5,4);}
