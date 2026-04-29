@@ -2255,25 +2255,30 @@ let myClanId = localStorage.getItem('dvx_clan_id') || null;
 let myClanRole = localStorage.getItem('dvx_clan_role') || null; // 'leader','officer','member'
 let _clanCache = null; // кэш всех кланов
 
-// ── JSONBin helpers ──
 async function clanLoadAll() {
   try {
-    const res = await fetch(`https://api.jsonbin.io/v3/b/${CLAN_BIN_ID}/latest`, {
-      headers: { 'X-Master-Key': JB_KEY }
+    const res = await fetch(`${UPSTASH_URL}/get/clans`, {
+      headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}` }
     });
     const data = await res.json();
-    _clanCache = data.record.clans || [];
-    return _clanCache;
+    const clans = JSON.parse(data.result || '[]');
+    _clanCache = clans;
+    return clans;
   } catch(e) { return _clanCache || []; }
 }
 
 async function clanSaveAll(clans) {
-  await fetch(`https://api.jsonbin.io/v3/b/${CLAN_BIN_ID}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', 'X-Master-Key': JB_KEY },
-    body: JSON.stringify({ clans })
-  });
-  _clanCache = clans;
+  try {
+    await fetch(`${UPSTASH_URL}/set/clans`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${UPSTASH_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(JSON.stringify(clans))
+    });
+    _clanCache = clans;
+  } catch(e) { console.warn('Clan save failed', e); }
 }
 
 function getMyClan(clans) {
