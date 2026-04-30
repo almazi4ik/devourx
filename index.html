@@ -2737,6 +2737,9 @@ window.addEventListener('load',()=>{
   // Загружаем сохранённый ник
   const savedName = localStorage.getItem('dvx_name');
   if(savedName) document.getElementById('nameInput').value = savedName;
+  initParticles();
+  if (currentBG==='water') initWaterFish();
+  if (currentBG==='space') initSpaceNebula();
 });
 
 // Live обновление ника
