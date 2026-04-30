@@ -625,6 +625,49 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
 #clanChatSend { background:linear-gradient(135deg,#a29bfe,#6c63ff); border:none; border-radius:10px; color:#fff; font-size:16px; padding:0 14px; cursor:pointer; transition:transform .15s; }
 #clanChatSend:hover { transform:scale(1.08); }
 #clanChatNoMember { text-align:center; padding:40px 20px; color:rgba(255,255,255,0.3); font-size:13px; font-weight:800; }
+  /* ═══ ДЛЯ ПЛАНШЕТОВ (Redmi Pad SE) ═══ */
+@media (min-width: 768px) and (max-width: 1200px) {
+  .logo { font-size: 64px !important; }
+  .mode-card { width: 200px !important; }
+  .skins-grid { grid-template-columns: repeat(4,1fr) !important; }
+}
+
+/* ═══ ДЛЯ ТЕЛЕФОНОВ ═══ */
+@media (max-width: 767px) {
+  .logo { font-size: 36px !important; }
+  .logo .lio { font-size: 22px !important; }
+  .menu-center { width: 95vw !important; margin-top: 20px !important; gap: 6px !important; }
+  .btn-play { font-size: 22px !important; padding: 12px 0 !important; }
+  .btn-skins { font-size: 18px !important; padding: 10px 0 !important; }
+  .btn-quests-menu, .btn-leaderboard { font-size: 14px !important; padding: 8px 0 !important; }
+  .btn-music { font-size: 12px !important; padding: 6px 0 !important; }
+  .name-input { font-size: 14px !important; padding: 8px 16px !important; }
+  .mode-btns { flex-direction: column !important; align-items: center !important; gap: 12px !important; }
+  .mode-card { width: 85vw !important; max-width: 300px !important; padding: 16px !important; flex-direction: row !important; gap: 12px !important; }
+  .mode-icon { font-size: 36px !important; }
+  .mode-label { font-size: 18px !important; }
+  .mode-desc { font-size: 11px !important; text-align: left !important; }
+  .mode-badge { top: 6px !important; right: 6px !important; font-size: 8px !important; }
+  .coins-fixed { top: 6px !important; right: 6px !important; }
+  .crystals-fixed { top: 50px !important; right: 6px !important; }
+  #clanBtn { bottom: 90px !important; right: 6px !important; width: 40px !important; height: 40px !important; }
+  #gearBtn { bottom: 12px !important; left: 6px !important; width: 36px !important; height: 36px !important; font-size: 16px !important; }
+  .skins-grid { grid-template-columns: repeat(3,1fr) !important; gap: 6px !important; }
+  .skin-card { padding: 10px 6px !important; }
+  .skin-preview { width: 40px !important; height: 40px !important; }
+  .sk-name { font-size: 10px !important; }
+  
+  /* Джойстик и буст больше */
+  #joystickBase { width: 130px !important; height: 130px !important; }
+  #joystickKnob { width: 56px !important; height: 56px !important; }
+  #boostBtn { width: 100px !important; height: 100px !important; font-size: 16px !important; }
+  
+  /* Кнопки в игре */
+  .ap-btn { bottom: 12px !important; left: 8px !important; padding: 6px 10px !important; }
+  .ap-btn span { font-size: 10px !important; }
+  .minimap-c { width: 80px !important; height: 80px !important; bottom: 80px !important; }
+  .hud-bottom { bottom: 80px !important; }
+}
 </style>
 </head>
 <body>
