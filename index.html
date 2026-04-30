@@ -845,6 +845,14 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
   <div class="bm-score" id="bmScore">0</div>
 </div>
 <div id="onlineCounter">Онлайн: <span id="onlineNum">0</span></div>
+
+<!-- НОВЫЙ БЛОК КРИСТАЛЛОВ -->
+<div class="crystals-fixed" id="crystalsBox" style="position:fixed;top:60px;right:14px;display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.55);border:2px solid rgba(162,155,254,0.5);border-radius:50px;padding:4px 8px 4px 14px;z-index:999;cursor:pointer;" onclick="toggleCrystalShop()">
+  <span style="font-size:20px">💎</span>
+  <span id="crystalsCnt" style="font-family:'Fredoka One',cursive;font-size:20px;color:#a29bfe;">0</span>
+  <span style="background:rgba(162,155,254,0.3);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:16px;">+</span>
+</div>
+  
 <div class="coins-fixed"><canvas id="coinTopCanvas" width="36" height="36" style="width:36px;height:36px;display:block;flex-shrink:0;"></canvas><span class="ess-cnt" id="essCnt" style="font-family:'Fredoka One',cursive;font-size:20px;color:#f9ca24;">0</span></div>
 
 <!-- ШЕСТЕРЕНКА -->
@@ -938,6 +946,41 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
 <canvas id="fxCanvas" style="position:fixed;inset:0;pointer-events:none;z-index:99998;"></canvas>
 <canvas id="irisCanvas" style="position:fixed;inset:0;pointer-events:none;z-index:99999;"></canvas>
 
+  <!-- МАГАЗИН КРИСТАЛЛОВ -->
+<div id="crystalShopOverlay" onclick="toggleCrystalShop()" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+  <div id="crystalShopPanel" onclick="event.stopPropagation()" style="background:linear-gradient(160deg,#1a1a3e,#0f0f2a);border:2px solid rgba(162,155,254,0.4);border-radius:20px;padding:24px;width:min(340px,90vw);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+      <span style="font-family:'Fredoka One',cursive;font-size:22px;color:#a29bfe;">💎 МАГАЗИН</span>
+      <button onclick="toggleCrystalShop()" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);border-radius:50%;width:32px;height:32px;color:#fff;font-size:16px;cursor:pointer;">✕</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;background:rgba(0,0,0,0.3);border-radius:14px;padding:12px;">
+      <span style="font-size:28px">💎</span>
+      <div>
+        <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#a29bfe;">Баланс: <span id="shopCrystals">0</span> 💎</div>
+        <div style="font-family:'Nunito',sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">Монет: <span id="shopCoins">0</span> 💰</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div onclick="buyCrystals(1,1500)" style="padding:12px;background:rgba(255,255,255,0.05);border-radius:10px;cursor:pointer;display:flex;justify-content:space-between;">
+        <span style="font-family:'Fredoka One',cursive;color:#e8f5e9;">💎 1 Кристалл</span>
+        <span style="font-family:'Fredoka One',cursive;color:#f9ca24;">💰 1 500</span>
+      </div>
+      <div onclick="buyCrystals(5,4500)" style="padding:12px;background:rgba(255,255,255,0.05);border-radius:10px;cursor:pointer;display:flex;justify-content:space-between;">
+        <span style="font-family:'Fredoka One',cursive;color:#e8f5e9;">💎💎 5 Кристаллов</span>
+        <span style="font-family:'Fredoka One',cursive;color:#f9ca24;">💰 4 500</span>
+      </div>
+      <div onclick="buyCrystals(15,12000)" style="padding:12px;background:rgba(255,255,255,0.05);border-radius:10px;cursor:pointer;display:flex;justify-content:space-between;">
+        <span style="font-family:'Fredoka One',cursive;color:#e8f5e9;">💎💎💎 15 Кристаллов</span>
+        <span style="font-family:'Fredoka One',cursive;color:#f9ca24;">💰 12 000</span>
+      </div>
+      <div onclick="buyCrystals(50,35000)" style="padding:12px;background:linear-gradient(135deg,rgba(162,155,254,0.1),rgba(108,92,231,0.1));border-radius:10px;cursor:pointer;display:flex;justify-content:space-between;">
+        <span style="font-family:'Fredoka One',cursive;color:#a29bfe;">💎✨ 50 Кристаллов</span>
+        <span style="font-family:'Fredoka One',cursive;color:#f9ca24;">💰 35 000</span>
+      </div>
+    </div>
+  </div>
+</div>
+  
 <script>
 // ══════ SKINS ══════
 const SKINS_DATA=[
@@ -982,8 +1025,9 @@ const SKINS_DATA=[
   {id:39,key:'sk_germany', h:'#1c1917',b:['#dc2626','#fde047'],   rarity:'rare',     cost:100,  owned:false},
   {id:40,key:'sk_france',  h:'#1d4ed8',b:['#ef4444','#f8fafc'],   rarity:'rare',     cost:100,  owned:false},
   {id:41,key:'sk_brazil',  h:'#14532d',b:['#fde047','#15803d'],   rarity:'rare',     cost:100,  owned:false},
+  {id:42, key:'sk_crystal', h:'#1e40af', b:['#3b82f6','#1d4ed8','#60a5fa'], rarity:'crystal', cost:50, owned:false, currency:'crystals'},
 ];
-const RARITY_C={standard:'#a8d8b8',rare:'#a29bfe',legendary:'#f9ca24'};
+  const RARITY_C={standard:'#a8d8b8',rare:'#a29bfe',legendary:'#f9ca24',crystal:'#a78bfa'};
 
 (function loadSavedSkins(){
   SKINS_DATA.forEach(s=>{ if(s.rarity==='standard') s.owned=true; });
@@ -996,6 +1040,47 @@ let essence=parseInt(localStorage.getItem('dvx_coins')||'18'),curCat='all';
 const MIN_LEN=10,MAX_BODY=750;
 let musicEnabled=localStorage.getItem('dvx_music')!=='off';
 
+  // ══════ КРИСТАЛЛЫ ══════
+let crystals=parseInt(localStorage.getItem('dvx_crystals')||'0');
+function syncCrystals(){
+  localStorage.setItem('dvx_crystals', crystals);
+  const el=document.getElementById('crystalsCnt');
+  if(el) el.textContent=crystals;
+}
+
+// ══════ МАГАЗИН КРИСТАЛЛОВ ══════ 
+function toggleCrystalShop(){
+  const overlay = document.getElementById('crystalShopOverlay');
+  if (!overlay) return;
+  
+  const isOpen = overlay.style.display === 'flex';
+  
+  if (isOpen) {
+    overlay.style.display = 'none';
+  } else {
+    document.getElementById('shopCrystals').textContent = crystals;
+    document.getElementById('shopCoins').textContent = essence;
+    overlay.style.display = 'flex';
+  }
+}
+
+function buyCrystals(amount, price) {
+  if (essence < price) {
+    showToast(`Недостаточно монет! Нужно ${price} 💰`, '#ff6b6b');
+    return;
+  }
+  essence -= price;
+  crystals += amount;
+  syncEss();
+  syncCrystals();
+  showToast(`Куплено ${amount} 💎 за ${price} 💰!`, '#a29bfe');
+  
+  const sc = document.getElementById('shopCrystals');
+  const sco = document.getElementById('shopCoins');
+  if (sc) sc.textContent = crystals;
+  if (sco) sco.textContent = essence;
+}
+  
 // ══════ BACKGROUND THEME ══════
 let currentBG = localStorage.getItem('dvx_bg') || 'classic';
 
@@ -1049,6 +1134,7 @@ function syncEss(){
 }
 function saveSkins(){localStorage.setItem('dvx_skins',JSON.stringify(SKINS_DATA.map(s=>({id:s.id,owned:s.owned}))));localStorage.setItem('dvx_selSkin',selSkin);}
 syncEss();
+syncCrystals(); // ← добавить эту строку
 
 function renderSkins(){
   const grid=document.getElementById('skinsGrid');grid.innerHTML='';
@@ -1059,10 +1145,38 @@ function renderSkins(){
     const rc=RARITY_C[s.rarity];
     const glowStyle=s.rarity==='legendary'?`box-shadow:0 0 18px ${s.b[0]}66,0 0 6px ${s.b[0]}44`:'';
     const animStyle=s.rarity==='legendary'?'animation:skinShimmer 2s ease-in-out infinite':'';
-    card.innerHTML=`${locked?'<span class="lock-ico">🔒</span>':''}<div class="skin-preview" style="background:${(FLAG_PREVIEW&&FLAG_PREVIEW[s.id])?('linear-gradient(180deg,'+FLAG_PREVIEW[s.id].join(',')+')'):('linear-gradient(135deg,'+s.b[0]+','+s.b[1]+')')};${glowStyle};${animStyle}"></div><div class="sk-name" style="color:${rc}">${t(s.key)}</div>${locked?`<div class="sk-cost">${coinHTML(22)} ${s.cost}</div>`:(s.id===selSkin?`<div class="sk-equip">${t('equipped')}</div>`:`<div class="sk-equip" style="color:#888">${t('equip')}</div>`)}<div class="rarity-bar" style="background:${rc}55"></div>`;
+    card.innerHTML=`${locked?'<span class="lock-ico">🔒</span>':''}<div class="skin-preview" style="background:${(FLAG_PREVIEW&&FLAG_PREVIEW[s.id])?('linear-gradient(180deg,'+FLAG_PREVIEW[s.id].join(',')+')'):('linear-gradient(135deg,'+s.b[0]+','+s.b[1]+')')};${glowStyle};${animStyle}"></div><div class="sk-name" style="color:${rc}">${t(s.key)}</div>${locked?(s.currency==='crystals'?`<div class="sk-cost" style="background:rgba(162,155,254,0.2);border-color:rgba(162,155,254,0.4);"><span style="font-size:16px">💎</span> ${s.cost}</div>`:`<div class="sk-cost">${coinHTML(22)} ${s.cost}</div>`):(s.id===selSkin?`<div class="sk-equip">${t('equipped')}</div>`:`<div class="sk-equip" style="color:#888">${t('equip')}</div>`)}<div class="rarity-bar" style="background:${rc}55"></div>`;
     card.onclick=()=>{
-      if(locked){if(essence>=s.cost){essence-=s.cost;s.owned=true;selSkin=s.id;syncEss();saveSkins();renderSkins();}else alert(t('need_coins')+' '+s.cost+' '+t('coins'));return;}
-      selSkin=s.id;saveSkins();renderSkins();
+      if(locked){
+        if(s.currency==='crystals'){
+          if(crystals>=s.cost){
+            crystals-=s.cost;
+            s.owned=true;
+            selSkin=s.id;
+            syncCrystals();
+            saveSkins();
+            renderSkins();
+            showToast('🔮 Скин куплен за '+s.cost+' 💎!','#a78bfa');
+          } else {
+            showToast('Нужно '+s.cost+' 💎! У тебя '+crystals+' 💎','#ff6b6b');
+          }
+          return;
+        }
+        if(essence>=s.cost){
+          essence-=s.cost;
+          s.owned=true;
+          selSkin=s.id;
+          syncEss();
+          saveSkins();
+          renderSkins();
+        } else {
+          alert(t('need_coins')+' '+s.cost+' '+t('coins'));
+        }
+        return;
+      }
+      selSkin=s.id;
+      saveSkins();
+      renderSkins();
     };
     grid.appendChild(card);
   });
@@ -1859,7 +1973,7 @@ const FLAG_SKINS={
   40:['#ed2939','#ffffff','#002395'],
   41:['#009c3b','#ffdf00','#009c3b'],
 };
-const FLAG_HEADS={36:'#0057b7',37:'#ffffff',39:'#000000',40:'#002395',41:'#002776'};
+const FLAG_HEADS={36:'#0057b7',37:'#ffffff',39:'#000000',40:'#002395',41:'#002776',42:'#1e40af'};
 const FLAG_PREVIEW={
   36:['#0057b7','#ffd700'],
   37:['#ffffff','#0039a6','#d52b1e'],
@@ -1867,10 +1981,86 @@ const FLAG_PREVIEW={
   39:['#000000','#dd0000','#ffce00'],
   40:['#002395','#ffffff','#ed2939'],
   41:['#009c3b','#ffdf00','#009c3b'],
+  42:['#3b82f6','#1d4ed8','#60a5fa'], // ← кристальный скин
 };
 function getFlagColor(skinId,i,total){const cols=FLAG_SKINS[skinId];if(!cols)return null;const stripe=Math.floor((1-i/total)*cols.length);return cols[Math.min(stripe,cols.length-1)];}
-function drawServerSnake(p,cx,cy){let segs=p.segs;if(gameMode==='online'&&_prevWorld&&_prevWorld._segsMap){const prevSegs=_prevWorld._segsMap[p.name];if(prevSegs&&prevSegs.length===segs.length){const elapsed=performance.now()-_worldRecvTime;const tt=Math.min(elapsed/INTERP_DURATION,1.2);segs=interpSegs(prevSegs,segs,Math.min(tt,1));}}if(!segs||segs.length<2)return;const hd0=segs[0],hsx=hd0.x-cx,hsy=hd0.y-cy;if(hsx<-500||hsx>W+500||hsy<-500||hsy>H+500)return;const sk=SKINS_DATA[p.skinId%SKINS_DATA.length]||SKINS_DATA[0];const isFlag=!!FLAG_SKINS[p.skinId];const r=6+(Math.min(p.score||10,1000)/1000)*22;if(p.boosting)ctx.globalAlpha=0.72;for(let i=segs.length-1;i>=1;i--){const s=segs[i],sx=s.x-cx,sy=s.y-cy;if(sx<-150||sx>W+150||sy<-150||sy>H+150)continue;const tt=i/segs.length;ctx.beginPath();ctx.arc(sx,sy,r*(.72+.28*(1-tt)),0,Math.PI*2);ctx.fillStyle=isFlag?getFlagColor(p.skinId,i,segs.length):(i%2===0?sk.b[0]:sk.b[1]);ctx.fill();}ctx.globalAlpha=1;const hx=hd0.x-cx,hy=hd0.y-cy;if(p.isMe){ctx.beginPath();ctx.arc(hx,hy,r+9,0,Math.PI*2);ctx.fillStyle='rgba(57,255,20,0.11)';ctx.fill();}ctx.beginPath();ctx.arc(hx,hy,r,0,Math.PI*2);ctx.fillStyle=isFlag?(FLAG_HEADS[p.skinId]||sk.h):sk.h;ctx.fill();const ang=segs.length>1?Math.atan2(segs[0].y-segs[1].y,segs[0].x-segs[1].x):0;[ang-.48,ang+.48].forEach(a=>{const ex=hx+Math.cos(a)*r*.5,ey=hy+Math.sin(a)*r*.5,er=r*.33;ctx.beginPath();ctx.arc(ex,ey,er,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.beginPath();ctx.arc(ex+Math.cos(ang)*er*.5,ey+Math.sin(ang)*er*.5,er*.5,0,Math.PI*2);ctx.fillStyle='#111';ctx.fill();});ctx.font='bold '+(9+r)+'px Nunito';ctx.textAlign='center';ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillText(p.name,hx+1,hy-r-8+1);ctx.fillStyle=p.isMe?'#f9ca24':'#fff';ctx.fillText(p.name,hx,hy-r-8);}
-
+function drawServerSnake(p,cx,cy){
+  let segs=p.segs;
+  if(gameMode==='online'&&_prevWorld&&_prevWorld._segsMap){
+    const prevSegs=_prevWorld._segsMap[p.name];
+    if(prevSegs&&prevSegs.length===segs.length){
+      const elapsed=performance.now()-_worldRecvTime;
+      const tt=Math.min(elapsed/INTERP_DURATION,1.2);
+      segs=interpSegs(prevSegs,segs,Math.min(tt,1));
+    }
+  }
+  if(!segs||segs.length<2)return;
+  const hd0=segs[0],hsx=hd0.x-cx,hsy=hd0.y-cy;
+  if(hsx<-500||hsx>W+500||hsy<-500||hsy>H+500)return;
+  const sk=SKINS_DATA.find(sk=>sk.id===p.skinId)||SKINS_DATA[0];
+  const isFlag=!!FLAG_SKINS[p.skinId] && p.skinId !== 42;
+  const r=6+(Math.min(p.score||10,1000)/1000)*22;
+  if(p.boosting)ctx.globalAlpha=0.72;
+  
+  for(let i=segs.length-1;i>=1;i--){
+    const s=segs[i],sx=s.x-cx,sy=s.y-cy;
+    if(sx<-150||sx>W+150||sy<-150||sy>H+150)continue;
+    const tt=i/segs.length;
+    ctx.beginPath();
+    ctx.arc(sx,sy,r*(.72+.28*(1-tt)),0,Math.PI*2);
+    
+    // Цвет сегментов
+    if(isFlag){
+      ctx.fillStyle=getFlagColor(p.skinId,i,segs.length);
+    } else if(p.skinId===42){
+      // Кристальный скин — чередуем 3 цвета
+      const colors=['#3b82f6','#1d4ed8','#60a5fa'];
+      ctx.fillStyle=colors[i%3];
+    } else {
+      ctx.fillStyle=i%2===0?sk.b[0]:sk.b[1];
+    }
+    ctx.fill();
+  }
+  
+  ctx.globalAlpha=1;
+  const hx=hd0.x-cx,hy=hd0.y-cy;
+  
+  // Свечение для кристального скина
+  if(p.skinId===42){
+    ctx.beginPath();
+    ctx.arc(hx,hy,r+6,0,Math.PI*2);
+    ctx.fillStyle='rgba(96,165,250,0.2)';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(hx,hy,r+3,0,Math.PI*2);
+    ctx.strokeStyle='rgba(147,197,253,0.6)';
+    ctx.lineWidth=2;
+    ctx.stroke();
+  }
+  
+  if(p.isMe){
+    ctx.beginPath();ctx.arc(hx,hy,r+9,0,Math.PI*2);
+    ctx.fillStyle='rgba(57,255,20,0.11)';ctx.fill();
+  }
+  
+  ctx.beginPath();ctx.arc(hx,hy,r,0,Math.PI*2);
+  ctx.fillStyle=isFlag?(FLAG_HEADS[p.skinId]||sk.h):(p.skinId===42?'#1e40af':sk.h);
+  ctx.fill();
+  
+  const ang=segs.length>1?Math.atan2(segs[0].y-segs[1].y,segs[0].x-segs[1].x):0;
+  [ang-.48,ang+.48].forEach(a=>{
+    const ex=hx+Math.cos(a)*r*.5,ey=hy+Math.sin(a)*r*.5,er=r*.33;
+    ctx.beginPath();ctx.arc(ex,ey,er,0,Math.PI*2);
+    ctx.fillStyle='#fff';ctx.fill();
+    ctx.beginPath();ctx.arc(ex+Math.cos(ang)*er*.5,ey+Math.sin(ang)*er*.5,er*.5,0,Math.PI*2);
+    ctx.fillStyle='#111';ctx.fill();
+  });
+  
+  ctx.font='bold '+(9+r)+'px Nunito';ctx.textAlign='center';
+  ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillText(p.name,hx+1,hy-r-8+1);
+  ctx.fillStyle=p.isMe?'#f9ca24':'#fff';ctx.fillText(p.name,hx,hy-r-8);
+}
+  
 function draw(cx,cy){drawBackground(cx,cy);if(!running){updateParticles();drawParticles();return;}if(gameMode==='maze'){drawWalls(cx,cy);}if(serverWorld){drawFoodList(serverWorld.foods||[],cx,cy);for(const p of(serverWorld.players||[]))drawServerSnake(p,cx,cy);}}
 
 let lastT=0;
@@ -2152,40 +2342,47 @@ function renderAccPanel() {
   } catch(e) { /* offline — оставляем сессию */ }
 })();
 
-async function jbLoadScores() {
-  try {
-    const res = await fetch(`${UPSTASH_URL}/get/scores`, {
-      headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}` }
-    });
-    const data = await res.json();
-    return JSON.parse(data.result || '[]');
-  } catch(e) { return []; }
+// ══════ ЛИДЕРБОРДЫ (Daily, Weekly, All-Time) ══════
+function getDailyKey(){return'lb_daily_'+new Date().toISOString().slice(0,10);}
+function getWeeklyKey(){
+  const d=new Date();d.setDate(d.getDate()-d.getDay()+(d.getDay()===0?-6:1));
+  return'lb_weekly_'+d.toISOString().slice(0,10);
+}
+const LB_ALLTIME='lb_alltime';
+
+async function lbLoad(key){
+  try{
+    const res=await fetch(`${UPSTASH_URL}/get/${key}`,{headers:{'Authorization':`Bearer ${UPSTASH_TOKEN}`}});
+    const data=await res.json();
+    let result = data.result || '[]';
+    // Если результат — JSON-строка, парсим
+    if (typeof result === 'string') result = JSON.parse(result);
+    // Если всё ещё строка — ещё раз парсим
+    if (typeof result === 'string') result = JSON.parse(result);
+    // Убеждаемся что это массив
+    return Array.isArray(result) ? result : [];
+  }catch(e){return[];}
+}
+async function lbSave(key,scores){
+  await fetch(`${UPSTASH_URL}/set/${key}`,{method:'POST',
+    headers:{'Authorization':`Bearer ${UPSTASH_TOKEN}`,'Content-Type':'application/json'},
+    body:JSON.stringify(JSON.stringify(scores))
+  });
 }
 
-async function jbSaveScore(name, score) {
-  try {
-    const scores = await jbLoadScores();
-    const existing = scores.findIndex(s => s.pid === _playerId);
-    if (existing >= 0) {
-      if (score <= scores[existing].score) return;
-      scores[existing].score = score;
-      scores[existing].date = Date.now();
-    } else {
-      scores.push({ name, score, date: Date.now(), pid: _playerId });
+async function jbLoadScores(){return lbLoad(LB_ALLTIME);}
+async function jbSaveScore(name,score){
+  try{
+    for(const key of[getDailyKey(),getWeeklyKey(),LB_ALLTIME]){
+      const scores=await lbLoad(key);
+      const idx=scores.findIndex(s=>s.pid===_playerId);
+      if(idx>=0){if(score>scores[idx].score)scores[idx].score=score;}
+      else{scores.push({name,score,pid:_playerId});}
+      scores.sort((a,b)=>b.score-a.score);
+      await lbSave(key,scores.slice(0,100));
     }
-    scores.sort((a, b) => b.score - a.score);
-    const top = scores.slice(0, 100);
-    
-    await fetch(`${UPSTASH_URL}/set/scores`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${UPSTASH_TOKEN}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(JSON.stringify(top))
-    });
-    updateBestMassWidget(top);
-  } catch(e) { console.warn('jbSaveScore error', e); }
+    const all=await lbLoad(LB_ALLTIME);updateBestMassWidget(all);
+  }catch(e){console.warn('lb save error',e);}
 }
   
 // Обновляем имя в глобальном рейтинге без изменения счёта
@@ -2236,18 +2433,62 @@ function openLbPanel(){
   document.getElementById('lbPanelList').innerHTML='<div class="lb-panel-loading">Загрузка...</div>';
   document.getElementById('lbOverlay').classList.add('open');
   document.getElementById('lbPanel').classList.add('open');
-  jbLoadScores().then(scores=>{
-    const medals=['🥇','🥈','🥉'];
-    if(!scores.length){document.getElementById('lbPanelList').innerHTML='<div class="lb-panel-loading">Рекордов пока нет!</div>';return;}
-    document.getElementById('lbPanelList').innerHTML=scores.slice(0,50).map((s,i)=>{
-      const isMe=s.pid===_playerId;
-      const rank=i<3?medals[i]:`${i+1}`;
-      return `<div class="lb-panel-row${isMe?' me':''}"><span class="lb-panel-rank">${rank}</span><span class="lb-panel-name">${s.name}</span><span class="lb-panel-score">${s.score}</span></div>`;
-    }).join('');
-    const myIdx=scores.slice(0,50).findIndex(s=>s.pid===_playerId);
-    if(myIdx>5){const rows=document.querySelectorAll('.lb-panel-row');if(rows[myIdx])rows[myIdx].scrollIntoView({block:'center'});}
+  
+  // Вкладки
+  const tabsContainer = document.createElement('div');
+  tabsContainer.style.cssText = 'display:flex;gap:6px;margin-bottom:14px;';
+  tabsContainer.innerHTML = `
+    <button class="lb-tab active" data-tab="daily" style="flex:1;padding:10px 8px;border-radius:12px;border:2px solid rgba(249,202,36,0.3);background:rgba(249,202,36,0.15);color:#f9ca24;font-family:'Fredoka One',cursive;font-size:14px;cursor:pointer;">🥇 ДЕНЬ</button>
+    <button class="lb-tab" data-tab="weekly" style="flex:1;padding:10px 8px;border-radius:12px;border:2px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.6);font-family:'Fredoka One',cursive;font-size:14px;cursor:pointer;">🏆 НЕДЕЛЯ</button>
+    <button class="lb-tab" data-tab="alltime" style="flex:1;padding:10px 8px;border-radius:12px;border:2px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.6);font-family:'Fredoka One',cursive;font-size:14px;cursor:pointer;">👑 ВСЁ ВРЕМЯ</button>
+  `;
+  
+  const contentDiv = document.createElement('div');
+  contentDiv.id = 'lbTabContent';
+  
+  const lbHeader = document.querySelector('.lb-panel-header');
+  const panel = document.getElementById('lbPanelList');
+  panel.innerHTML = '';
+  panel.appendChild(tabsContainer);
+  panel.appendChild(contentDiv);
+  
+  let allData = { daily: [], weekly: [], alltime: [] };
+  
+  Promise.all([lbLoad(getDailyKey()),lbLoad(getWeeklyKey()),lbLoad(LB_ALLTIME)]).then(([daily,weekly,alltime])=>{
+    allData = { daily, weekly, alltime };
+    showLbTab('daily', daily);
+    
+    // Обработчики вкладок
+    document.querySelectorAll('.lb-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.lb-tab').forEach(b => {
+          b.classList.remove('active');
+          b.style.background = 'rgba(255,255,255,0.05)';
+          b.style.color = 'rgba(255,255,255,0.6)';
+          b.style.borderColor = 'rgba(255,255,255,0.15)';
+        });
+        btn.classList.add('active');
+        btn.style.background = 'rgba(249,202,36,0.15)';
+        btn.style.color = '#f9ca24';
+        btn.style.borderColor = 'rgba(249,202,36,0.3)';
+        showLbTab(btn.dataset.tab, allData[btn.dataset.tab]);
+      });
+    });
   });
+  
+  function showLbTab(name, scores) {
+    const s = Array.isArray(scores) ? scores : [];
+    const titles = { daily: '🥇 ЕЖЕДНЕВНЫЙ', weekly: '🏆 НЕДЕЛЬНЫЙ', alltime: '👑 ЗА ВСЁ ВРЕМЯ' };
+    document.getElementById('lbTabContent').innerHTML = s.length === 0 
+      ? '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.3);font-family:\'Fredoka One\',cursive;">Пока никого нет — будь первым!</div>'
+      : s.slice(0,50).map((r,i)=>{
+          const m=['🥇','🥈','🥉'];const rk=i<3?m[i]:String(i+1);
+          const me=r.pid===_playerId;
+          return`<div class="lb-panel-row${me?' me':''}"><span class="lb-panel-rank">${rk}</span><span class="lb-panel-name">${r.name}</span><span class="lb-panel-score">${r.score}</span></div>`;
+        }).join('');
+  }
 }
+  
 function closeLbPanel(){document.getElementById('lbOverlay').classList.remove('open');document.getElementById('lbPanel').classList.remove('open');}
 document.getElementById('lbMenuBtn').onclick=openLbPanel;
 document.getElementById('lbPanelClose').onclick=closeLbPanel;
