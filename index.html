@@ -625,153 +625,228 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
 #clanChatSend { background:linear-gradient(135deg,#a29bfe,#6c63ff); border:none; border-radius:10px; color:#fff; font-size:16px; padding:0 14px; cursor:pointer; transition:transform .15s; }
 #clanChatSend:hover { transform:scale(1.08); }
 #clanChatNoMember { text-align:center; padding:40px 20px; color:rgba(255,255,255,0.3); font-size:13px; font-weight:800; }
-/* ═══ ДЛЯ ПЛАНШЕТОВ (Redmi Pad SE) ═══ */
-@media (min-width: 768px) and (max-width: 1200px) {
-  .logo { font-size: 52px !important; }
-  .logo .lio { font-size: 28px !important; }
-  .top-bar { padding-top: 40px !important; }
-  
-  .menu-center { 
-    margin-top: 40px !important; 
-    gap: 10px !important; 
-    width: 80vw !important;
-    max-width: 600px !important;
-  }
-  
-  .btn-play { font-size: 28px !important; padding: 14px 0 !important; }
-  .btn-skins { font-size: 22px !important; padding: 12px 0 !important; }
-  .btn-quests-menu, .btn-leaderboard { font-size: 18px !important; padding: 10px 0 !important; }
-  .btn-music { font-size: 14px !important; padding: 8px 0 !important; }
-  
-  .name-row { width: 80vw !important; max-width: 600px !important; }
-  .name-input { font-size: 18px !important; padding: 10px 20px !important; }
-
-  .mode-card { width: 180px !important; }
-  .mode-icon { font-size: 50px !important; }
-  .mode-label { font-size: 22px !important; }
-  .mode-desc { font-size: 11px !important; }
-  
-  .skins-grid { grid-template-columns: repeat(4,1fr) !important; gap: 10px !important; }
-  .skin-card { padding: 14px 8px !important; }
-  .skin-preview { width: 50px !important; height: 50px !important; }
-  
-  #joystickBase { width: 140px !important; height: 140px !important; }
-  #joystickKnob { width: 60px !important; height: 60px !important; }
-  #boostBtn { width: 110px !important; height: 110px !important; font-size: 16px !important; }
-  
-  .minimap-c { width: 90px !important; height: 90px !important; }
-  
-  .coins-fixed { top: 10px !important; right: 10px !important; }
-  .crystals-fixed { top: 54px !important; right: 10px !important; }
-  #clanBtn { bottom: 110px !important; right: 10px !important; }
-  #gearBtn { bottom: 16px !important; left: 10px !important; }
-}
-
-/* ═══ ДЛЯ ТЕЛЕФОНОВ (горизонтальный режим) ═══ */
+/* ═══ ДЛЯ ТЕЛЕФОНОВ (ВЕРТИКАЛЬНО) ═══ */
 @media (max-width: 767px) {
-  /* Принудительный горизонтальный режим */
-  #gameCanvas {
-    width: 100vw !important;
-    height: 56.25vw !important;
-    position: fixed !important;
-    top: 50% !important;
-    left: 0 !important;
-    transform: translateY(-50%) !important;
-  }
-
-  body {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    overflow: hidden !important;
-  }
-
-  .screen {
-    width: 100vw !important;
-    height: 100vh !important;
-  }
-
-  /* Логотип меньше */
-  .logo { font-size: 28px !important; }
-  .logo .lio { font-size: 16px !important; }
-  .top-bar { padding-top: 10px !important; }
-
-  /* Меню - кнопки */
-  .menu-center { 
-    margin-top: 10px !important; 
-    gap: 4px !important; 
-    width: 95vw !important;
-    max-width: 500px !important;
-  }
-  
-  .btn-play { font-size: 18px !important; padding: 8px 0 !important; }
-  .btn-skins { font-size: 16px !important; padding: 7px 0 !important; }
-  .btn-quests-menu, .btn-leaderboard { font-size: 12px !important; padding: 6px 0 !important; }
-  .btn-music { font-size: 10px !important; padding: 5px 0 !important; }
-  
-  .name-row { width: 95vw !important; max-width: 500px !important; }
-  .name-input { font-size: 12px !important; padding: 6px 14px !important; }
-
-  /* Карточки режимов - в ряд */
-  .mode-btns { 
-    flex-direction: row !important; 
-    flex-wrap: wrap !important;
+  /* Главное меню — всё по центру экрана */
+  #menuScreen { 
     justify-content: center !important; 
-    gap: 8px !important; 
+    align-items: center !important;
+    padding: 0 !important; 
+  }
+  .top-bar { 
+    padding-top: 2vh !important; 
+  }
+  .logo { 
+    font-size: 7vw !important; 
+  }
+  .logo .lio { 
+    font-size: 4.5vw !important; 
+  }
+  .tip { 
+    font-size: 2.5vw !important; 
+    margin-top: 0.5vh !important; 
+  }
+
+  /* Контейнер кнопок — по центру, на всю высоту */
+  .menu-center { 
+    margin-top: 3vh !important; 
+    gap: 1.5vh !important; 
+    width: 90vw !important;
+    max-width: 450px !important;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-evenly !important;
+  }
+  
+  /* Кнопки — адаптивные, на всю ширину */
+  .btn-play { 
+    font-size: 5vw !important; 
+    padding: 2vh 0 !important; 
+    width: 100% !important;
+  }
+  .btn-skins { 
+    font-size: 4vw !important; 
+    padding: 1.8vh 0 !important; 
+    width: 100% !important;
+  }
+  .btn-quests-menu, .btn-leaderboard { 
+    font-size: 3.5vw !important; 
+    padding: 1.5vh 0 !important; 
+    width: 100% !important;
+  }
+  .btn-music { 
+    font-size: 3vw !important; 
+    padding: 1.2vh 0 !important; 
+    width: 100% !important;
+  }
+  .name-row { 
+    width: 90vw !important; 
+    max-width: 450px !important; 
+  }
+  .name-input { 
+    font-size: 3.5vw !important; 
+    padding: 1.5vh 4vw !important; 
+  }
+
+  /* Карточки режимов — вертикально по центру */
+  .mode-btns { 
+    flex-direction: column !important; 
+    align-items: center !important; 
+    gap: 2vh !important; 
   }
   .mode-card { 
-    width: 30vw !important; 
-    min-width: 100px !important;
-    max-width: 150px !important;
-    padding: 10px 6px !important; 
+    width: 85vw !important; 
+    max-width: 380px !important;
+    padding: 2.5vh 5vw !important; 
   }
-  .mode-icon { font-size: 24px !important; }
-  .mode-label { font-size: 14px !important; letter-spacing: 1px !important; }
-  .mode-desc { font-size: 9px !important; }
-  .mode-badge { top: 4px !important; right: 4px !important; font-size: 7px !important; padding: 2px 6px !important; }
-
-  /* Кнопка Назад */
+  .mode-icon { font-size: 8vw !important; }
+  .mode-label { font-size: 5vw !important; }
+  .mode-desc { font-size: 3vw !important; }
   .mode-back { 
-    margin-top: 10px !important; 
-    font-size: 12px !important; 
-    padding: 6px 20px !important; 
+    font-size: 3.5vw !important; 
+    padding: 1.5vh 6vw !important; 
+    margin-top: 2vh !important; 
   }
 
   /* Монеты и кристаллы */
-  .coins-fixed { top: 4px !important; right: 4px !important; padding: 2px 8px 2px 2px !important; }
-  .coins-fixed .ess-cnt { font-size: 14px !important; }
-  .crystals-fixed { top: 38px !important; right: 4px !important; padding: 2px 6px 2px 10px !important; }
-  #crystalsCnt { font-size: 14px !important; }
+  .coins-fixed { 
+    top: 1vh !important; 
+    right: 2vw !important; 
+    padding: 0.5vh 3vw 0.5vh 0.5vh !important; 
+  }
+  .coins-fixed .ess-cnt, #crystalsCnt { 
+    font-size: 3.5vw !important; 
+  }
+  .crystals-fixed { 
+    top: 7vh !important; 
+    right: 2vw !important; 
+    padding: 0.5vh 3vw 0.5vh 0.5vh !important; 
+  }
 
   /* Кнопки снизу */
-  #clanBtn { bottom: 20px !important; right: 6px !important; width: 34px !important; height: 34px !important; }
-  #gearBtn { bottom: 8px !important; left: 6px !important; width: 30px !important; height: 30px !important; font-size: 14px !important; }
+  #clanBtn { 
+    bottom: 8vh !important; 
+    right: 3vw !important; 
+    width: 10vw !important; 
+    height: 10vw !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+  }
+  #gearBtn { 
+    bottom: 2vh !important; 
+    left: 3vw !important; 
+    width: 9vw !important; 
+    height: 9vw !important;
+    min-width: 30px !important; 
+    min-height: 30px !important;
+  }
 
   /* Скины */
-  .skins-grid { grid-template-columns: repeat(4,1fr) !important; gap: 4px !important; }
-  .skin-card { padding: 6px 4px !important; }
-  .skin-preview { width: 30px !important; height: 30px !important; }
-  .sk-name { font-size: 8px !important; }
+  .skins-grid { 
+    grid-template-columns: repeat(3,1fr) !important; 
+    gap: 1.5vw !important; 
+  }
+  .skin-card { padding: 2vw 1.5vw !important; }
+  .skin-preview { 
+    width: 12vw !important; 
+    height: 12vw !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+  }
+  .sk-name { font-size: 2.5vw !important; }
 
-  /* Игровые элементы */
-  #joystickBase { width: 100px !important; height: 100px !important; }
-  #joystickKnob { width: 44px !important; height: 44px !important; }
-  #boostBtn { width: 80px !important; height: 80px !important; font-size: 14px !important; bottom: 80px !important; right: 10px !important; }
-  #joystickWrap { bottom: 80px !important; left: 10px !important; }
-  
-  .ap-btn { bottom: 10px !important; left: 8px !important; padding: 4px 8px !important; }
-  .ap-btn span { font-size: 8px !important; }
-  .minimap-c { width: 60px !important; height: 60px !important; bottom: 60px !important; right: 6px !important; }
-  .hud-bottom { bottom: 60px !important; gap: 4px !important; }
-  .hud-stat { padding: 4px 10px !important; }
-  .hud-lbl { font-size: 8px !important; }
-  .hud-val { font-size: 16px !important; }
+  /* Джойстик */
+  #joystickBase { 
+    width: 28vw !important; 
+    height: 28vw !important;
+    min-width: 110px !important;
+    min-height: 110px !important;
+  }
+  #joystickKnob { 
+    width: 13vw !important; 
+    height: 13vw !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+  }
+  #boostBtn { 
+    width: 22vw !important; 
+    height: 22vw !important;
+    min-width: 85px !important;
+    min-height: 85px !important;
+    font-size: 3.5vw !important; 
+  }
+  #joystickWrap { bottom: 12vh !important; left: 3vw !important; }
+  #boostBtn { bottom: 12vh !important; right: 3vw !important; }
+
+  /* HUD */
+  .ap-btn { bottom: 2vh !important; left: 3vw !important; padding: 1vh 2vw !important; }
+  .minimap-c { 
+    width: 16vw !important; 
+    height: 16vw !important;
+    min-width: 60px !important;
+    min-height: 60px !important;
+    bottom: 12vh !important; 
+  }
+  .hud-bottom { bottom: 12vh !important; }
+  .leaderboard { top: 1vh !important; right: 2vw !important; padding: 1vh 2vw !important; }
   
   /* Смерть */
-  .death-title { font-size: 40px !important; }
-  .death-score { font-size: 28px !important; }
-  .btn-restart { font-size: 18px !important; padding: 10px 30px !important; }
-  .btn-back-menu { font-size: 14px !important; padding: 7px 20px !important; }
+  .death-title { font-size: 10vw !important; }
+  .death-score { font-size: 6vw !important; }
+  .btn-restart { font-size: 5vw !important; padding: 2vh 8vw !important; }
+  .btn-back-menu { font-size: 4vw !important; padding: 1.5vh 6vw !important; }
+}
+
+/* ═══ ДЛЯ ПЛАНШЕТОВ ═══ */
+@media (min-width: 768px) and (max-width: 1200px) {
+  .logo { font-size: 5vw !important; }
+  .logo .lio { font-size: 3vw !important; }
+  .top-bar { padding-top: 4vh !important; }
+  
+  .menu-center { 
+    margin-top: 4vh !important; 
+    gap: 1.5vh !important; 
+    width: 70vw !important;
+    max-width: 550px !important;
+  }
+  
+  .btn-play { font-size: 3vw !important; padding: 2vh 0 !important; }
+  .btn-skins { font-size: 2.5vw !important; padding: 1.8vh 0 !important; }
+  .btn-quests-menu, .btn-leaderboard { font-size: 2vw !important; padding: 1.5vh 0 !important; }
+  .btn-music { font-size: 1.5vw !important; padding: 1.2vh 0 !important; }
+  
+  .name-row { width: 70vw !important; max-width: 550px !important; }
+  .name-input { font-size: 2vw !important; padding: 1.5vh 3vw !important; }
+
+  .mode-card { width: 22vw !important; padding: 3vh 2vw !important; }
+  .mode-icon { font-size: 5vw !important; }
+  .mode-label { font-size: 3vw !important; }
+  .mode-desc { font-size: 1.5vw !important; }
+  
+  .skins-grid { grid-template-columns: repeat(4,1fr) !important; gap: 1.5vw !important; }
+  .skin-card { padding: 2vw 1.5vw !important; }
+  .skin-preview { width: 8vw !important; height: 8vw !important; }
+  .sk-name { font-size: 1.5vw !important; }
+  
+  #joystickBase { width: 18vw !important; height: 18vw !important; }
+  #joystickKnob { width: 8vw !important; height: 8vw !important; }
+  #boostBtn { width: 14vw !important; height: 14vw !important; font-size: 2vw !important; }
+  #joystickWrap { bottom: 13vh !important; left: 2vw !important; }
+  #boostBtn { bottom: 13vh !important; right: 2vw !important; }
+  
+  .minimap-c { width: 10vw !important; height: 10vw !important; bottom: 10vh !important; }
+  .hud-bottom { bottom: 10vh !important; gap: 1vw !important; }
+  
+  .coins-fixed { top: 1.5vh !important; right: 2vw !important; }
+  .crystals-fixed { top: 7vh !important; right: 2vw !important; }
+  #clanBtn { bottom: 10vh !important; right: 2vw !important; width: 6vw !important; height: 6vw !important; }
+  #gearBtn { bottom: 2vh !important; left: 2vw !important; width: 5vw !important; height: 5vw !important; }
+  
+  .death-title { font-size: 6vw !important; }
+  .death-score { font-size: 4vw !important; }
+  .btn-restart { font-size: 3vw !important; padding: 2vh 6vw !important; }
+  .btn-back-menu { font-size: 2.5vw !important; padding: 1.5vh 5vw !important; }
 }
 </style>
 </head>
