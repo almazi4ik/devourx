@@ -1719,15 +1719,10 @@ function mkParticle(fromTop){
 }
 
 function initParticles(){
-  if (typeof W === 'undefined' || typeof H === 'undefined') {
-    W = window.innerWidth;
-    H = window.innerHeight;
-  }
+  if (typeof W === 'undefined') W = window.innerWidth;
+  if (typeof H === 'undefined') H = window.innerHeight;
   particles=[];
-  for(let i=0;i<PARTICLE_COUNT;i++){
-    const fromTop = i < PARTICLE_COUNT/2;
-    particles.push(mkParticle(fromTop));
-  }
+  for(let i=0;i<PARTICLE_COUNT;i++)particles.push(mkParticle(false));
   if(currentBG==='space' && typeof initSpaceNebula==='function')initSpaceNebula();
   if(currentBG==='water' && typeof initWaterFish==='function')initWaterFish();
 }
