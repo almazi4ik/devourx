@@ -1679,14 +1679,8 @@ let W,H;
 function resize(){
   W=canvas.width=window.innerWidth;
   H=canvas.height=window.innerHeight;
-  
-  if (typeof running !== 'undefined' && running) {
-    if (typeof initParticles === 'function') initParticles();
-    if (currentBG==='water' && typeof initWaterFish === 'function') initWaterFish();
-    if (currentBG==='space' && typeof initSpaceNebula === 'function') initSpaceNebula();
-  }
 }
-resize();window.addEventListener('resize',resize);
+window.addEventListener('resize',resize);
 
 window.addEventListener('orientationchange', () => {
   setTimeout(() => {
@@ -1696,6 +1690,14 @@ window.addEventListener('orientationchange', () => {
       camY = player.segs[0].y - H/2;
     }
   }, 300);
+});
+
+// Вызовем resize() после загрузки всего скрипта
+window.addEventListener('load', () => {
+  resize();
+  initParticles();
+  if (currentBG==='water') initWaterFish();
+  if (currentBG==='space') initSpaceNebula();
 });
 
 // ══════ PARTICLES ══════
