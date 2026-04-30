@@ -1676,7 +1676,17 @@ const mc=document.getElementById('minimap');
 const mctx=mc.getContext('2d');
 mc.width=108;mc.height=108;
 let W,H;
-function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+function resize(){
+  W=canvas.width=window.innerWidth;
+  H=canvas.height=window.innerHeight;
+  
+  // Пересчитываем частицы при повороте
+  if (running) {
+    initParticles();
+    if (currentBG==='water') initWaterFish();
+    if (currentBG==='space') initSpaceNebula();
+  }
+}
 resize();window.addEventListener('resize',resize);
 
 // ══════ PARTICLES ══════
