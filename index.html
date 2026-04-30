@@ -2309,8 +2309,18 @@ function drawServerSnake(p,cx,cy){
   ctx.fillStyle=p.isMe?'#f9ca24':'#fff';ctx.fillText(p.name,hx,hy-r-8);
 }
   
-function draw(cx,cy){drawBackground(cx,cy);if(!running){updateParticles();drawParticles();return;}if(gameMode==='maze'){drawWalls(cx,cy);}if(serverWorld){drawFoodList(serverWorld.foods||[],cx,cy);for(const p of(serverWorld.players||[]))drawServerSnake(p,cx,cy);}}
-
+function draw(cx,cy){
+  drawBackground(cx,cy);
+  if(!running){
+    if (particles.length === 0) initParticles();
+    updateParticles();
+    drawParticles();
+    return;
+  }
+  if(gameMode==='maze'){drawWalls(cx,cy);}
+  if(serverWorld){drawFoodList(serverWorld.foods||[],cx,cy);for(const p of(serverWorld.players||[]))drawServerSnake(p,cx,cy);}
+}
+  
 let lastT=0;
 function loop(ts){const dt=Math.min((ts-lastT)/16,3);lastT=ts;if(running)updHUD();draw(camX,camY);if(running)drawMM();requestAnimationFrame(loop);}
 requestAnimationFrame(loop);
