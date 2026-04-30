@@ -1680,7 +1680,6 @@ function resize(){
   W=canvas.width=window.innerWidth;
   H=canvas.height=window.innerHeight;
   
-  // Пересчитываем частицы при повороте
   if (typeof running !== 'undefined' && running) {
     if (typeof initParticles === 'function') initParticles();
     if (currentBG==='water' && typeof initWaterFish === 'function') initWaterFish();
