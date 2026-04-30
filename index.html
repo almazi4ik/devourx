@@ -634,30 +634,48 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
 
 /* ═══ ДЛЯ ТЕЛЕФОНОВ ═══ */
 @media (max-width: 767px) {
+  /* Центрируем главное меню */
+  #menuScreen { justify-content: center !important; padding-top: 0 !important; }
+  .top-bar { padding-top: 30px !important; }
+  .menu-center { margin-top: 30px !important; }
+
+  /* Кнопки на всю ширину */
+  .btn-play, .btn-skins, .btn-quests-menu, .btn-leaderboard, .btn-music { 
+    width: 90vw !important; 
+    max-width: 400px !important;
+  }
+
+  /* Логотип */
   .logo { font-size: 36px !important; }
   .logo .lio { font-size: 22px !important; }
-  .menu-center { width: 95vw !important; margin-top: 20px !important; gap: 6px !important; }
-  .btn-play { font-size: 22px !important; padding: 12px 0 !important; }
-  .btn-skins { font-size: 18px !important; padding: 10px 0 !important; }
-  .btn-quests-menu, .btn-leaderboard { font-size: 14px !important; padding: 8px 0 !important; }
-  .btn-music { font-size: 12px !important; padding: 6px 0 !important; }
+
+  /* Инпут имени */
+  .name-row { width: 90vw !important; max-width: 400px !important; }
   .name-input { font-size: 14px !important; padding: 8px 16px !important; }
+
+  /* Карточки режимов */
   .mode-btns { flex-direction: column !important; align-items: center !important; gap: 12px !important; }
   .mode-card { width: 85vw !important; max-width: 300px !important; padding: 16px !important; flex-direction: row !important; gap: 12px !important; }
   .mode-icon { font-size: 36px !important; }
   .mode-label { font-size: 18px !important; }
   .mode-desc { font-size: 11px !important; text-align: left !important; }
   .mode-badge { top: 6px !important; right: 6px !important; font-size: 8px !important; }
+  
+  /* Монеты и кристаллы */
   .coins-fixed { top: 6px !important; right: 6px !important; }
   .crystals-fixed { top: 50px !important; right: 6px !important; }
+  
+  /* Кнопки снизу */
   #clanBtn { bottom: 90px !important; right: 6px !important; width: 40px !important; height: 40px !important; }
   #gearBtn { bottom: 12px !important; left: 6px !important; width: 36px !important; height: 36px !important; font-size: 16px !important; }
+  
+  /* Скины */
   .skins-grid { grid-template-columns: repeat(3,1fr) !important; gap: 6px !important; }
   .skin-card { padding: 10px 6px !important; }
   .skin-preview { width: 40px !important; height: 40px !important; }
   .sk-name { font-size: 10px !important; }
   
-  /* Джойстик и буст больше */
+  /* Джойстик и буст */
   #joystickBase { width: 130px !important; height: 130px !important; }
   #joystickKnob { width: 56px !important; height: 56px !important; }
   #boostBtn { width: 100px !important; height: 100px !important; font-size: 16px !important; }
