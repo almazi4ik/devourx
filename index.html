@@ -3200,6 +3200,8 @@ function closeClanPanel() {
   _clanPanelOpen = false;
   document.getElementById('clanPanel').classList.remove('open');
   document.getElementById('clanOverlay').classList.remove('open');
+  document.querySelector('.coins-fixed').style.display = 'flex';
+  document.querySelector('.crystals-fixed').style.display = 'flex';
 }
 
 document.getElementById('clanBtn').addEventListener('click', openClanPanel);
