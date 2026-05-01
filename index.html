@@ -3019,12 +3019,30 @@ async function clanLoadAll() {
       headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}` }
     });
     const data = await res.json();
-    const clans = JSON.parse(data.result || '[]');
+    let clans = data.result;
+    
+    // Проверяем — если строка, парсим
+    if (typeof clans === 'string') {
+      try { clans = JSON.parse(clans); } catch(e) { clans = []; }
+    }
+    // Если всё ещё строка — парсим ещё раз
+    if (typeof clans === 'string') {
+      try { clans = JSON.parse(clans); } catch(e) { clans = []; }
+    }
+    // Главное — убеждаемся что это массив
+    if (!Array.isArray(clans)) {
+      console.warn('clans не массив, сбрасываем в []');
+      clans = [];
+    }
+    
     _clanCache = clans;
     return clans;
-  } catch(e) { return _clanCache || []; }
+  } catch(e) {
+    console.warn('Clan load error', e);
+    return _clanCache || [];
+  }
 }
-
+  
 async function clanSaveAll(clans) {
   try {
     await fetch(`${UPSTASH_URL}/set/clans`, {
