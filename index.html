@@ -2749,7 +2749,7 @@ function initMusic(){if(_audioStarted)return;_audioStarted=true;
   _chordTimer=setTimeout(playChord,400);
 }
   
-function startMusic(){if(!musicEnabled)return;if(!_audioStarted)initMusic();else if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();if(musicMasterGain)musicMasterGain.gain.setValueAtTime(0.35,audioCtx.currentTime);}
+function startMusic(){if(!musicEnabled)return;if(!_audioStarted)initMusic();else if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();if(musicMasterGain)musicMasterGain.gain.setValueAtTime(0.65,audioCtx.currentTime);}
 function stopMusic(){if(audioCtx&&audioCtx.state==='running')audioCtx.suspend();}
 function toggleMusic(){musicEnabled=!musicEnabled;localStorage.setItem('dvx_music',musicEnabled?'on':'off');const L=LANGS[curLang]||LANGS.en;const btn=document.getElementById('musicMenuBtn');if(musicEnabled){btn.textContent=L.music_on;btn.classList.remove('off');startMusic();}else{btn.textContent=L.music_off;btn.classList.add('off');stopMusic();}}
 document.getElementById('musicMenuBtn').onclick=toggleMusic;
