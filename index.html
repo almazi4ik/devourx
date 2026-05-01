@@ -2298,7 +2298,6 @@ function connectWS(){
   };
 }
 const causeEl=document.getElementById('deathCauseMsg');
-if(causeEl){const c=msg.deathCause;if(c==='wall')causeEl.textContent='🧱 Вы врезались в край карты';else if(c&&c.killerName)causeEl.textContent='💀 Вас подбил '+c.killerName;else causeEl.textContent='';}
 
 // ══════ INPUT ══════
 let mx=400,my=300;
