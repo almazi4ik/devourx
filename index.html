@@ -3191,9 +3191,11 @@ function openClanPanel() {
   _clanPanelOpen = true;
   document.getElementById('clanPanel').classList.add('open');
   document.getElementById('clanOverlay').classList.add('open');
+  document.querySelector('.coins-fixed').style.display = 'none';
+  document.querySelector('.crystals-fixed').style.display = 'none';
   loadClanTab('all');
 }
-
+  
 function closeClanPanel() {
   _clanPanelOpen = false;
   document.getElementById('clanPanel').classList.remove('open');
