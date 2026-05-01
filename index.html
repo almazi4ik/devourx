@@ -2114,7 +2114,189 @@ function getServerUrl(){ return SERVERS[_selServer]?.url || SERVERS[0].url; }
 let ws=null,wsConnecting=false;
 let _connectTimeout=null,_loadInterval=null;
 
-function connectWS(){if(wsConnecting)return;wsConnecting=true;gameMode='online';serverWorld=null;_prevWorld=null;if(ws){try{ws.close();}catch(e){}ws=null;}showLoading(t('connecting'));let loadPct=0;_loadInterval=setInterval(()=>{loadPct=Math.min(loadPct+3,85);document.getElementById('loadBarFill').style.width=loadPct+'%';},100);ws=new WebSocket(getServerUrl());_connectTimeout=setTimeout(()=>{if(!running){clearInterval(_loadInterval);wsConnecting=false;if(ws){try{ws.close();}catch(e){}ws=null;}setLoadStatus(t('no_server'),100);document.getElementById('loadBarFill').style.background='#e74c3c';setTimeout(()=>showMenu(),3000);}},8000);ws.onopen=()=>{clearInterval(_loadInterval);document.getElementById('loadBarFill').style.width='92%';setLoadStatus(t('auth'));const name=document.getElementById('nameInput').value.trim()||'Player';ws.send(JSON.stringify({type:'join',name,skinId:selSkin,skinColor:SKINS_DATA[selSkin].b[0]}));};ws.onmessage=(e)=>{try{const msg=JSON.parse(e.data);if(msg.type==='joined'){clearTimeout(_connectTimeout);wsConnecting=false;document.getElementById('loadBarFill').style.width='100%';setLoadStatus(t('ready'));if(msg.playerCount){document.getElementById('onlineNum').textContent=msg.playerCount;}pname=document.getElementById('nameInput').value.trim()||'Player';player={segs:[{x:msg.spawnX||WORLD/2,y:msg.spawnY||WORLD/2}],tAngle:0,angle:0,score:MIN_LEN,boosting:false,alive:true};camX=(msg.spawnX||WORLD/2)-W/2;camY=(msg.spawnY||WORLD/2)-H/2;playIrisOpen(()=>{document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});document.getElementById('gearBtn').style.display='none';document.getElementById('hud').style.display='block';document.querySelector('.coins-fixed').style.display='none';document.querySelector('.crystals-fixed').style.display='none';document.getElementById('clanBtn').style.display='none';document.getElementById('xpBarWrap').style.display='none';document.getElementById('bestMassWidget').style.display='none';document.getElementById('achBtn').style.display='none';document.getElementById('achPanel').classList.remove('open');achOpen=false;autopilotMode=false;document.getElementById('apBtn').classList.remove('active');const _sbOn=document.getElementById('serverPickBtn');if(_sbOn)_sbOn.style.display='none';running=true;surviveTimer=0;lastSurviveTick=performance.now();_xpFoodCounter=0;_prevScore=MIN_LEN;_foodCoinCounter=0;if(isMobile())showJoystick(true);},null);}if(msg.type==='world'){_prevWorld=serverWorld?{players:serverWorld.players,_segsMap:buildSegsMap(serverWorld)}:null;_worldRecvTime=performance.now();serverWorld=msg;if(msg.playerCount){document.getElementById('onlineNum').textContent=msg.playerCount;}if(serverWorld.players){const me=serverWorld.players.find(p=>p.isMe);if(me&&me.segs&&me.segs.length>0){const sh=me.segs[0];camX+=(sh.x-W/2-camX)*0.08;camY+=(sh.y-H/2-camY)*0.08;if(player){const gained=me.score-(player.score||MIN_LEN);if(gained>0){trackQuest('eat_food',gained);_xpFoodCounter+=gained;const xg=Math.floor(_xpFoodCounter/5);if(xg>0){_xpFoodCounter-=xg*5;addXP(xg);}}player.segs=me.segs;player.score=me.score||player.score;_prevScore=me.score;}}}}if(msg.type==='dead'){clearTimeout(_connectTimeout);const score=msg.score||0;document.getElementById('deathScore').textContent=t('mass')+': '+score;
+function connectWS(){
+  if(wsConnecting)return;
+  wsConnecting=true;
+  gameMode='online';
+  serverWorld=null;
+  _prevWorld=null;
+  if(ws){try{ws.close();}catch(e){}ws=null;}
+  
+  showLoading(t('connecting'));
+  let loadPct=0;
+  _loadInterval=setInterval(()=>{
+    loadPct=Math.min(loadPct+3,85);
+    document.getElementById('loadBarFill').style.width=loadPct+'%';
+  },100);
+  
+  ws=new WebSocket(getServerUrl());
+  
+  _connectTimeout=setTimeout(()=>{
+    if(!running){
+      clearInterval(_loadInterval);
+      wsConnecting=false;
+      if(ws){try{ws.close();}catch(e){}ws=null;}
+      setLoadStatus(t('no_server'),100);
+      document.getElementById('loadBarFill').style.background='#e74c3c';
+      setTimeout(()=>showMenu(),3000);
+    }
+  },8000);
+  
+  ws.onopen=()=>{
+    clearInterval(_loadInterval);
+    document.getElementById('loadBarFill').style.width='92%';
+    setLoadStatus(t('auth'));
+    const name=document.getElementById('nameInput').value.trim()||'Player';
+    ws.send(JSON.stringify({type:'join',name,skinId:selSkin,skinColor:SKINS_DATA[selSkin].b[0]}));
+  };
+  
+  ws.onmessage=(e)=>{
+    try{
+      const msg=JSON.parse(e.data);
+      
+      if(msg.type==='joined'){
+        clearTimeout(_connectTimeout);
+        wsConnecting=false;
+        document.getElementById('loadBarFill').style.width='100%';
+        setLoadStatus(t('ready'));
+        if(msg.playerCount){
+          document.getElementById('onlineNum').textContent=msg.playerCount;
+        }
+        pname=document.getElementById('nameInput').value.trim()||'Player';
+        player={
+          segs:[{x:msg.spawnX||WORLD/2,y:msg.spawnY||WORLD/2}],
+          tAngle:0,angle:0,score:MIN_LEN,boosting:false,alive:true
+        };
+        camX=(msg.spawnX||WORLD/2)-W/2;
+        camY=(msg.spawnY||WORLD/2)-H/2;
+        
+        playIrisOpen(()=>{
+          document.querySelectorAll('.screen').forEach(s=>{
+            s.classList.remove('active');s.style.cssText='';
+          });
+          document.getElementById('gearBtn').style.display='none';
+          document.getElementById('hud').style.display='block';
+          document.querySelector('.coins-fixed').style.display='none';
+          document.querySelector('.crystals-fixed').style.display='none';
+          document.getElementById('clanBtn').style.display='none';
+          document.getElementById('xpBarWrap').style.display='none';
+          document.getElementById('bestMassWidget').style.display='none';
+          document.getElementById('achBtn').style.display='none';
+          document.getElementById('achPanel').classList.remove('open');
+          const _sbOn=document.getElementById('serverPickBtn');
+          if(_sbOn)_sbOn.style.display='none';
+          achOpen=false;
+          autopilotMode=false;
+          document.getElementById('apBtn').classList.remove('active');
+          running=true;
+          surviveTimer=0;
+          lastSurviveTick=performance.now();
+          _xpFoodCounter=0;
+          _prevScore=MIN_LEN;
+          _foodCoinCounter=0;
+          if(isMobile())showJoystick(true);
+          
+          // Фикс для горизонтального режима
+          setTimeout(()=>{
+            if(running&&player&&player.segs&&player.segs.length>0){
+              camX=player.segs[0].x-W/2;
+              camY=player.segs[0].y-H/2;
+            }
+          },150);
+        },null);
+      }
+      
+      if(msg.type==='world'){
+        _prevWorld=serverWorld?{
+          players:serverWorld.players,
+          _segsMap:buildSegsMap(serverWorld)
+        }:null;
+        _worldRecvTime=performance.now();
+        serverWorld=msg;
+        if(msg.playerCount){
+          document.getElementById('onlineNum').textContent=msg.playerCount;
+        }
+        if(serverWorld.players){
+          const me=serverWorld.players.find(p=>p.isMe);
+          if(me&&me.segs&&me.segs.length>0){
+            const sh=me.segs[0];
+            camX+=(sh.x-W/2-camX)*0.08;
+            camY+=(sh.y-H/2-camY)*0.08;
+            if(player){
+              const gained=me.score-(player.score||MIN_LEN);
+              if(gained>0){
+                trackQuest('eat_food',gained);
+                _xpFoodCounter+=gained;
+                const xg=Math.floor(_xpFoodCounter/5);
+                if(xg>0){
+                  _xpFoodCounter-=xg*5;
+                  addXP(xg);
+                }
+              }
+              player.segs=me.segs;
+              player.score=me.score||player.score;
+              _prevScore=me.score;
+            }
+          }
+        }
+      }
+      
+      if(msg.type==='dead'){
+        clearTimeout(_connectTimeout);
+        const score=msg.score||0;
+        document.getElementById('deathScore').textContent=t('mass')+': '+score;
+        const causeEl=document.getElementById('deathCauseMsg');
+        if(causeEl){
+          const c=msg.deathCause;
+          if(c==='wall')causeEl.textContent='🧱 Вы врезались в край карты';
+          else if(c&&c.killerName)causeEl.textContent='💀 Вас подбил '+c.killerName;
+          else causeEl.textContent='';
+        }
+        jbSaveScore(pname,score);
+        clanUpdateScore(score);
+        document.getElementById('hud').style.display='none';
+        running=false;
+        switchScreen('deathScreen',()=>{
+          renderRecords(score);
+          trackQuest('reach_mass',score);
+        });
+      }
+      
+      if(msg.type==='kill_reward'){
+        essence=Math.min(9999999,essence+msg.coins);
+        syncEss();
+        showToast('💀 +'+msg.coins+' '+t('kill_reward'),'#ff6b6b');
+      }
+      if(msg.type==='coin_reward'){
+        essence=Math.min(9999999,essence+msg.coins);
+        syncEss();
+      }
+    }catch(err){
+      console.warn('WS msg error',err);
+    }
+  };
+  
+  ws.onerror=()=>{
+    clearTimeout(_connectTimeout);
+    clearInterval(_loadInterval);
+    wsConnecting=false;
+    setLoadStatus(t('conn_err'),100);
+    document.getElementById('loadBarFill').style.background='#e74c3c';
+    setTimeout(()=>showMenu(),3000);
+  };
+  
+  ws.onclose=()=>{
+    wsConnecting=false;
+    ws=null;
+    serverWorld=null;
+    _prevWorld=null;
+    if(running&&gameMode==='online'){
+      running=false;
+      document.getElementById('hud').style.display='none';
+      showMenu();
+    }
+  };
+}
 const causeEl=document.getElementById('deathCauseMsg');
 if(causeEl){const c=msg.deathCause;if(c==='wall')causeEl.textContent='🧱 Вы врезались в край карты';else if(c&&c.killerName)causeEl.textContent='💀 Вас подбил '+c.killerName;else causeEl.textContent='';}
 jbSaveScore(pname,score);clanUpdateScore(score);document.getElementById('hud').style.display='none';running=false;switchScreen('deathScreen',()=>{renderRecords(score);trackQuest('reach_mass',score);});}if(msg.type==='kill_reward'){essence=Math.min(9999999,essence+msg.coins);syncEss();showToast('💀 +'+msg.coins+' '+t('kill_reward'),'#ff6b6b');}if(msg.type==='coin_reward'){essence=Math.min(9999999,essence+msg.coins);syncEss();}}catch(err){console.warn('WS msg error',err);}};ws.onerror=()=>{clearTimeout(_connectTimeout);clearInterval(_loadInterval);wsConnecting=false;setLoadStatus(t('conn_err'),100);document.getElementById('loadBarFill').style.background='#e74c3c';setTimeout(()=>showMenu(),3000);};ws.onclose=()=>{wsConnecting=false;ws=null;serverWorld=null;_prevWorld=null;if(running&&gameMode==='online'){running=false;document.getElementById('hud').style.display='none';showMenu();}};}
