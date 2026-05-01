@@ -2049,6 +2049,9 @@ function startMazeMode(){
     document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});
     document.getElementById('gearBtn').style.display='none';
     document.getElementById('hud').style.display='block';
+    document.querySelector('.coins-fixed').style.display='none';
+    document.querySelector('.crystals-fixed').style.display='none';
+    document.getElementById('clanBtn').style.display='none';
     document.getElementById('xpBarWrap').style.display='none';
     document.getElementById('bestMassWidget').style.display='none';
     document.getElementById('achBtn').style.display='none';
