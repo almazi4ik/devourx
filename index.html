@@ -2665,7 +2665,6 @@ let surviveTimer=0,lastSurviveTick=0,_xpFoodCounter=0,_foodCoinCounter=0,_prevSc
 
 // ══════ МУЗЫКА ══════
 let audioCtx=null,musicMasterGain=null,_chordTimer=null,_audioStarted=false;
-let audioCtx=null,musicMasterGain=null,_chordTimer=null,_audioStarted=false;
 function initMusic(){if(_audioStarted)return;_audioStarted=true;
   audioCtx=new(window.AudioContext||window.webkitAudioContext)();
   musicMasterGain=audioCtx.createGain();
