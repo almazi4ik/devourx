@@ -2299,7 +2299,6 @@ function connectWS(){
 }
 const causeEl=document.getElementById('deathCauseMsg');
 if(causeEl){const c=msg.deathCause;if(c==='wall')causeEl.textContent='🧱 Вы врезались в край карты';else if(c&&c.killerName)causeEl.textContent='💀 Вас подбил '+c.killerName;else causeEl.textContent='';}
-jbSaveScore(pname,score);clanUpdateScore(score);document.getElementById('hud').style.display='none';running=false;switchScreen('deathScreen',()=>{renderRecords(score);trackQuest('reach_mass',score);});}if(msg.type==='kill_reward'){essence=Math.min(9999999,essence+msg.coins);syncEss();showToast('💀 +'+msg.coins+' '+t('kill_reward'),'#ff6b6b');}if(msg.type==='coin_reward'){essence=Math.min(9999999,essence+msg.coins);syncEss();}}catch(err){console.warn('WS msg error',err);}};ws.onerror=()=>{clearTimeout(_connectTimeout);clearInterval(_loadInterval);wsConnecting=false;setLoadStatus(t('conn_err'),100);document.getElementById('loadBarFill').style.background='#e74c3c';setTimeout(()=>showMenu(),3000);};ws.onclose=()=>{wsConnecting=false;ws=null;serverWorld=null;_prevWorld=null;if(running&&gameMode==='online'){running=false;document.getElementById('hud').style.display='none';showMenu();}};}
 
 // ══════ INPUT ══════
 let mx=400,my=300;
