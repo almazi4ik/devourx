@@ -2665,8 +2665,91 @@ let surviveTimer=0,lastSurviveTick=0,_xpFoodCounter=0,_foodCoinCounter=0,_prevSc
 
 // ══════ МУЗЫКА ══════
 let audioCtx=null,musicMasterGain=null,_chordTimer=null,_audioStarted=false;
-function initMusic(){if(_audioStarted)return;_audioStarted=true;audioCtx=new(window.AudioContext||window.webkitAudioContext)();musicMasterGain=audioCtx.createGain();musicMasterGain.gain.value=musicEnabled?0.48:0;musicMasterGain.connect(audioCtx.destination);const convSize=audioCtx.sampleRate*3,convBuf=audioCtx.createBuffer(2,convSize,audioCtx.sampleRate);for(let c=0;c<2;c++){const cd=convBuf.getChannelData(c);for(let i=0;i<convSize;i++)cd[i]=(Math.random()*2-1)*Math.pow(1-i/convSize,2.5);}const conv=audioCtx.createConvolver();conv.buffer=convBuf;const convGain=audioCtx.createGain();convGain.gain.value=0.55;conv.connect(convGain);convGain.connect(musicMasterGain);const chords=[[146.83,174.61,220.00,261.63,311.13],[196.00,246.94,293.66,349.23,392.00],[110.00,130.81,164.81,220.00,261.63],[164.81,196.00,246.94,293.66,329.63]];let chordIdx=0;function playChord(){if(!audioCtx)return;const now=audioCtx.currentTime,freqs=chords[chordIdx%chords.length];chordIdx++;freqs.forEach((f,i)=>{const osc=audioCtx.createOscillator(),g=audioCtx.createGain();osc.type=i<2?'sine':'triangle';osc.frequency.value=f;const lfo=audioCtx.createOscillator(),lfoG=audioCtx.createGain();lfo.frequency.value=0.4+Math.random()*0.3;lfoG.gain.value=0.8;lfo.connect(lfoG);lfoG.connect(osc.frequency);lfo.start(now);g.gain.setValueAtTime(0,now);g.gain.linearRampToValueAtTime(0.06+(freqs.length-i)*0.008,now+1.5);g.gain.setValueAtTime(0.06+(freqs.length-i)*0.008,now+6);g.gain.linearRampToValueAtTime(0,now+9);osc.connect(g);g.connect(conv);osc.start(now);osc.stop(now+10);});_chordTimer=setTimeout(playChord,8000);}
-_chordTimer=setTimeout(playChord,600);}
+let audioCtx=null,musicMasterGain=null,_chordTimer=null,_audioStarted=false;
+function initMusic(){if(_audioStarted)return;_audioStarted=true;
+  audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  musicMasterGain=audioCtx.createGain();
+  musicMasterGain.gain.value=musicEnabled?0.35:0; // чуть тише чтобы не давило
+  musicMasterGain.connect(audioCtx.destination);
+  
+  // Лёгкая реверберация для атмосферы
+  const convSize=audioCtx.sampleRate*2;
+  const convBuf=audioCtx.createBuffer(2,convSize,audioCtx.sampleRate);
+  for(let c=0;c<2;c++){const cd=convBuf.getChannelData(c);
+    for(let i=0;i<convSize;i++)cd[i]=(Math.random()*2-1)*Math.pow(1-i/convSize,3);
+  }
+  const conv=audioCtx.createConvolver();conv.buffer=convBuf;
+  const convGain=audioCtx.createGain();convGain.gain.value=0.35;
+  conv.connect(convGain);convGain.connect(musicMasterGain);
+  
+  // Красивые аккорды (пентатоника — звучит приятно, не "воет")
+  const chords=[
+    [261.63,329.63,392.00,523.25], // C major
+    [293.66,369.99,440.00,587.33], // D major
+    [329.63,415.30,493.88,659.25], // E minor
+    [349.23,440.00,523.25,698.46], // F major
+    [392.00,493.88,587.33,783.99], // G major
+    [329.63,392.00,493.88,587.33], // Em add9
+    [261.63,349.23,440.00,523.25], // Am
+    [293.66,369.99,466.16,587.33], // D sus
+  ];
+  
+  let chordIdx=0;
+  function playChord(){
+    if(!audioCtx)return;
+    const now=audioCtx.currentTime;
+    const freqs=chords[chordIdx%chords.length];
+    chordIdx++;
+    
+    freqs.forEach((f,i)=>{
+      // Основной тон — мягкий синус
+      const osc=audioCtx.createOscillator();
+      const g=audioCtx.createGain();
+      osc.type='sine';
+      osc.frequency.value=f;
+      
+      // Тёплое вибрато
+      const lfo=audioCtx.createOscillator();
+      const lfoG=audioCtx.createGain();
+      lfo.frequency.value=1.2+Math.random()*0.6;
+      lfoG.gain.value=f*0.003;
+      lfo.connect(lfoG);
+      lfoG.connect(osc.frequency);
+      lfo.start(now);
+      
+      // Плавное появление и затухание
+      g.gain.setValueAtTime(0,now);
+      g.gain.linearRampToValueAtTime(0.04+(freqs.length-i)*0.006,now+2);
+      g.gain.setValueAtTime(0.04+(freqs.length-i)*0.006,now+5);
+      g.gain.linearRampToValueAtTime(0,now+8);
+      
+      osc.connect(g);
+      g.connect(conv);
+      osc.start(now);
+      osc.stop(now+9);
+    });
+    
+    // Лёгкий бас
+    if(chordIdx%2===0){
+      const bassFreq=freqs[0]/2;
+      const bass=audioCtx.createOscillator();
+      const bassG=audioCtx.createGain();
+      bass.type='triangle';
+      bass.frequency.value=bassFreq;
+      bassG.gain.setValueAtTime(0,now);
+      bassG.gain.linearRampToValueAtTime(0.06,now+1.5);
+      bassG.gain.linearRampToValueAtTime(0,now+7);
+      bass.connect(bassG);
+      bassG.connect(musicMasterGain);
+      bass.start(now);
+      bass.stop(now+8);
+    }
+    
+    _chordTimer=setTimeout(playChord,6500);
+  }
+  _chordTimer=setTimeout(playChord,400);
+}
+  
 function startMusic(){if(!musicEnabled)return;if(!_audioStarted)initMusic();else if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();if(musicMasterGain)musicMasterGain.gain.setValueAtTime(0.48,audioCtx.currentTime);}
 function stopMusic(){if(audioCtx&&audioCtx.state==='running')audioCtx.suspend();}
 function toggleMusic(){musicEnabled=!musicEnabled;localStorage.setItem('dvx_music',musicEnabled?'on':'off');const L=LANGS[curLang]||LANGS.en;const btn=document.getElementById('musicMenuBtn');if(musicEnabled){btn.textContent=L.music_on;btn.classList.remove('off');startMusic();}else{btn.textContent=L.music_off;btn.classList.add('off');stopMusic();}}
