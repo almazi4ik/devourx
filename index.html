@@ -2754,11 +2754,12 @@ window.addEventListener('load',()=>{
   // Загружаем сохранённый ник
   const savedName = localStorage.getItem('dvx_name');
   if(savedName) document.getElementById('nameInput').value = savedName;
+  resize();          // ← ВОТ ТУТ ДОБАВЬ! Прямо перед initParticles()
   initParticles();
   if (currentBG==='water') initWaterFish();
   if (currentBG==='space') initSpaceNebula();
 });
-
+  
 // Live обновление ника
 document.getElementById('nameInput').addEventListener('input', () => {
   const name = document.getElementById('nameInput').value.trim() || 'Player';
