@@ -1708,7 +1708,7 @@ function resize(){
 }
   
 // ══════ PARTICLES ══════
-const PARTICLE_COUNT=38;
+const PARTICLE_COUNT = isMobile() ? 12 : 38; // Меньше частиц на телефонах
 let particles=[];
 const CLASSIC_SHAPES=['leaf','leaf','leaf','leaf','star'];
 const CLASSIC_COLORS=['rgba(46,204,113,VAL)','rgba(57,255,20,VAL)','rgba(39,174,96,VAL)','rgba(0,229,204,VAL)','rgba(249,202,36,VAL)','rgba(162,155,254,VAL)','rgba(168,230,192,VAL)'];
