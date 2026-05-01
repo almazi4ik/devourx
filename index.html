@@ -2736,7 +2736,7 @@ function initMusic(){if(_audioStarted)return;_audioStarted=true;
       bass.type='triangle';
       bass.frequency.value=bassFreq;
       bassG.gain.setValueAtTime(0,now);
-      bassG.gain.linearRampToValueAtTime(0.06,now+1.5);
+      bassG.gain.linearRampToValueAtTime(0.10,now+1.5);
       bassG.gain.linearRampToValueAtTime(0,now+7);
       bass.connect(bassG);
       bassG.connect(musicMasterGain);
