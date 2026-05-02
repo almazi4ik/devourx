@@ -653,11 +653,12 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
 /* ═══ ДЛЯ ТЕЛЕФОНОВ (ВЕРТИКАЛЬНО) ═══ */
 @media (max-width: 767px) {
   /* Главное меню — всё по центру экрана */
-  #menuScreen { 
-    justify-content: center !important; 
-    align-items: center !important;
-    padding: 0 !important; 
-  }
+#menuScreen { 
+  justify-content: flex-start !important; 
+  align-items: center !important;
+  padding: 0 !important;
+  overflow-y: auto !important;
+}
   .top-bar { 
     padding-top: 2vh !important; 
   }
