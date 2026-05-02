@@ -908,13 +908,17 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
   .skin-card { box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important; }
   .skin-preview { box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important; }
   
-  /* Чтобы кнопки нажимались и в вертикальном режиме */
-  .screen.active { pointer-events: all !important; z-index: 50 !important; }
-  .menu-center { position: relative !important; z-index: 51 !important; }
-  button, .btn-play, .btn-skins, .btn-quests-menu, .btn-leaderboard, .btn-music, .mode-card { 
-    pointer-events: all !important; 
-    position: relative !important; 
-    z-index: 52 !important; 
+#clanBtn { 
+  bottom: 20px !important; 
+  right: 16px !important;
+  z-index: 999 !important;
+  position: fixed !important;
+}
+#gearBtn { 
+  bottom: 20px !important; 
+  left: 16px !important;
+  z-index: 999 !important;
+  position: fixed !important;
   }
 </style>
 </head>
