@@ -1086,6 +1086,33 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
   <canvas id="clanShieldCanvas" width="44" height="44"></canvas>
 </button>
 
+<!-- ГЛОБАЛЬНЫЙ ЧАТ -->
+<button id="globalChatBtn" style="
+  position: fixed; bottom: 80px; right: 16px; z-index: 200;
+  width: 48px; height: 48px; border-radius: 50%;
+  background: rgba(0,0,0,0.65); border: 2px solid rgba(0,229,204,0.55);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; backdrop-filter: blur(6px); font-size: 22px;
+" onclick="toggleGlobalChat()">💬</button>
+
+<div id="globalChatOverlay" style="
+  display:none; position:fixed; inset:0; z-index:9999;
+  background:rgba(0,0,0,0.75); backdrop-filter:blur(8px);
+  align-items:center; justify-content:center;
+" onclick="toggleGlobalChat()">
+  <div id="globalChatPanel" style="
+    background:#0d2b15; border:2px solid #2ecc71; border-radius:16px;
+    width:min(400px, 90vw); height:70vh; display:flex; flex-direction:column;
+    overflow:hidden;
+  " onclick="event.stopPropagation()">
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 16px; background:rgba(0,0,0,0.5);">
+      <span style="font-family:'Fredoka One',cursive; color:#2ecc71;">💬 ГЛОБАЛЬНЫЙ ЧАТ</span>
+      <button onclick="toggleGlobalChat()" style="background:none; border:none; color:#fff; font-size:20px; cursor:pointer;">✕</button>
+    </div>
+    <div id="globalChatContainer" style="flex:1;"></div>
+  </div>
+</div>
+
 <!-- КЛАНЫ ОВЕРЛЕЙ + ПАНЕЛЬ -->
 <div id="clanOverlay"></div>
 <div id="clanPanel">
