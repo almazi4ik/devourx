@@ -4373,6 +4373,90 @@ document.addEventListener('DOMContentLoaded',()=>{
     document.querySelectorAll('.srv-row').forEach((r,i)=>r.classList.toggle('selected',i===_selServer));
   }
 });
+
+// ══════ ГЛОБАЛЬНЫЙ ЧАТ (PieSocket) ══════
+let globalChatSocket = null;
+let globalChatMessages = [];
+
+function toggleGlobalChat() {
+  const overlay = document.getElementById('globalChatOverlay');
+  if (overlay.style.display === 'flex') {
+    overlay.style.display = 'none';
+    return;
+  }
+  overlay.style.display = 'flex';
+  if (!globalChatSocket) connectGlobalChat();
+  document.getElementById('globalChatInput').focus();
+}
+
+function connectGlobalChat() {
+  globalChatSocket = new WebSocket('wss://free.blr2.piesocket.com/v3/1?api_key=UJ5kUPvVyeiMjB5kWM4SuISq1oGrctvRyYYPSUpN&notify_self=1');
+  
+  globalChatSocket.onopen = () => {
+    console.log('Global chat connected');
+  };
+  
+  globalChatSocket.onmessage = (event) => {
+    try {
+      const msg = JSON.parse(event.data);
+      if (msg.event === 'message' && msg.data) {
+        globalChatMessages.push(msg.data);
+        if (globalChatMessages.length > 100) globalChatMessages.shift();
+        renderGlobalChat();
+      }
+    } catch(e) {}
+  };
+  
+  globalChatSocket.onclose = () => {
+    globalChatSocket = null;
+  };
+}
+
+function sendGlobalMessage() {
+  const input = document.getElementById('globalChatInput');
+  const text = input.value.trim();
+  if (!text || !globalChatSocket) return;
+  
+  const nick = (document.getElementById('nameInput').value.trim() || 'Player').slice(0, 16);
+  
+  const msg = {
+    event: 'message',
+    data: {
+      name: nick,
+      text: text.slice(0, 120),
+      time: Date.now()
+    }
+  };
+  
+  globalChatSocket.send(JSON.stringify(msg));
+  input.value = '';
+}
+
+function renderGlobalChat() {
+  const box = document.getElementById('globalChatMessages');
+  if (!box) return;
+  
+  const wasAtBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+  
+  box.innerHTML = globalChatMessages.map(m => {
+    const time = new Date(m.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    const isMe = m.name === (document.getElementById('nameInput').value.trim() || 'Player');
+    return `<div style="background:${isMe?'rgba(46,204,113,0.15)':'rgba(255,255,255,0.05)'}; border:1px solid ${isMe?'rgba(46,204,113,0.3)':'rgba(255,255,255,0.08)'}; border-radius:10px; padding:8px 12px;">
+      <div style="display:flex; gap:6px; align-items:center; margin-bottom:2px;">
+        <span style="font-size:11px; font-weight:900; color:${isMe?'#2ecc71':'#a29bfe'};">${m.name}</span>
+        <span style="font-size:9px; color:rgba(255,255,255,0.3);">${time}</span>
+      </div>
+      <div style="font-size:12px; color:#d4f5e9; word-break:break-word;">${m.text}</div>
+    </div>`;
+  }).join('');
+  
+  if (wasAtBottom) box.scrollTop = box.scrollHeight;
+}
+
+document.getElementById('globalChatSend').addEventListener('click', sendGlobalMessage);
+document.getElementById('globalChatInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') sendGlobalMessage();
+});
 </script>
 </body>
 </html>
