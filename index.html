@@ -827,7 +827,14 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
   .ripple-host { pointer-events: none !important; }
   @keyframes skinShimmer { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.1); } }
 
-  #bestMassWidget { display: none !important; }  /* ← ВОТ СЮДА */
+  #bestMassWidget { 
+  bottom: 80px !important; 
+  right: 8px !important;
+  padding: 4px 8px !important;
+}
+#bestMassWidget .bm-label { font-size: 8px !important; }
+#bestMassWidget .bm-name { font-size: 10px !important; }
+#bestMassWidget .bm-score { font-size: 16px !important; }
 }
   
 /* ═══ ДЛЯ ПЛАНШЕТОВ ═══ */
