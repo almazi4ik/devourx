@@ -2606,7 +2606,11 @@ document.getElementById('offlineBtn').onclick=()=>{
 document.getElementById('onlineBtn').onclick = () => {
   showToast('🌐 Онлайн появится в следующем обновлении!', '#ff9f43');
 };
-document.getElementById('mazeBtn').onclick=()=>{pname=document.getElementById('nameInput').value.trim()||'Player';startMazeMode();};
+document.getElementById('mazeBtn').onclick=()=>{
+  if(running) return;
+  pname=document.getElementById('nameInput').value.trim()||'Player';
+  startMazeMode();
+};
 document.getElementById('restartBtn').onclick=()=>{if(gameMode==='offline'){startOffline();}else if(gameMode==='maze'){startMazeMode();}else{if(ws&&ws.readyState===WebSocket.OPEN){running=false;serverWorld=null;_prevWorld=null;showLoading(t('respawn'));ws.send(JSON.stringify({type:'respawn'}));}else connectWS();}};
 document.getElementById('menuBackBtn').onclick=()=>{if(offlineTickInterval){clearInterval(offlineTickInterval);offlineTickInterval=null;}if(mazeBreakTimeout){clearTimeout(mazeBreakTimeout);mazeBreakTimeout=null;}if(ws){try{ws.close();}catch(e){}ws=null;}wsConnecting=false;serverWorld=null;_prevWorld=null;running=false;offlineState=null;mazeState=null;showMenu();};
 document.getElementById('nameInput').addEventListener('keydown',e=>{if(e.key==='Enter'){pname=document.getElementById('nameInput').value.trim()||'Player';showModeSelect();}});
