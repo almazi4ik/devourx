@@ -1092,8 +1092,10 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
   width: 48px; height: 48px; border-radius: 50%;
   background: rgba(0,0,0,0.65); border: 2px solid rgba(0,229,204,0.55);
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; backdrop-filter: blur(6px); font-size: 22px;
-" onclick="toggleGlobalChat()">💬</button>
+  cursor: pointer; backdrop-filter: blur(6px); padding: 0;
+" onclick="toggleGlobalChat()">
+  <canvas id="chatIconCanvas" width="36" height="36"></canvas>
+</button>
 
 <div id="globalChatOverlay" style="
   display:none; position:fixed; inset:0; z-index:9999;
