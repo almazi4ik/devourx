@@ -4497,7 +4497,6 @@ function connectGlobalChat() {
   
   globalChatSocket.onopen = async () => {
     console.log('Global chat connected');
-    // Загружаем историю чата из Upstash
     try {
       const saved = await lbLoad('global_chat');
       if (Array.isArray(saved)) {
@@ -4513,11 +4512,8 @@ function connectGlobalChat() {
       if (msg.event === 'message' && msg.data) {
         globalChatMessages.push(msg.data);
         if (globalChatMessages.length > 50) globalChatMessages.shift();
-        // Сохраняем в Upstash
         lbSave('global_chat', globalChatMessages);
         renderGlobalChat();
-        // Звук нового сообщения
-        playChatSound();
       }
     } catch(e) {}
   };
@@ -4573,7 +4569,7 @@ document.getElementById('globalChatInput').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') sendGlobalMessage();
 });
 
-  // ══════ РИСУЕМ ИКОНКУ ЧАТА ══════
+// ══════ РИСУЕМ ИКОНКУ ЧАТА ══════
 function drawChatIcon() {
   const cv = document.getElementById('chatIconCanvas');
   if (!cv) return;
@@ -4581,10 +4577,8 @@ function drawChatIcon() {
   const w = 36, h = 36;
   c.clearRect(0, 0, w, h);
   
-  // Облачко сообщения
   const cx = 18, cy = 16;
   
-  // Тень облачка
   c.fillStyle = 'rgba(0,0,0,0.3)';
   c.beginPath();
   c.moveTo(8, 8);
@@ -4601,7 +4595,6 @@ function drawChatIcon() {
   c.quadraticCurveTo(4, 8, 8, 8);
   c.fill();
   
-  // Основное облачко
   const grad = c.createLinearGradient(4, 4, 32, 32);
   grad.addColorStop(0, '#00e5cc');
   grad.addColorStop(1, '#2ecc71');
@@ -4621,16 +4614,13 @@ function drawChatIcon() {
   c.quadraticCurveTo(3, 6, 7, 6);
   c.fill();
   
-  // Три точки внутри облачка
   c.fillStyle = '#fff';
   c.beginPath(); c.arc(12, 16, 2.5, 0, Math.PI * 2); c.fill();
   c.beginPath(); c.arc(18, 16, 2.5, 0, Math.PI * 2); c.fill();
   c.beginPath(); c.arc(24, 16, 2.5, 0, Math.PI * 2); c.fill();
 }
 
-// Вызываем при загрузке
 window.addEventListener('load', drawChatIcon);
-});
 </script>
 </body>
 </html>
