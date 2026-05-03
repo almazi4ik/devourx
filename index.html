@@ -1561,8 +1561,7 @@ document.getElementById('skCats').addEventListener('click',e=>{
   const btn=e.target.closest('.cat-btn');if(!btn)return;
   document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');curCat=btn.dataset.cat;
-  if(curCat==='glasses') renderGlasses();
-  else renderSkins();
+  renderSkins();
 });
 
 // ══════ ЯЗЫКИ ══════
