@@ -4534,11 +4534,8 @@ const GLASSES_DATA = [
   { id: 0, name: 'Без очков', cost: 0, owned: true },
   { id: 1, name: 'Тёмные 🕶️', cost: 0, owned: true, draw: 'dark' },
   { id: 2, name: 'Круглые 🤓', cost: 100, owned: false, draw: 'round' },
-  { id: 3, name: 'Спорт 🥽', cost: 200, owned: false, draw: 'sport' },
-  { id: 4, name: 'Монокль 👁️', cost: 5, owned: false, draw: 'monocle', currency: 'crystals' },
-  { id: 5, name: 'Лазер 🔴', cost: 500, owned: false, draw: 'laser' },
 ];
-
+  
 let selGlasses = parseInt(localStorage.getItem('dvx_selGlasses') || '0');
 
 function drawGlasses(ctx, x, y, angle, r, type) {
