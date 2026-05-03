@@ -4539,22 +4539,26 @@ const GLASSES_DATA = [
 let selGlasses = parseInt(localStorage.getItem('dvx_selGlasses') || '0');
 
 function drawGlasses(ctx, x, y, angle, r, type) {
+  // Левый глаз находится здесь:
+  const ex1 = x + Math.cos(angle - 0.5) * r * 0.5;
+  const ey1 = y + Math.sin(angle - 0.5) * r * 0.5;
+  // Правый глаз находится здесь:
+  const ex2 = x + Math.cos(angle + 0.5) * r * 0.5;
+  const ey2 = y + Math.sin(angle + 0.5) * r * 0.5;
+  
   ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate(angle);  // ← поворачиваем как голова змейки
   
   if (type === 'dark') {
     ctx.fillStyle = '#111';
-    ctx.fillRect(-8, -5, 6, 5);   // левый
-    ctx.fillRect(2, -5, 6, 5);    // правый
-    ctx.fillStyle = '#444';
-    ctx.fillRect(-2, -4, 4, 2);   // дужка
+    // Рисуем на месте левого глаза
+    ctx.fillRect(ex1 - 4, ey1 - 3, 7, 5);
+    // Рисуем на месте правого глаза
+    ctx.fillRect(ex2 - 3, ey2 - 3, 7, 5);
   } else if (type === 'round') {
     ctx.strokeStyle = '#333';
     ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(-5, -2, 4, 0, Math.PI*2); ctx.stroke();
-    ctx.beginPath(); ctx.arc(5, -2, 4, 0, Math.PI*2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(-1, -2); ctx.lineTo(1, -2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(ex1, ey1, 4, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(ex2, ey2, 4, 0, Math.PI * 2); ctx.stroke();
   }
   
   ctx.restore();
