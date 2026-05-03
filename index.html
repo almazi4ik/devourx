@@ -4543,30 +4543,20 @@ function drawGlasses(ctx, x, y, angle, r, type) {
   ctx.translate(x, y);
   ctx.rotate(angle);
   
-  // Глаза находятся на расстоянии r*0.5 от центра, под углом ±0.5 радиан
-  const eyeOffsetX = Math.cos(0.5) * r * 0.5;
-  const eyeOffsetY = Math.sin(0.5) * r * 0.5;
-  
   if (type === 'dark') {
-    // Тёмные очки — рисуем прямо на позициях глаз
+    // Тёмные очки — два тёмных прямоугольника
     ctx.fillStyle = '#111';
-    // Левый глаз
-    ctx.fillRect(-eyeOffsetX - 4, -eyeOffsetY - 3, 8, 6);
-    // Правый глаз
-    ctx.fillRect(eyeOffsetX - 4, eyeOffsetY - 3, 8, 6);
-    // Перемычка
+    ctx.fillRect(-9, -5, 7, 5);   // левый глаз
+    ctx.fillRect(2, -5, 7, 5);    // правый глаз
     ctx.fillStyle = '#444';
-    ctx.fillRect(-2, -2, 4, 2);
+    ctx.fillRect(-2, -4, 4, 2);   // перемычка
   } else if (type === 'round') {
-    // Круглые очки
+    // Круглые очки — два круга
     ctx.strokeStyle = '#333';
     ctx.lineWidth = 2;
-    // Левый глаз
-    ctx.beginPath(); ctx.arc(-eyeOffsetX, -eyeOffsetY, 4, 0, Math.PI * 2); ctx.stroke();
-    // Правый глаз
-    ctx.beginPath(); ctx.arc(eyeOffsetX, eyeOffsetY, 4, 0, Math.PI * 2); ctx.stroke();
-    // Перемычка
-    ctx.beginPath(); ctx.moveTo(-eyeOffsetX + 4, -eyeOffsetY); ctx.lineTo(eyeOffsetX - 4, eyeOffsetY); ctx.stroke();
+    ctx.beginPath(); ctx.arc(-5, -2, 4, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(5, -2, 4, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-1, -2); ctx.lineTo(1, -2); ctx.stroke();
   }
   
   ctx.restore();
