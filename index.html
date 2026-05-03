@@ -4541,21 +4541,19 @@ let selGlasses = parseInt(localStorage.getItem('dvx_selGlasses') || '0');
 function drawGlasses(ctx, x, y, angle, r, type) {
   ctx.save();
   ctx.translate(x, y);
-  ctx.rotate(angle);
+  ctx.rotate(angle);  // ← поворачиваем как голова змейки
   
   if (type === 'dark') {
-    // Тёмные очки — два тёмных прямоугольника
     ctx.fillStyle = '#111';
-    ctx.fillRect(-9, -5, 7, 5);   // левый глаз
-    ctx.fillRect(2, -5, 7, 5);    // правый глаз
+    ctx.fillRect(-8, -5, 6, 5);   // левый
+    ctx.fillRect(2, -5, 6, 5);    // правый
     ctx.fillStyle = '#444';
-    ctx.fillRect(-2, -4, 4, 2);   // перемычка
+    ctx.fillRect(-2, -4, 4, 2);   // дужка
   } else if (type === 'round') {
-    // Круглые очки — два круга
     ctx.strokeStyle = '#333';
     ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(-5, -2, 4, 0, Math.PI * 2); ctx.stroke();
-    ctx.beginPath(); ctx.arc(5, -2, 4, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(-5, -2, 4, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(5, -2, 4, 0, Math.PI*2); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(-1, -2); ctx.lineTo(1, -2); ctx.stroke();
   }
   
