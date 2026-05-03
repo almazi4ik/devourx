@@ -1918,15 +1918,51 @@ function offlineUpdateSnake(sn,ts){if(!sn.alive)return;let da=sn.tAngle-sn.angle
 
 function offlineEatFood(sn){const h=sn.segs[0],r=offlineGetR(sn.score);const foodList=(gameMode==='maze'&&mazeState)?mazeState.foods:offlineState.foods;for(let i=foodList.length-1;i>=0;i--){const f=foodList[i];const dx=h.x-f.x,dy=h.y-f.y;const er=(f.size==='big'?f.r+10:f.size==='medium'?f.r+7:f.r+5)+r;if(dx*dx+dy*dy<er*er){const g=f.size==='big'?10:f.size==='medium'?5:2;sn.score+=g;if(sn.length<MAX_BODY){if(sn.length<750){sn.length=Math.min(750,sn.length+g);}else{sn._growBuf=(sn._growBuf||0)+g;if(sn._growBuf>=2){const add=Math.floor(sn._growBuf/2);sn._growBuf-=add*2;sn.length=Math.min(MAX_BODY,sn.length+add);}}}if(sn.isMe){sn.foodEaten=(sn.foodEaten||0)+1;if(sn.foodEaten>=3){sn.foodEaten-=3;essence=Math.min(9999999,essence+1);syncEss();}trackAch('eat',1);_xpFoodCounter+=g;const xg=Math.floor(_xpFoodCounter/5);if(xg>0){_xpFoodCounter-=xg*5;addXP(xg);}}foodList[i]=(gameMode==='maze')?mkMazeFood():mkOfflineFood();}}}
 
-function offlineKill(sn){if(!sn.alive)return;sn.alive=false;const dropCount=Math.max(1,Math.min(200,Math.floor(sn.score/2)));const totalSegs=sn.segs.length;const targetList=(gameMode==='maze'&&mazeState)?mazeState.foods:offlineState.foods;for(let i=0;i<dropCount;i++){const idx=Math.floor((i/dropCount)*totalSegs),s=sn.segs[Math.min(idx,totalSegs-1)];targetList.push({x:Math.max(50,Math.min(WORLD-50,s.x+(Math.random()-.5)*20)),y:Math.max(50,Math.min(WORLD-50,s.y+(Math.random()-.5)*20)),r:9+Math.random()*3,color:`hsl(${Math.floor(Math.random()*360)},90%,65%)`,size:'big',drop:true,p:0});}const maxFood=(gameMode==='maze')?MAZE_FOOD_COUNT:OFFLINE_FOOD_COUNT;if(targetList.length>maxFood+200)targetList.splice(0,targetList.length-(maxFood+200));}
-
+function offlineKill(sn){
+  if(!sn.alive)return;
+  sn.alive=false;
+  const dropCount=Math.max(1,Math.min(200,Math.floor(sn.score/2)));
+  const totalSegs=sn.segs.length;
+  const targetList=(gameMode==='maze'&&mazeState)?mazeState.foods:offlineState.foods;
+  
+  for(let i=0;i<dropCount;i++){
+    const idx=Math.floor((i/dropCount)*totalSegs);
+    const s=sn.segs[Math.min(idx,totalSegs-1)];
+    
+    // Создаём "временную" еду с таймером на 30 секунд
+    targetList.push({
+      x:Math.max(50,Math.min(WORLD-50,s.x+(Math.random()-.5)*20)),
+      y:Math.max(50,Math.min(WORLD-50,s.y+(Math.random()-.5)*20)),
+      r:9+Math.random()*3,
+      color:`hsl(${Math.floor(Math.random()*360)},90%,65%)`,
+      size:'big',
+      drop:true,
+      p:0,
+      expireAt:Date.now()+30000 // ← исчезнет через 30 секунд
+    });
+  }
+  
+  // Лимит НЕ применяется к дроп-еде — она управляется отдельно
+  const maxFood=(gameMode==='maze')?MAZE_FOOD_COUNT:OFFLINE_FOOD_COUNT;
+  if(targetList.length>maxFood+200)targetList.splice(0,targetList.length-(maxFood+200));
+}
+  
 function offlineBotAI(bot){bot._thinkTimer=(bot._thinkTimer||0)-1;if(bot._thinkTimer>0)return;bot._thinkTimer=3+Math.floor(Math.random()*5);const h=bot.segs[0];const margin=180;const state=(gameMode==='maze'&&mazeState)?mazeState:offlineState;const allSnakes=state?[state.player,...state.bots]:[offlineState.player,...offlineState.bots];if(h.x<margin||h.x>WORLD-margin||h.y<margin||h.y>WORLD-margin){bot.tAngle=Math.atan2(WORLD/2-h.y,WORLD/2-h.x)+(Math.random()-.5)*0.5;bot.boosting=false;return;}function danger(tx,ty){if(gameMode==='maze'&&mazeState&&mazeState.walls&&checkMazeWallCollision(tx,ty,offlineGetR(bot.score)))return true;for(const other of allSnakes){if(!other||!other.alive||other===bot||!other.segs)continue;for(let i=1;i<Math.min(other.segs.length,30);i++){const s=other.segs[i],dx=tx-s.x,dy=ty-s.y;if(dx*dx+dy*dy<90*90)return true;}}return tx<150||tx>WORLD-150||ty<150||ty>WORLD-150;}let victim=null,victimDist=Infinity;for(const other of allSnakes){if(!other||!other.alive||other===bot||!other.segs)continue;const dx=other.segs[0].x-h.x,dy=other.segs[0].y-h.y;const d=dx*dx+dy*dy;if(other.length<bot.length*0.85&&d<400*400&&d<victimDist){victimDist=d;victim=other;}}if(victim){const vh=victim.segs[0];const vAngle=victim.angle;const intercept=80;const tx=vh.x+Math.cos(vAngle)*intercept;const ty=vh.y+Math.sin(vAngle)*intercept;let angle=Math.atan2(ty-h.y,tx-h.x);const ax=h.x+Math.cos(angle)*100,ay=h.y+Math.sin(angle)*100;if(danger(ax,ay)){angle+=(Math.random()>0.5?1:-1)*(Math.PI/3+Math.random()*0.3);}bot.tAngle=angle+(Math.random()-.5)*0.08;bot.boosting=victimDist<200*200&&bot.length>15;return;}let best=Infinity,tgt=null;const fl=state?state.foods:offlineState.foods;for(let i=0;i<fl.length;i++){const f=fl[i];if(!f)continue;const dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;if(d<best&&!danger(f.x,f.y)){best=d;tgt=f;}}if(!tgt){for(let i=0;i<fl.length;i++){const f=fl[i];if(!f)continue;const dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;if(d<best){best=d;tgt=f;}}}if(tgt){let angle=Math.atan2(tgt.y-h.y,tgt.x-h.x);const ax=h.x+Math.cos(angle)*120,ay=h.y+Math.sin(angle)*120;if(danger(ax,ay)){const left=angle-Math.PI/3,right=angle+Math.PI/3;const alx=h.x+Math.cos(left)*120,aly=h.y+Math.sin(left)*120;const arx=h.x+Math.cos(right)*120,ary=h.y+Math.sin(right)*120;if(!danger(alx,aly))angle=left;else if(!danger(arx,ary))angle=right;else angle+=Math.PI*(0.8+Math.random()*0.4);}bot.tAngle=angle+(Math.random()-.5)*0.12;}bot.boosting=best<100*100&&bot.length>20;}
 
 function offlineCheckCollisions(){const state=(gameMode==='maze'&&mazeState)?mazeState:offlineState;const alive=state?[state.player,...state.bots].filter(s=>s.alive):[offlineState.player,...offlineState.bots].filter(s=>s.alive);for(const sn of alive){if(!sn.alive)continue;const h=sn.segs[0],r=offlineGetR(sn.score);for(const other of alive){if(!other.alive||other===sn)continue;for(let i=2;i<other.segs.length;i++){const s=other.segs[i],dx=h.x-s.x,dy=h.y-s.y;const otherR=offlineGetR(other.score)*0.55;if(dx*dx+dy*dy<(r*0.85+otherR)**2){offlineKill(sn);if(!sn.isMe&&other.isMe){essence=Math.min(9999999,essence+3);syncEss();showToast('💀 +3 '+t('kill_reward'),'#ff6b6b');trackAch('kills',1);}break;}}if(!sn.alive)break;}}}
 
 function offlineRespawnBots(){const state=(gameMode==='maze'&&mazeState)?mazeState:offlineState;if(!state)return;for(let i=0;i<state.bots.length;i++){if(!state.bots[i].alive){const name=BOT_NAMES[Math.floor(Math.random()*BOT_NAMES.length)];state.bots[i]=mkBot(name,Math.floor(Math.random()*3));}}}
 
-function offlineTick(){if(!running||(gameMode!=='offline'&&gameMode!=='maze')||!offlineState)return;const state=(gameMode==='maze'&&mazeState)?mazeState:offlineState;const me=state.player;if(!me.alive){if(!me._deathHandled){me._deathHandled=true;if(offlineTickInterval){clearInterval(offlineTickInterval);offlineTickInterval=null;}if(mazeBreakTimeout){clearTimeout(mazeBreakTimeout);mazeBreakTimeout=null;}running=false;const score=me.score||0;const deathMsg=gameMode==='maze'?'🧱 Вы врезались в стену лабиринта!':'';document.getElementById('deathCauseMsg').textContent=deathMsg;document.getElementById('deathScore').textContent=t('mass')+': '+score;jbSaveScore(pname,score);clanUpdateScore(score);document.getElementById('hud').style.display='none';switchScreen('deathScreen',()=>{renderRecords(score);trackAch('mass',score);trackAch('survive',surviveTimer);});}return;}if(!autopilotMode){me.tAngle=Math.atan2(my-H/2,mx-W/2);me.boosting=boosting&&me.score>MIN_LEN;}else{
+function offlineTick(){if(!running||(gameMode!=='offline'&&gameMode!=='maze')||!offlineState)return;
+  // Очищаем просроченную еду (дроп из убитых змеек)
+  const now=Date.now();
+  const allFood=(gameMode==='maze'&&mazeState)?mazeState.foods:offlineState.foods;
+  for(let i=allFood.length-1;i>=0;i--){
+    if(allFood[i].expireAt && now>allFood[i].expireAt){
+      allFood.splice(i,1);
+    }
+  }
+  const state=(gameMode==='maze'&&mazeState)?mazeState:offlineState;const me=state.player;if(!me.alive){if(!me._deathHandled){me._deathHandled=true;if(offlineTickInterval){clearInterval(offlineTickInterval);offlineTickInterval=null;}if(mazeBreakTimeout){clearTimeout(mazeBreakTimeout);mazeBreakTimeout=null;}running=false;const score=me.score||0;const deathMsg=gameMode==='maze'?'🧱 Вы врезались в стену лабиринта!':'';document.getElementById('deathCauseMsg').textContent=deathMsg;document.getElementById('deathScore').textContent=t('mass')+': '+score;jbSaveScore(pname,score);clanUpdateScore(score);document.getElementById('hud').style.display='none';switchScreen('deathScreen',()=>{renderRecords(score);trackAch('mass',score);trackAch('survive',surviveTimer);});}return;}if(!autopilotMode){me.tAngle=Math.atan2(my-H/2,mx-W/2);me.boosting=boosting&&me.score>MIN_LEN;}else{
   const h=me.segs[0];
   const allSnakes=state.bots.filter(b=>b.alive);
   const dangerSegs=[];
@@ -1964,7 +2000,7 @@ function offlineTick(){if(!running||(gameMode!=='offline'&&gameMode!=='maze')||!
     if(bestAng!==null)angle=bestAng;
   }
   me.tAngle=angle;me.boosting=false;
-}if(me.boosting&&me.length>MIN_LEN&&Math.random()<0.05){me.length=Math.max(MIN_LEN,me.length-1);me.score=Math.max(MIN_LEN,me.score-1);}offlineUpdateSnake(me,0.18);offlineEatFood(me);if(me.segs.length>0){camX+=(me.segs[0].x-W/2-camX)*0.12;camY+=(me.segs[0].y-H/2-camY)*0.12;}const now=performance.now();if(now-lastSurviveTick>=1000){surviveTimer++;lastSurviveTick=now;trackQuest('survive_time',1);}for(const bot of state.bots){if(!bot.alive)continue;offlineBotAI(bot);if(bot.boosting&&bot.length>MIN_LEN&&Math.random()<0.05){bot.length=Math.max(MIN_LEN,bot.length-1);bot.score=Math.max(MIN_LEN,bot.score-1);}offlineUpdateSnake(bot,0.13);offlineEatFood(bot);}offlineCheckCollisions();offlineRespawnBots();const allPlayers=[me,...state.bots].filter(p=>p.alive).map(p=>({name:p.name,skinId:p.skinId,score:p.score,segs:p.segs.slice(0,750),boosting:p.boosting,isMe:p.isMe}));const lb=[...allPlayers].sort((a,b)=>b.score-a.score).slice(0,10).map(p=>({name:p.name,score:p.score,isMe:p.isMe}));serverWorld={players:allPlayers,foods:state.foods,leaderboard:lb};}
+}if(me.boosting&&me.length>MIN_LEN&&Math.random()<0.05){me.length=Math.max(MIN_LEN,me.length-1);me.score=Math.max(MIN_LEN,me.score-1);}offlineUpdateSnake(me,0.18);offlineEatFood(me);if(me.segs.length>0){camX+=(me.segs[0].x-W/2-camX)*0.12;camY+=(me.segs[0].y-H/2-camY)*0.12;}const now2=performance.now();if(now2-lastSurviveTick>=1000){surviveTimer++;lastSurviveTick=now2;trackQuest('survive_time',1);}for(const bot of state.bots){if(!bot.alive)continue;offlineBotAI(bot);if(bot.boosting&&bot.length>MIN_LEN&&Math.random()<0.05){bot.length=Math.max(MIN_LEN,bot.length-1);bot.score=Math.max(MIN_LEN,bot.score-1);}offlineUpdateSnake(bot,0.13);offlineEatFood(bot);}offlineCheckCollisions();offlineRespawnBots();const allPlayers=[me,...state.bots].filter(p=>p.alive).map(p=>({name:p.name,skinId:p.skinId,score:p.score,segs:p.segs.slice(0,750),boosting:p.boosting,isMe:p.isMe}));const lb=[...allPlayers].sort((a,b)=>b.score-a.score).slice(0,10).map(p=>({name:p.name,score:p.score,isMe:p.isMe}));serverWorld={players:allPlayers,foods:state.foods,leaderboard:lb};}
 
 function startOffline(){gameMode='offline';if(offlineTickInterval){clearInterval(offlineTickInterval);offlineTickInterval=null;}if(mazeBreakTimeout){clearTimeout(mazeBreakTimeout);mazeBreakTimeout=null;}mazeState=null;serverWorld=null;_prevWorld=null;playIrisOpen(()=>{const{spawnX,spawnY}=initOffline();camX=spawnX-W/2;camY=spawnY-H/2;player=offlineState.player;document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});document.getElementById('gearBtn').style.display='none';document.getElementById('hud').style.display='block';document.querySelector('.coins-fixed').style.display='none';document.querySelector('.crystals-fixed').style.display='none';document.getElementById('clanBtn').style.display='none';document.getElementById('xpBarWrap').style.display='none';document.getElementById('bestMassWidget').style.display='none';document.getElementById('achBtn').style.display='none';document.getElementById('achPanel').classList.remove('open');const _sbOff=document.getElementById('serverPickBtn');if(_sbOff)_sbOff.style.display='none';achOpen=false;autopilotMode=false;document.getElementById('apBtn').classList.remove('active');running=true;surviveTimer=0;lastSurviveTick=performance.now();_xpFoodCounter=0;_foodCoinCounter=0;if(isMobile())showJoystick(true);offlineTickInterval=setInterval(offlineTick,33);trackAch('games',1);
 // Фикс для горизонтального режима — теперь player уже есть!
@@ -2514,8 +2550,73 @@ function drawMM(){
 }
 function drawBackground(cx,cy){if(!running){if(currentBG==='space')drawSpaceBackground();else if(currentBG==='water')drawWaterBackground();else{ctx.fillStyle='#0d2b15';ctx.fillRect(0,0,W,H);}return;}const bgColors={'classic':'#0d2b15','space':'#03020d','water':'#020e1a'};ctx.fillStyle=bgColors[currentBG]||'#0d2b15';ctx.fillRect(0,0,W,H);const gridColors={'classic':'rgba(46,204,113,0.055)','space':'rgba(120,100,255,0.06)','water':'rgba(0,160,220,0.055)'};ctx.strokeStyle=gridColors[currentBG]||gridColors.classic;ctx.lineWidth=1;for(let x=Math.floor(cx/CELL)*CELL;x<cx+W+CELL;x+=CELL){ctx.beginPath();ctx.moveTo(x-cx,0);ctx.lineTo(x-cx,H);ctx.stroke();}for(let y=Math.floor(cy/CELL)*CELL;y<cy+H+CELL;y+=CELL){ctx.beginPath();ctx.moveTo(0,y-cy);ctx.lineTo(W,y-cy);ctx.stroke();}ctx.strokeStyle='rgba(231,76,60,0.5)';ctx.lineWidth=8;ctx.strokeRect(-cx,-cy,WORLD,WORLD);}
 
-function drawFoodList(fl,cx,cy){for(const f of fl){const fx=f.x-cx,fy=f.y-cy;if(fx<-20||fx>W+20||fy<-20||fy>H+20)continue;if(f.p!==undefined)f.p+=.05;const pr=f.r*(f.size==='big'?1:.85+.15*Math.sin(f.p||0));ctx.beginPath();ctx.arc(fx,fy,pr,0,Math.PI*2);ctx.fillStyle=f.color||'#2ecc71';ctx.fill();ctx.beginPath();ctx.arc(fx-pr*.3,fy-pr*.3,pr*.27,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.28)';ctx.fill();}}
+// ══════ ОПТИМИЗИРОВАННАЯ ЕДА (БЕЗ ГЛОУ, С ПУЛЬСАЦИЕЙ) ══════
+let _foodSprites = {};
 
+const FOOD_PALETTE = [
+  '#ff4444','#ff8800','#ffdd00','#44ff44','#00ff88',
+  '#00ddff','#4488ff','#aa44ff','#ff44aa','#ffaa00',
+  '#88ff00','#00ffcc'
+];
+
+function snapColor(colorStr) {
+  if (colorStr && colorStr.startsWith('hsl')) {
+    const hue = parseInt(colorStr.match(/\d+/)[0]) || 0;
+    const idx = Math.floor(hue / 30) % FOOD_PALETTE.length;
+    return FOOD_PALETTE[idx];
+  }
+  return colorStr || '#2ecc71';
+}
+
+function getFoodSprite(r, baseColor) {
+  const safeColor = snapColor(baseColor);
+  const safeR = Math.round(r);
+  const key = `${safeR}_${safeColor}`;
+  
+  if (!_foodSprites[key]) {
+    const cv = document.createElement('canvas');
+    cv.width = safeR * 2 + 4;
+    cv.height = safeR * 2 + 4;
+    const c = cv.getContext('2d');
+    const cx = cv.width / 2;
+    const cy = cv.height / 2;
+    
+    // Простой кружочек без глоу
+    c.beginPath();
+    c.arc(cx, cy, safeR, 0, Math.PI * 2);
+    c.fillStyle = safeColor;
+    c.fill();
+    
+    // Лёгкий блик (как в оригинале)
+    c.beginPath();
+    c.arc(cx - safeR * 0.3, cy - safeR * 0.3, safeR * 0.27, 0, Math.PI * 2);
+    c.fillStyle = 'rgba(255,255,255,0.28)';
+    c.fill();
+    
+    _foodSprites[key] = { canvas: cv, size: cv.width };
+  }
+  return _foodSprites[key];
+}
+
+function drawFoodList(fl, cx, cy) {
+  for (const f of fl) {
+    const fx = f.x - cx;
+    const fy = f.y - cy;
+    if (fx < -40 || fx > W + 40 || fy < -40 || fy > H + 40) continue;
+    
+    // Пульсация (дыхание)
+    if (f.p === undefined) f.p = Math.random() * Math.PI * 2;
+    f.p += 0.04;
+    const pulse = 1 + Math.sin(f.p) * 0.1;
+    
+    const sprite = getFoodSprite(f.r, f.color);
+    const sw = sprite.size * pulse;
+    const sh = sprite.size * pulse;
+    
+    ctx.drawImage(sprite.canvas, fx - sw/2, fy - sh/2, sw, sh);
+  }
+}
+  
 const FLAG_SKINS={
   36:['#ffd700','#0057b7'],
   37:['#d52b1e','#0039a6','#ffffff'],
