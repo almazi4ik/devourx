@@ -4572,6 +4572,65 @@ document.getElementById('globalChatSend').addEventListener('click', sendGlobalMe
 document.getElementById('globalChatInput').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') sendGlobalMessage();
 });
+
+  // ══════ РИСУЕМ ИКОНКУ ЧАТА ══════
+function drawChatIcon() {
+  const cv = document.getElementById('chatIconCanvas');
+  if (!cv) return;
+  const c = cv.getContext('2d');
+  const w = 36, h = 36;
+  c.clearRect(0, 0, w, h);
+  
+  // Облачко сообщения
+  const cx = 18, cy = 16;
+  
+  // Тень облачка
+  c.fillStyle = 'rgba(0,0,0,0.3)';
+  c.beginPath();
+  c.moveTo(8, 8);
+  c.lineTo(28, 8);
+  c.quadraticCurveTo(32, 8, 32, 12);
+  c.lineTo(32, 22);
+  c.quadraticCurveTo(32, 26, 28, 26);
+  c.lineTo(18, 26);
+  c.lineTo(14, 30);
+  c.lineTo(16, 26);
+  c.lineTo(8, 26);
+  c.quadraticCurveTo(4, 26, 4, 22);
+  c.lineTo(4, 12);
+  c.quadraticCurveTo(4, 8, 8, 8);
+  c.fill();
+  
+  // Основное облачко
+  const grad = c.createLinearGradient(4, 4, 32, 32);
+  grad.addColorStop(0, '#00e5cc');
+  grad.addColorStop(1, '#2ecc71');
+  c.fillStyle = grad;
+  c.beginPath();
+  c.moveTo(7, 6);
+  c.lineTo(29, 6);
+  c.quadraticCurveTo(33, 6, 33, 10);
+  c.lineTo(33, 22);
+  c.quadraticCurveTo(33, 26, 29, 26);
+  c.lineTo(18, 26);
+  c.lineTo(14, 30);
+  c.lineTo(16, 26);
+  c.lineTo(7, 26);
+  c.quadraticCurveTo(3, 26, 3, 22);
+  c.lineTo(3, 10);
+  c.quadraticCurveTo(3, 6, 7, 6);
+  c.fill();
+  
+  // Три точки внутри облачка
+  c.fillStyle = '#fff';
+  c.beginPath(); c.arc(12, 16, 2.5, 0, Math.PI * 2); c.fill();
+  c.beginPath(); c.arc(18, 16, 2.5, 0, Math.PI * 2); c.fill();
+  c.beginPath(); c.arc(24, 16, 2.5, 0, Math.PI * 2); c.fill();
+}
+
+// Вызываем при загрузке
+window.addEventListener('load', drawChatIcon);
+});
 </script>
 </body>
 </html>
