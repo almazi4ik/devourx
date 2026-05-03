@@ -2659,11 +2659,9 @@ function drawServerSnake(p,cx,cy){
     ctx.beginPath();
     ctx.arc(sx,sy,r*(.72+.28*(1-tt)),0,Math.PI*2);
     
-    // Цвет сегментов
     if(isFlag){
       ctx.fillStyle=getFlagColor(p.skinId,i,segs.length);
     } else if(p.skinId===42){
-      // Кристальный скин — чередуем 3 цвета
       const colors=['#3b82f6','#1d4ed8','#60a5fa'];
       ctx.fillStyle=colors[i%3];
     } else {
@@ -2675,7 +2673,6 @@ function drawServerSnake(p,cx,cy){
   ctx.globalAlpha=1;
   const hx=hd0.x-cx,hy=hd0.y-cy;
   
-  // Свечение для кристального скина
   if(p.skinId===42){
     ctx.beginPath();
     ctx.arc(hx,hy,r+6,0,Math.PI*2);
@@ -2705,6 +2702,12 @@ function drawServerSnake(p,cx,cy){
     ctx.beginPath();ctx.arc(ex+Math.cos(ang)*er*.5,ey+Math.sin(ang)*er*.5,er*.5,0,Math.PI*2);
     ctx.fillStyle='#111';ctx.fill();
   });
+  
+  // Очки
+  const glasses = GLASSES_DATA[selGlasses];
+  if (glasses && glasses.draw) {
+    drawGlasses(ctx, hx, hy, ang, r, glasses.draw);
+  }
   
   ctx.font='bold '+(9+r)+'px Nunito';ctx.textAlign='center';
   ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillText(p.name,hx+1,hy-r-8+1);
