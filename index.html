@@ -4527,47 +4527,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     document.querySelectorAll('.srv-row').forEach((r,i)=>r.classList.toggle('selected',i===_selServer));
   }
 });
-
-// ══════ ОЧКИ ДЛЯ ЗМЕЙКИ ══════
-const GLASSES_DATA = [
-  { id: 0, name: 'Без очков', cost: 0, owned: true },
-  { id: 1, name: 'Тёмные 🕶️', cost: 0, owned: true, draw: 'dark' },
-  { id: 2, name: 'Круглые 🤓', cost: 100, owned: false, draw: 'round' },
-];
   
-let selGlasses = parseInt(localStorage.getItem('dvx_selGlasses') || '0');
-
-function drawGlasses(ctx, x, y, angle, r, type) {
-  // Левый глаз находится здесь:
-  const ex1 = x + Math.cos(angle - 0.5) * r * 0.5;
-  const ey1 = y + Math.sin(angle - 0.5) * r * 0.5;
-  // Правый глаз находится здесь:
-  const ex2 = x + Math.cos(angle + 0.5) * r * 0.5;
-  const ey2 = y + Math.sin(angle + 0.5) * r * 0.5;
-  
-  ctx.save();
-  
-  if (type === 'dark') {
-    ctx.fillStyle = '#111';
-    // Рисуем на месте левого глаза
-    ctx.fillRect(ex1 - 4, ey1 - 3, 7, 5);
-    // Рисуем на месте правого глаза
-    ctx.fillRect(ex2 - 3, ey2 - 3, 7, 5);
-  } else if (type === 'round') {
-    ctx.strokeStyle = '#333';
-    ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(ex1, ey1, 4, 0, Math.PI * 2); ctx.stroke();
-    ctx.beginPath(); ctx.arc(ex2, ey2, 4, 0, Math.PI * 2); ctx.stroke();
-  }
-  
-  ctx.restore();
-}
-  
-function saveGlasses() {
-  localStorage.setItem('dvx_selGlasses', selGlasses);
-  localStorage.setItem('dvx_glasses_owned', JSON.stringify(GLASSES_DATA.map(g => ({ id: g.id, owned: g.owned }))));
-}
-
 // ══════ ГЛОБАЛЬНЫЙ ЧАТ (PieSocket) ══════
 let globalChatSocket = null;
 let globalChatMessages = [];
