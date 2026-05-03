@@ -4493,8 +4493,16 @@ function toggleGlobalChat() {
 function connectGlobalChat() {
   globalChatSocket = new WebSocket('wss://free.blr2.piesocket.com/v3/1?api_key=UJ5kUPvVyeiMjB5kWM4SuISq1oGrctvRyYYPSUpN&notify_self=1');
   
-  globalChatSocket.onopen = () => {
+  globalChatSocket.onopen = async () => {
     console.log('Global chat connected');
+    // Загружаем историю чата из Upstash
+    try {
+      const saved = await lbLoad('global_chat');
+      if (Array.isArray(saved)) {
+        globalChatMessages = saved;
+        renderGlobalChat();
+      }
+    } catch(e) {}
   };
   
   globalChatSocket.onmessage = (event) => {
@@ -4502,8 +4510,12 @@ function connectGlobalChat() {
       const msg = JSON.parse(event.data);
       if (msg.event === 'message' && msg.data) {
         globalChatMessages.push(msg.data);
-        if (globalChatMessages.length > 100) globalChatMessages.shift();
+        if (globalChatMessages.length > 50) globalChatMessages.shift();
+        // Сохраняем в Upstash
+        lbSave('global_chat', globalChatMessages);
         renderGlobalChat();
+        // Звук нового сообщения
+        playChatSound();
       }
     } catch(e) {}
   };
