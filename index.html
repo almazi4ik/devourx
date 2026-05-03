@@ -2754,12 +2754,6 @@ function drawServerSnake(p,cx,cy){
     ctx.fillStyle='#111';ctx.fill();
   });
   
-  // Очки
-  const glasses = GLASSES_DATA[selGlasses];
-  if (glasses && glasses.draw) {
-    drawGlasses(ctx, hx, hy, ang, r, glasses.draw);
-  }
-  
   ctx.font='bold '+(9+r)+'px Nunito';ctx.textAlign='center';
   ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillText(p.name,hx+1,hy-r-8+1);
   ctx.fillStyle=p.isMe?'#f9ca24':'#fff';ctx.fillText(p.name,hx,hy-r-8);
