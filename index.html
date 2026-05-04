@@ -151,31 +151,6 @@ body { background:#0d2b15; overflow:hidden; font-family:'Nunito',sans-serif; use
   position:absolute; top:12px; right:12px; border-radius:20px;
   font-size:10px; font-weight:900; padding:3px 9px; letter-spacing:1px;
 }
-
-/* ═══ НОВЫЕ СТИЛИ (ДОБАВЬ СЮДА, НЕ ЗАМЕНЯЙ!) ═══ */
-.mode-card-online.disabled {
-  opacity: 0.5;
-  pointer-events: none;
-  filter: grayscale(40%);
-  position: relative;
-}
-.mode-card-online.disabled::after {
-  content: 'СКОРО';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(-25deg);
-  font-family: 'Fredoka One', cursive;
-  font-size: 22px;
-  color: rgba(255,255,255,0.7);
-  background: rgba(231,76,60,0.85);
-  padding: 6px 24px;
-  border-radius: 8px;
-  letter-spacing: 3px;
-  z-index: 10;
-  pointer-events: none;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-}
 .mode-badge-bot  { background:rgba(249,202,36,0.15); color:#f9ca24; border:1px solid rgba(249,202,36,0.4); }
 .mode-badge-live { background:rgba(46,204,113,0.15); color:#2ecc71; border:1px solid rgba(46,204,113,0.4); }
 .live-dot { display:inline-block; width:7px; height:7px; background:#2ecc71; border-radius:50%; margin-right:4px; animation:livepulse 1.2s infinite; vertical-align:middle; }
@@ -958,7 +933,7 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
       <div class="mode-label" data-i18n="offline">ОФЛАЙН</div>
       <div class="mode-desc" data-i18n="offline_desc">Играй против ботов<br>без интернета</div>
     </div>
-    <div class="mode-card mode-card-online disabled" id="onlineBtn">
+    <div class="mode-card mode-card-online" id="onlineBtn">
       <span class="mode-badge mode-badge-live"><span class="live-dot"></span><span data-i18n="live">LIVE</span></span>
       <div class="mode-icon">🌐</div>
       <div class="mode-label" data-i18n="online_btn">ОНЛАЙН</div>
@@ -1084,13 +1059,6 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
         <div class="srv-name">Europe_1</div>
       </div>
       <div class="srv-ping" id="srvPing0">—</div>
-    </div>
-    <div class="srv-row" id="srvRow1" onclick="selectServer(1)">
-      <div class="srv-dot yellow"></div>
-      <div class="srv-info">
-        <div class="srv-name">Europe_2</div>
-      </div>
-      <div class="srv-ping" id="srvPing1">—</div>
     </div>
     <button class="srv-close-btn" onclick="closeServerPick()">ЗАКРЫТЬ</button>
   </div>
@@ -2340,8 +2308,7 @@ function mkBotAt(x,y,name,skinId){
 
 // ══════ СЕРВЕР ОНЛАЙН ══════
 const SERVERS = [
-  { name:'Europe_1', url:'wss://devourx-server.onrender.com' },
-  { name:'Europe_2', url:'wss://devourx-server-production.up.railway.app' }
+  { name:'Europe_1', url:'wss://devourx-server-1.onrender.com' }
 ];
 let _selServer = parseInt(localStorage.getItem('dvx_server')||'0');
 function getServerUrl(){ return SERVERS[_selServer]?.url || SERVERS[0].url; }
@@ -2393,9 +2360,6 @@ function connectWS(){
         wsConnecting=false;
         document.getElementById('loadBarFill').style.width='100%';
         setLoadStatus(t('ready'));
-        if(msg.playerCount){
-          document.getElementById('onlineNum').textContent=msg.playerCount;
-        }
         pname=document.getElementById('nameInput').value.trim()||'Player';
         player={
           segs:[{x:msg.spawnX||WORLD/2,y:msg.spawnY||WORLD/2}],
@@ -2447,9 +2411,6 @@ function connectWS(){
         }:null;
         _worldRecvTime=performance.now();
         serverWorld=msg;
-        if(msg.playerCount){
-          document.getElementById('onlineNum').textContent=msg.playerCount;
-        }
         if(serverWorld.players){
           const me=serverWorld.players.find(p=>p.isMe);
           if(me&&me.segs&&me.segs.length>0){
@@ -2723,7 +2684,9 @@ function drawFoodList(fl, cx, cy) {
     
     // Пульсация (дыхание)
     if (f.p === undefined) f.p = Math.random() * Math.PI * 2;
-    f.p += 0.04;
+    // В онлайне замедляем пульсацию чтобы не дёргалась
+    const speed = (gameMode === 'online') ? 0.008 : 0.04;
+    f.p += speed;
     const pulse = 1 + Math.sin(f.p) * 0.1;
     
     const sprite = getFoodSprite(f.r, f.color);
@@ -2849,9 +2812,7 @@ document.getElementById('offlineBtn').onclick=()=>{
   pname=document.getElementById('nameInput').value.trim()||'Player';
   startOffline();
 };
-document.getElementById('onlineBtn').onclick = () => {
-  showToast('🌐 Онлайн появится в следующем обновлении!', '#ff9f43');
-};
+document.getElementById('onlineBtn').onclick=()=>{pname=document.getElementById('nameInput').value.trim()||'Player';connectWS();};
 document.getElementById('mazeBtn').onclick=()=>{
   if(running) return;
   pname=document.getElementById('nameInput').value.trim()||'Player';
