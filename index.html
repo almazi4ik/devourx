@@ -1056,9 +1056,16 @@ body.theme-water #modeScreen, body.theme-water #loadingScreen {
     <div class="srv-row selected" id="srvRow0" onclick="selectServer(0)">
       <div class="srv-dot green"></div>
       <div class="srv-info">
-        <div class="srv-name">Europe_1</div>
+        <div class="srv-name">europe_1</div>
       </div>
       <div class="srv-ping" id="srvPing0">—</div>
+    </div>
+    <div class="srv-row" id="srvRow1" onclick="selectServer(1)">
+      <div class="srv-dot yellow"></div>
+      <div class="srv-info">
+        <div class="srv-name">europe_2</div>
+      </div>
+      <div class="srv-ping" id="srvPing1">—</div>
     </div>
     <button class="srv-close-btn" onclick="closeServerPick()">ЗАКРЫТЬ</button>
   </div>
@@ -2000,12 +2007,89 @@ const OFFLINE_BOTS_COUNT=14,OFFLINE_FOOD_COUNT=600;
 let offlineState=null,offlineTickInterval=null,mazeBreakTimeout=null;
 const BOT_NAMES=['Cobra','Viper','Noodle','Slimy','Zigzag','Mamba','Python','Adder','Taipan','Boa','Asp','Racer','Krait','Sidewinder','Copperhead','Rattler','Anaconda','Diamondback'];
 
-function mkOfflineFood(){const rnd=Math.random();let size,r;if(rnd<0.75){size='small';r=3+Math.random()*2;}else if(rnd<0.95){size='medium';r=5+Math.random()*2;}else{size='big';r=8+Math.random()*2;}return{x:200+Math.random()*(WORLD-400),y:200+Math.random()*(WORLD-400),r,color:`hsl(${Math.floor(Math.random()*360)},90%,65%)`,size,p:Math.random()*Math.PI*2};}
-
+function mkOfflineFood() {
+  const rnd = Math.random();
+  let size, r;
+  if (rnd < 0.7) { 
+    size = 'small'; 
+    r = 3 + Math.random() * 2; 
+  } else if (rnd < 0.92) { 
+    size = 'medium'; 
+    r = 5 + Math.random() * 2.5; 
+  } else { 
+    size = 'big'; 
+    r = 8 + Math.random() * 3; 
+  }
+  
+  // Яркие цвета в формате hex (для свечения и бликов)
+  const colors = ['#5eff5e', '#ff5e5e', '#5e5eff', '#ffff5e', '#ff5eff', '#5effff', '#ffaa5e'];
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  
+  return {
+    x: 200 + Math.random() * (WORLD - 400),
+    y: 200 + Math.random() * (WORLD - 400),
+    r: r,
+    size: size,
+    color: color,
+    p: Math.random() * Math.PI * 2
+  };
+}
+  
 function mkBot(name,skinId){const x=300+Math.random()*(WORLD-600),y=300+Math.random()*(WORLD-600);const angle=Math.random()*Math.PI*2;const segs=[];for(let i=0;i<MIN_LEN;i++)segs.push({x:x-Math.cos(angle)*i*14,y:y-Math.sin(angle)*i*14});return{x,y,name,skinId:skinId||Math.floor(Math.random()*3),angle,tAngle:angle,speed:2.4+Math.random()*0.6,boosting:false,alive:true,length:MIN_LEN,score:MIN_LEN,segs,isMe:false,_growBuf:0,_thinkTimer:0,foodEaten:0};}
 
-function initOffline(){const spawnX=300+Math.random()*(WORLD-600),spawnY=300+Math.random()*(WORLD-600);const angle=Math.random()*Math.PI*2;const playerSegs=[];for(let i=0;i<MIN_LEN;i++)playerSegs.push({x:spawnX-Math.cos(angle)*i*14,y:spawnY-Math.sin(angle)*i*14});const startM=getStartMass();const me={x:spawnX,y:spawnY,name:pname,skinId:selSkin,angle,tAngle:angle,speed:2.8,boosting:false,alive:true,length:startM,score:startM,segs:playerSegs,isMe:true,_growBuf:0,foodEaten:0,_deathHandled:false};const usedNames=[...BOT_NAMES].sort(()=>Math.random()-.5).slice(0,OFFLINE_BOTS_COUNT);const bots=usedNames.map((n,i)=>mkBot(n,i%3));const foods=[];for(let i=0;i<OFFLINE_FOOD_COUNT;i++)foods.push(mkOfflineFood());offlineState={foods,bots,player:me};return{spawnX,spawnY};}
-
+function initOffline() {
+  const spawnX = 300 + Math.random() * (WORLD - 600);
+  const spawnY = 300 + Math.random() * (WORLD - 600);
+  const angle = Math.random() * Math.PI * 2;
+  
+  const playerSegs = [];
+  for (let i = 0; i < MIN_LEN; i++) {
+    playerSegs.push({
+      x: spawnX - Math.cos(angle) * i * 14,
+      y: spawnY - Math.sin(angle) * i * 14
+    });
+  }
+  
+  const startM = getStartMass();
+  const me = {
+    x: spawnX, y: spawnY,
+    name: pname,
+    skinId: selSkin,
+    angle: angle,
+    tAngle: angle,
+    speed: 2.8,
+    boosting: false,
+    alive: true,
+    length: startM,
+    score: startM,
+    segs: playerSegs,
+    isMe: true,
+    _growBuf: 0,
+    foodEaten: 0,
+    _deathHandled: false
+  };
+  
+  const usedNames = [...BOT_NAMES].sort(() => Math.random() - 0.5).slice(0, OFFLINE_BOTS_COUNT);
+  
+  // ══════ СОЗДАНИЕ БОТОВ С ПОДДЕРЖКОЙ ДОМИНАНТОВ ══════
+  const bots = usedNames.map((n, i) => {
+    const bot = mkBot(n, i % 3);
+    bot.isDominant = Math.random() < 0.2;      // 20% ботов — доминанты
+    bot._dominantMode = false;                 // не в режиме круга по умолчанию
+    bot._spinDirection = Math.random() < 0.5 ? 1 : -1;  // направление закрутки
+    bot._updateCounter = 0;                    // счётчик для оптимизации
+    return bot;
+  });
+  
+  const foods = [];
+  for (let i = 0; i < OFFLINE_FOOD_COUNT; i++) {
+    foods.push(mkOfflineFood());
+  }
+  
+  offlineState = { foods, bots, player: me };
+  return { spawnX, spawnY };
+}
+  
 function offlineGetR(score){return 6+(Math.min(score,1000)/1000)*22;}
 function offlineGetTurnSpeed(score){const t=Math.min(score,1000)/1000;return 0.18-t*0.125;}
 
@@ -2096,8 +2180,187 @@ function offlineKill(sn){
   if(targetList.length>maxFood+200)targetList.splice(0,targetList.length-(maxFood+200));
 }
   
-function offlineBotAI(bot){bot._thinkTimer=(bot._thinkTimer||0)-1;if(bot._thinkTimer>0)return;bot._thinkTimer=3+Math.floor(Math.random()*5);const h=bot.segs[0];const margin=180;const state=(gameMode==='maze'&&mazeState)?mazeState:offlineState;const allSnakes=state?[state.player,...state.bots]:[offlineState.player,...offlineState.bots];if(h.x<margin||h.x>WORLD-margin||h.y<margin||h.y>WORLD-margin){bot.tAngle=Math.atan2(WORLD/2-h.y,WORLD/2-h.x)+(Math.random()-.5)*0.5;bot.boosting=false;return;}function danger(tx,ty){if(gameMode==='maze'&&mazeState&&mazeState.walls&&checkMazeWallCollision(tx,ty,offlineGetR(bot.score)))return true;for(const other of allSnakes){if(!other||!other.alive||other===bot||!other.segs)continue;for(let i=1;i<Math.min(other.segs.length,30);i++){const s=other.segs[i],dx=tx-s.x,dy=ty-s.y;if(dx*dx+dy*dy<90*90)return true;}}return tx<150||tx>WORLD-150||ty<150||ty>WORLD-150;}let victim=null,victimDist=Infinity;for(const other of allSnakes){if(!other||!other.alive||other===bot||!other.segs)continue;const dx=other.segs[0].x-h.x,dy=other.segs[0].y-h.y;const d=dx*dx+dy*dy;if(other.length<bot.length*0.85&&d<400*400&&d<victimDist){victimDist=d;victim=other;}}if(victim){const vh=victim.segs[0];const vAngle=victim.angle;const intercept=80;const tx=vh.x+Math.cos(vAngle)*intercept;const ty=vh.y+Math.sin(vAngle)*intercept;let angle=Math.atan2(ty-h.y,tx-h.x);const ax=h.x+Math.cos(angle)*100,ay=h.y+Math.sin(angle)*100;if(danger(ax,ay)){angle+=(Math.random()>0.5?1:-1)*(Math.PI/3+Math.random()*0.3);}bot.tAngle=angle+(Math.random()-.5)*0.08;bot.boosting=victimDist<200*200&&bot.length>15;return;}let best=Infinity,tgt=null;const fl=state?state.foods:offlineState.foods;for(let i=0;i<fl.length;i++){const f=fl[i];if(!f)continue;const dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;if(d<best&&!danger(f.x,f.y)){best=d;tgt=f;}}if(!tgt){for(let i=0;i<fl.length;i++){const f=fl[i];if(!f)continue;const dx=f.x-h.x,dy=f.y-h.y,d=dx*dx+dy*dy;if(d<best){best=d;tgt=f;}}}if(tgt){let angle=Math.atan2(tgt.y-h.y,tgt.x-h.x);const ax=h.x+Math.cos(angle)*120,ay=h.y+Math.sin(angle)*120;if(danger(ax,ay)){const left=angle-Math.PI/3,right=angle+Math.PI/3;const alx=h.x+Math.cos(left)*120,aly=h.y+Math.sin(left)*120;const arx=h.x+Math.cos(right)*120,ary=h.y+Math.sin(right)*120;if(!danger(alx,aly))angle=left;else if(!danger(arx,ary))angle=right;else angle+=Math.PI*(0.8+Math.random()*0.4);}bot.tAngle=angle+(Math.random()-.5)*0.12;}bot.boosting=best<100*100&&bot.length>20;}
+// ══════ БОТ-ДОМИНАНТ (Кольцо смерти) + ОБЫЧНЫЙ БОТ ══════
+function updateDominantBot(bot, state) {
+  // 1. Находим группу целей (игрок + боты) в радиусе 350px
+  const targets = [];
+  if (state.player && state.player.alive && state.player !== bot) {
+    const dx = state.player.segs[0].x - bot.segs[0].x;
+    const dy = state.player.segs[0].y - bot.segs[0].y;
+    const dist = Math.hypot(dx, dy);
+    if (dist < 350) targets.push(state.player.segs[0]);
+  }
+  for (const other of state.bots) {
+    if (other !== bot && other.alive) {
+      const dx = other.segs[0].x - bot.segs[0].x;
+      const dy = other.segs[0].y - bot.segs[0].y;
+      const dist = Math.hypot(dx, dy);
+      if (dist < 350) targets.push(other.segs[0]);
+    }
+  }
 
+  // Если меньше 2 целей — не выгодно крутить
+  if (targets.length < 2) {
+    bot._dominantMode = false;
+    return false;
+  }
+
+  // 2. Вычисляем центр масс группы
+  let centerX = 0, centerY = 0;
+  for (const t of targets) {
+    centerX += t.x;
+    centerY += t.y;
+  }
+  centerX /= targets.length;
+  centerY /= targets.length;
+
+  // 3. Вычисляем радиус захвата
+  const dxToCenter = bot.segs[0].x - centerX;
+  const dyToCenter = bot.segs[0].y - centerY;
+  let currentRadius = Math.hypot(dxToCenter, dyToCenter);
+
+  // 4. Нужная длина окружности (2*pi*R)
+  const requiredLen = Math.max(2 * Math.PI * currentRadius, 200);
+  
+  // 5. Проверка: хватает ли длины тела?
+  if (bot.length < requiredLen) {
+    bot._dominantMode = false;
+    return false;
+  }
+
+  // 6. Переходим в режим "Кольцо"
+  bot._dominantMode = true;
+  
+  // 7. Вычисляем угол движения по окружности
+  let angleToCenter = Math.atan2(bot.segs[0].y - centerY, bot.segs[0].x - centerX);
+  let moveAngle = angleToCenter + Math.PI / 2;
+  if (Math.random() < 0.02) bot._spinDirection = (bot._spinDirection || 1) * -1;
+  moveAngle += (bot._spinDirection || 1) * 0.15;
+
+  // 8. Постепенно уменьшаем радиус (сжатие)
+  if (currentRadius > 120) {
+    currentRadius -= 0.6;
+  } else {
+    currentRadius *= 0.99;
+  }
+
+  // 9. Новая плавная цель для движения
+  const newTargetX = centerX + Math.cos(moveAngle) * currentRadius;
+  const newTargetY = centerY + Math.sin(moveAngle) * currentRadius;
+  const dx = newTargetX - bot.segs[0].x;
+  const dy = newTargetY - bot.segs[0].y;
+  let targetAngle = Math.atan2(dy, dx);
+  
+  let angleDiff = targetAngle - bot.angle;
+  while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+  while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+  bot.tAngle = bot.angle + angleDiff * 0.3;
+  
+  bot.boosting = true;
+  return true;
+}
+
+function offlineBotAI(bot) {
+  // ОПТИМИЗАЦИЯ: обновляем стратегию раз в 10 кадров
+  if (bot._updateCounter === undefined) bot._updateCounter = 0;
+  bot._updateCounter++;
+  
+  if (bot.isDominant && bot._updateCounter >= 10) {
+    bot._updateCounter = 0;
+    if (updateDominantBot(bot, offlineState)) return;
+  }
+  
+  if (bot._updateCounter >= 5) {
+    bot._updateCounter = 0;
+    
+    // Обычная логика бота (не доминанта)
+    const h = bot.segs[0];
+    const margin = 180;
+    const state = (gameMode === 'maze' && mazeState) ? mazeState : offlineState;
+    const allSnakes = state ? [state.player, ...state.bots] : [offlineState.player, ...offlineState.bots];
+    
+    // Отступ от краёв
+    if (h.x < margin || h.x > WORLD - margin || h.y < margin || h.y > WORLD - margin) {
+      bot.tAngle = Math.atan2(WORLD/2 - h.y, WORLD/2 - h.x) + (Math.random() - 0.5) * 0.5;
+      bot.boosting = false;
+      return;
+    }
+    
+    function danger(tx, ty) {
+      if (gameMode === 'maze' && mazeState && mazeState.walls && checkMazeWallCollision(tx, ty, offlineGetR(bot.score))) return true;
+      for (const other of allSnakes) {
+        if (!other || !other.alive || other === bot || !other.segs) continue;
+        for (let i = 1; i < Math.min(other.segs.length, 30); i++) {
+          const s = other.segs[i];
+          if (Math.hypot(tx - s.x, ty - s.y) < 90) return true;
+        }
+      }
+      return (tx < 150 || tx > WORLD - 150 || ty < 150 || ty > WORLD - 150);
+    }
+    
+    // Охота на жертву
+    let victim = null, victimDist = Infinity;
+    for (const other of allSnakes) {
+      if (!other || !other.alive || other === bot || !other.segs) continue;
+      const d2 = Math.hypot(other.segs[0].x - h.x, other.segs[0].y - h.y);
+      if (other.length < bot.length * 0.85 && d2 < 400 && d2 < victimDist) {
+        victimDist = d2;
+        victim = other;
+      }
+    }
+    
+    if (victim) {
+      const vh = victim.segs[0];
+      const vAngle = victim.angle;
+      const intercept = 80;
+      const tx = vh.x + Math.cos(vAngle) * intercept;
+      const ty = vh.y + Math.sin(vAngle) * intercept;
+      let angle = Math.atan2(ty - h.y, tx - h.x);
+      if (danger(h.x + Math.cos(angle) * 100, h.y + Math.sin(angle) * 100)) {
+        angle += (Math.random() > 0.5 ? 1 : -1) * (Math.PI / 3 + Math.random() * 0.3);
+      }
+      bot.tAngle = angle + (Math.random() - 0.5) * 0.08;
+      bot.boosting = victimDist < 200 && bot.length > 15;
+      return;
+    }
+    
+    // Поиск еды
+    let best = Infinity, tgt = null;
+    const foods = state ? state.foods : offlineState.foods;
+    for (const f of foods) {
+      if (!f) continue;
+      const d2 = Math.hypot(f.x - h.x, f.y - h.y);
+      if (d2 < best && !danger(f.x, f.y)) {
+        best = d2;
+        tgt = f;
+      }
+    }
+    if (!tgt) {
+      for (const f of foods) {
+        if (!f) continue;
+        const d2 = Math.hypot(f.x - h.x, f.y - h.y);
+        if (d2 < best) {
+          best = d2;
+          tgt = f;
+        }
+      }
+    }
+    if (tgt) {
+      let angle = Math.atan2(tgt.y - h.y, tgt.x - h.x);
+      if (danger(h.x + Math.cos(angle) * 120, h.y + Math.sin(angle) * 120)) {
+        const left = angle - Math.PI/3, right = angle + Math.PI/3;
+        const alx = h.x + Math.cos(left) * 120, aly = h.y + Math.sin(left) * 120;
+        const arx = h.x + Math.cos(right) * 120, ary = h.y + Math.sin(right) * 120;
+        if (!danger(alx, aly)) angle = left;
+        else if (!danger(arx, ary)) angle = right;
+        else angle += Math.PI * (0.8 + Math.random() * 0.4);
+      }
+      bot.tAngle = angle + (Math.random() - 0.5) * 0.12;
+    }
+    bot.boosting = best < 10000 && bot.length > 20;
+  }
+}
+  
 function offlineCheckCollisions(){const state=(gameMode==='maze'&&mazeState)?mazeState:offlineState;const alive=state?[state.player,...state.bots].filter(s=>s.alive):[offlineState.player,...offlineState.bots].filter(s=>s.alive);for(const sn of alive){if(!sn.alive)continue;const h=sn.segs[0],r=offlineGetR(sn.score);for(const other of alive){if(!other.alive||other===sn)continue;for(let i=2;i<other.segs.length;i++){const s=other.segs[i],dx=h.x-s.x,dy=h.y-s.y;const otherR=offlineGetR(other.score)*0.55;if(dx*dx+dy*dy<(r*0.85+otherR)**2){offlineKill(sn);if(!sn.isMe&&other.isMe){essence=Math.min(9999999,essence+3);syncEss();showToast('💀 +3 '+t('kill_reward'),'#ff6b6b');trackAch('kills',1);}break;}}if(!sn.alive)break;}}}
 
 function offlineRespawnBots(){const state=(gameMode==='maze'&&mazeState)?mazeState:offlineState;if(!state)return;for(let i=0;i<state.bots.length;i++){if(!state.bots[i].alive){const name=BOT_NAMES[Math.floor(Math.random()*BOT_NAMES.length)];state.bots[i]=mkBot(name,Math.floor(Math.random()*3));}}}
@@ -2299,10 +2562,18 @@ function startMazeMode(){
     const startM=getStartMass();
     const me={x:spawn.x,y:spawn.y,name:pname,skinId:selSkin,angle,tAngle:angle,speed:2.8,boosting:false,alive:true,length:startM,score:startM,segs:playerSegs,isMe:true,_growBuf:0,foodEaten:0,_deathHandled:false};
     const usedNames=[...BOT_NAMES].sort(()=>Math.random()-.5).slice(0,MAZE_BOTS_COUNT);
-    const bots=usedNames.map((n,i)=>{
-      const sp=findSafeMazeSpawn(walls);
-      return mkBotAt(sp.x,sp.y,n,i%3);
+    
+    // ══════ СОЗДАНИЕ БОТОВ С ДОМИНАНТАМИ (ЛАБИРИНТ) ══════
+    const bots = usedNames.map((n, i) => {
+      const sp = findSafeMazeSpawn(walls);
+      const bot = mkBotAt(sp.x, sp.y, n, i % 3);
+      bot.isDominant = Math.random() < 0.2;        // 20% — доминанты
+      bot._dominantMode = false;
+      bot._spinDirection = Math.random() < 0.5 ? 1 : -1;
+      bot._updateCounter = 0;
+      return bot;
     });
+    
     const foods=[];
     for(let i=0;i<MAZE_FOOD_COUNT;i++){
       const f=mkMazeFood();
@@ -2312,7 +2583,6 @@ function startMazeMode(){
     mazeState={walls,foods,bots,player:me};
     offlineState=mazeState;
     camX=spawn.x-W/2;camY=spawn.y-H/2;
-    // Фикс для горизонтального режима
     setTimeout(()=>{if(running&&player&&player.segs&&player.segs.length>0){camX=player.segs[0].x-W/2;camY=player.segs[0].y-H/2;}},100);
     player=me;
     document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});
@@ -2372,7 +2642,8 @@ function mkBotAt(x,y,name,skinId){
 
 // ══════ СЕРВЕР ОНЛАЙН ══════
 const SERVERS = [
-  { name:'Europe_1', url:'wss://devourx-server-1.onrender.com' }
+  { name:'europe_1', url:'wss://almazi4ik-devourx-server.hf.space' },
+  { name:'europe_2', url:'wss://devourx-server-1.onrender.com' }
 ];
 let _selServer = parseInt(localStorage.getItem('dvx_server')||'0');
 function getServerUrl(){ return SERVERS[_selServer]?.url || SERVERS[0].url; }
@@ -2692,72 +2963,63 @@ function drawMM(){
 }
 function drawBackground(cx,cy){if(!running){if(currentBG==='space')drawSpaceBackground();else if(currentBG==='water')drawWaterBackground();else{ctx.fillStyle='#0d2b15';ctx.fillRect(0,0,W,H);}return;}const bgColors={'classic':'#0d2b15','space':'#03020d','water':'#020e1a'};ctx.fillStyle=bgColors[currentBG]||'#0d2b15';ctx.fillRect(0,0,W,H);const gridColors={'classic':'rgba(46,204,113,0.055)','space':'rgba(120,100,255,0.06)','water':'rgba(0,160,220,0.055)'};ctx.strokeStyle=gridColors[currentBG]||gridColors.classic;ctx.lineWidth=1;for(let x=Math.floor(cx/CELL)*CELL;x<cx+W+CELL;x+=CELL){ctx.beginPath();ctx.moveTo(x-cx,0);ctx.lineTo(x-cx,H);ctx.stroke();}for(let y=Math.floor(cy/CELL)*CELL;y<cy+H+CELL;y+=CELL){ctx.beginPath();ctx.moveTo(0,y-cy);ctx.lineTo(W,y-cy);ctx.stroke();}ctx.strokeStyle='rgba(231,76,60,0.5)';ctx.lineWidth=8;ctx.strokeRect(-cx,-cy,WORLD,WORLD);}
 
-// ══════ ОПТИМИЗИРОВАННАЯ ЕДА (БЕЗ ГЛОУ, С ПУЛЬСАЦИЕЙ) ══════
-let _foodSprites = {};
-
-const FOOD_PALETTE = [
-  '#ff4444','#ff8800','#ffdd00','#44ff44','#00ff88',
-  '#00ddff','#4488ff','#aa44ff','#ff44aa','#ffaa00',
-  '#88ff00','#00ffcc'
+// ══════ НОВАЯ КРАСИВАЯ ЕДА (СВЕЧЕНИЕ + БЛИКИ + ПУЛЬСАЦИЯ) ══════
+const FOOD_COLORS = [
+  { main: '#5eff5e', glow: 'rgba(94, 255, 94, 0.5)' }, // Зелёный
+  { main: '#ff5e5e', glow: 'rgba(255, 94, 94, 0.5)' }, // Красный
+  { main: '#5e5eff', glow: 'rgba(94, 94, 255, 0.5)' }, // Синий
+  { main: '#ffff5e', glow: 'rgba(255, 255, 94, 0.5)' }, // Жёлтый
+  { main: '#ff5eff', glow: 'rgba(255, 94, 255, 0.5)' }, // Фиолетовый
+  { main: '#5effff', glow: 'rgba(94, 255, 255, 0.5)' }, // Голубой
+  { main: '#ffaa5e', glow: 'rgba(255, 170, 94, 0.5)' }  // Оранжевый
 ];
 
-function snapColor(colorStr) {
-  if (colorStr && colorStr.startsWith('hsl')) {
-    const hue = parseInt(colorStr.match(/\d+/)[0]) || 0;
-    const idx = Math.floor(hue / 30) % FOOD_PALETTE.length;
-    return FOOD_PALETTE[idx];
+function getFoodColor(baseColor) {
+  // Если передан hsl, конвертируем в один из предустановленных цветов
+  if (baseColor && baseColor.startsWith('hsl')) {
+    const hue = parseInt(baseColor.match(/\d+/)[0]) || 0;
+    const index = Math.floor(hue / 51) % FOOD_COLORS.length;
+    return FOOD_COLORS[index];
   }
-  return colorStr || '#2ecc71';
-}
-
-function getFoodSprite(r, baseColor) {
-  const safeColor = snapColor(baseColor);
-  const safeR = Math.round(r);
-  const key = `${safeR}_${safeColor}`;
-  
-  if (!_foodSprites[key]) {
-    const cv = document.createElement('canvas');
-    cv.width = safeR * 2 + 4;
-    cv.height = safeR * 2 + 4;
-    const c = cv.getContext('2d');
-    const cx = cv.width / 2;
-    const cy = cv.height / 2;
-    
-    // Простой кружочек без глоу
-    c.beginPath();
-    c.arc(cx, cy, safeR, 0, Math.PI * 2);
-    c.fillStyle = safeColor;
-    c.fill();
-    
-    // Лёгкий блик (как в оригинале)
-    c.beginPath();
-    c.arc(cx - safeR * 0.3, cy - safeR * 0.3, safeR * 0.27, 0, Math.PI * 2);
-    c.fillStyle = 'rgba(255,255,255,0.28)';
-    c.fill();
-    
-    _foodSprites[key] = { canvas: cv, size: cv.width };
+  // Если уже наш цвет — берём его или дефолтный зелёный
+  for (const col of FOOD_COLORS) {
+    if (col.main === baseColor) return col;
   }
-  return _foodSprites[key];
+  return FOOD_COLORS[0];
 }
 
 function drawFoodList(fl, cx, cy) {
   for (const f of fl) {
     const fx = f.x - cx;
     const fy = f.y - cy;
-    if (fx < -40 || fx > W + 40 || fy < -40 || fy > H + 40) continue;
+    if (fx < -80 || fx > W + 80 || fy < -80 || fy > H + 80) continue;
     
-    // Пульсация (дыхание)
+    // Пульсация
     if (f.p === undefined) f.p = Math.random() * Math.PI * 2;
-    // В онлайне замедляем пульсацию чтобы не дёргалась
-    const speed = (gameMode === 'online') ? 0.008 : 0.04;
+    const speed = (gameMode === 'online') ? 0.008 : 0.025;
     f.p += speed;
-    const pulse = 1 + Math.sin(f.p) * 0.1;
+    const pulse = 1 + Math.sin(f.p) * 0.12;
+    const radius = (f.r || 5) * pulse;
     
-    const sprite = getFoodSprite(f.r, f.color);
-    const sw = sprite.size * pulse;
-    const sh = sprite.size * pulse;
+    const colorSet = getFoodColor(f.color);
     
-    ctx.drawImage(sprite.canvas, fx - sw/2, fy - sh/2, sw, sh);
+    // ОСНОВНОЕ ТЕЛО (без свечения)
+    ctx.beginPath();
+    ctx.arc(fx, fy, radius, 0, Math.PI * 2);
+    ctx.fillStyle = colorSet.main;
+    ctx.fill();
+    
+    // БОЛЬШОЙ БЛИК
+    ctx.beginPath();
+    ctx.arc(fx - radius * 0.28, fy - radius * 0.28, radius * 0.24, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.fill();
+    
+    // МАЛЕНЬКИЙ БЛИК ДЛЯ ОБЪЁМА
+    ctx.beginPath();
+    ctx.arc(fx - radius * 0.48, fy - radius * 0.48, radius * 0.1, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+    ctx.fill();
   }
 }
   
@@ -2827,7 +3089,6 @@ function drawServerSnake(p, cx, cy) {
       const colors = ['#3b82f6', '#1d4ed8', '#60a5fa'];
       ctx.fillStyle = colors[i % 3];
     } else {
-      // Градиент от головы к хвосту
       const t = i / segs.length;
       const rColor = Math.round(r1 * (1 - t) + r2 * t);
       const gColor = Math.round(g1 * (1 - t) + g2 * t);
@@ -2867,17 +3128,8 @@ function drawServerSnake(p, cx, cy) {
 
   const ang = segs.length > 1 ? Math.atan2(segs[0].y - segs[1].y, segs[0].x - segs[1].x) : 0;
 
-  // ========== ГЛАЗА, СЛЕДЯЩИЕ ЗА КУРСОРОМ ==========
-  const dxToCursor = mx - (hx + camX);
-  const dyToCursor = my - (hy + camY);
-  let targetAngle = Math.atan2(dyToCursor, dxToCursor);
-  
-  let angleDiff = targetAngle - ang;
-  if (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-  if (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
-  const maxTurn = Math.PI / 3;
-  const finalAngle = ang + Math.min(maxTurn, Math.max(-maxTurn, angleDiff));
-
+  // ========== ГЛАЗА (СМОТРЯТ ПО ДВИЖЕНИЮ, КАК В SLITHER.IO) ==========
+  // Без слежения за курсором, без бликов
   [-0.48, 0.48].forEach(offset => {
     const eyeX = hx + Math.cos(ang + offset) * r * 0.55;
     const eyeY = hy + Math.sin(ang + offset) * r * 0.55;
@@ -2885,21 +3137,16 @@ function drawServerSnake(p, cx, cy) {
 
     ctx.beginPath();
     ctx.arc(eyeX, eyeY, eyeR, 0, Math.PI * 2);
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = '#f0f0f0';
     ctx.fill();
 
     const pupilOffset = eyeR * 0.45;
-    const pupilX = eyeX + Math.cos(finalAngle) * pupilOffset;
-    const pupilY = eyeY + Math.sin(finalAngle) * pupilOffset;
+    const pupilX = eyeX + Math.cos(ang) * pupilOffset;
+    const pupilY = eyeY + Math.sin(ang) * pupilOffset;
 
     ctx.beginPath();
     ctx.arc(pupilX, pupilY, eyeR * 0.55, 0, Math.PI * 2);
     ctx.fillStyle = '#111';
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(pupilX - eyeR * 0.15, pupilY - eyeR * 0.15, eyeR * 0.2, 0, Math.PI * 2);
-    ctx.fillStyle = '#fff';
     ctx.fill();
   });
 
