@@ -2678,7 +2678,20 @@ function connectWS(){
     }
   },8000);
   
-ws.send(JSON.stringify({type:'join',name:pname,skinId:selSkin,skinColor:(SKINS_DATA[selSkin] || SKINS_DATA[0]).b[0]}));
+ws.onopen = () => {
+  clearInterval(_loadInterval);
+  document.getElementById('loadBarFill').style.width = '92%';
+  setLoadStatus(t('auth'));
+  
+  // Небольшая задержка, чтобы соединение точно установилось
+  setTimeout(() => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({type:'join',name:pname,skinId:selSkin,skinColor:(SKINS_DATA[selSkin] || SKINS_DATA[0]).b[0]}));
+    } else {
+      console.warn('WebSocket not ready, state:', ws.readyState);
+    }
+  }, 100);
+}; 
   
   ws.onmessage=(e)=>{
     try{
