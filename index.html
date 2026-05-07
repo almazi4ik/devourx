@@ -1103,6 +1103,19 @@ onmouseout="this.style.transform='scale(1)'; this.style.borderColor='rgba(0,229,
   <canvas id="chatIconCanvas" width="36" height="36"></canvas>
 </button>
 
+  <!-- КНОПКА ЕЖЕДНЕВНЫХ НАГРАД -->
+<button id="dailyRewardsBtn" style="
+  position: fixed; bottom: 260px; right: 16px; z-index: 200;
+  width: 48px; height: 48px; border-radius: 50%;
+  background: rgba(0,0,0,0.65); border: 2px solid rgba(162,155,254,0.55);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; backdrop-filter: blur(6px); font-size: 24px;
+  transition: transform .15s, border-color .2s;
+" onmouseover="this.style.transform='scale(1.1)'; this.style.borderColor='#a29bfe';"
+   onmouseout="this.style.transform='scale(1)'; this.style.borderColor='rgba(162,155,254,0.55)';">
+  🎁
+</button>
+
 <div id="globalChatOverlay" style="
   display:none; position:fixed; inset:0; z-index:9999;
   background:rgba(0,0,0,0.75); backdrop-filter:blur(8px);
@@ -1452,6 +1465,9 @@ const SKINS_DATA=[
   {id:42, key:'sk_crystal', h:'#1e40af', b:['#3b82f6','#1d4ed8','#60a5fa'], rarity:'crystal', cost:50, owned:false, currency:'crystals'},
   {id:43, key:'sk_toxic', h:'#39ff14', b:['#39ff14','#0a0a0a'], rarity:'legendary', cost:600, owned:false},
   {id:44, key:'sk_phoenix', h:'#ff4500', b:['#ff4500','#ffd700'], rarity:'legendary', cost:700, owned:false},
+  {id:45, key:'sk_void', h:'#1a0a2e', b:['#2d0a4a','#0a0a1a'], rarity:'legendary', cost:800, owned:false},
+  {id:46, key:'sk_thunder', h:'#f9ca24', b:['#f9ca24','#3498db'], rarity:'legendary', cost:750, owned:false},
+  {id:47, key:'sk_dragon', h:'#1a1a1a', b:['#1a1a1a','#f9ca24'], rarity:'legendary', cost:850, owned:false}
 ];
   const RARITY_C={standard:'#a8d8b8',rare:'#a29bfe',legendary:'#f9ca24',crystal:'#a78bfa'};
 
@@ -1852,6 +1868,7 @@ function showMenu(){
     document.getElementById('clanBtn').style.display='flex';
     showJoystick(false);updateXPBar();
     jbLoadScores().then(scores => updateBestMassWidget(scores));
+    showGameButtons();
   });
 }
 function showModeSelect(){
@@ -2414,7 +2431,7 @@ function offlineTick(){if(!running||(gameMode!=='offline'&&gameMode!=='maze')||!
   me.tAngle=angle;me.boosting=false;
 }if(me.boosting&&me.length>MIN_LEN&&Math.random()<0.05){me.length=Math.max(MIN_LEN,me.length-1);me.score=Math.max(MIN_LEN,me.score-1);}offlineUpdateSnake(me,0.18);offlineEatFood(me);if(me.segs.length>0){camX+=(me.segs[0].x-W/2-camX)*0.12;camY+=(me.segs[0].y-H/2-camY)*0.12;}const now2=performance.now();if(now2-lastSurviveTick>=1000){surviveTimer++;lastSurviveTick=now2;trackQuest('survive_time',1);}for(const bot of state.bots){if(!bot.alive)continue;offlineBotAI(bot);if(bot.boosting&&bot.length>MIN_LEN&&Math.random()<0.05){bot.length=Math.max(MIN_LEN,bot.length-1);bot.score=Math.max(MIN_LEN,bot.score-1);}offlineUpdateSnake(bot,0.13);offlineEatFood(bot);}offlineCheckCollisions();offlineRespawnBots();const allPlayers=[me,...state.bots].filter(p=>p.alive).map(p=>({name:p.name,skinId:p.skinId,score:p.score,segs:p.segs.slice(0,750),boosting:p.boosting,isMe:p.isMe}));const lb=[...allPlayers].sort((a,b)=>b.score-a.score).slice(0,10).map(p=>({name:p.name,score:p.score,isMe:p.isMe}));serverWorld={players:allPlayers,foods:state.foods,leaderboard:lb};}
 
-function startOffline(){gameMode='offline';if(offlineTickInterval){clearInterval(offlineTickInterval);offlineTickInterval=null;}if(mazeBreakTimeout){clearTimeout(mazeBreakTimeout);mazeBreakTimeout=null;}mazeState=null;serverWorld=null;_prevWorld=null;playIrisOpen(()=>{const{spawnX,spawnY}=initOffline();camX=spawnX-W/2;camY=spawnY-H/2;player=offlineState.player;document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});document.getElementById('gearBtn').style.display='none';document.getElementById('hud').style.display='block';document.querySelector('.coins-fixed').style.display='none';document.querySelector('.crystals-fixed').style.display='none';document.getElementById('clanBtn').style.display='none';document.getElementById('xpBarWrap').style.display='none';document.getElementById('bestMassWidget').style.display='none';document.getElementById('achBtn').style.display='none';document.getElementById('achPanel').classList.remove('open');const _sbOff=document.getElementById('serverPickBtn');if(_sbOff)_sbOff.style.display='none';achOpen=false;autopilotMode=false;document.getElementById('apBtn').classList.remove('active');running=true;surviveTimer=0;lastSurviveTick=performance.now();_xpFoodCounter=0;_foodCoinCounter=0;if(isMobile())showJoystick(true);offlineTickInterval=setInterval(offlineTick,33);trackAch('games',1);
+function startOffline(){gameMode='offline';if(offlineTickInterval){clearInterval(offlineTickInterval);offlineTickInterval=null;}if(mazeBreakTimeout){clearTimeout(mazeBreakTimeout);mazeBreakTimeout=null;}mazeState=null;serverWorld=null;_prevWorld=null;playIrisOpen(()=>{const{spawnX,spawnY}=initOffline();camX=spawnX-W/2;camY=spawnY-H/2;player=offlineState.player;document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.cssText='';});document.getElementById('gearBtn').style.display='none';document.getElementById('hud').style.display='block';document.querySelector('.coins-fixed').style.display='none';document.querySelector('.crystals-fixed').style.display='none';document.getElementById('clanBtn').style.display='none';document.getElementById('xpBarWrap').style.display='none';document.getElementById('bestMassWidget').style.display='none';document.getElementById('achBtn').style.display='none';document.getElementById('achPanel').classList.remove('open');const _sbOff=document.getElementById('serverPickBtn');if(_sbOff)_sbOff.style.display='none';achOpen=false;autopilotMode=false;document.getElementById('apBtn').classList.remove('active');running=true;surviveTimer=0;lastSurviveTick=performance.now();_xpFoodCounter=0;_foodCoinCounter=0;if(isMobile())showJoystick(true);hideGameButtons();offlineTickInterval=setInterval(offlineTick,33);trackAch('games',1);
 // Фикс для горизонтального режима — теперь player уже есть!
 setTimeout(()=>{if(running&&player&&player.segs&&player.segs.length>0){camX=player.segs[0].x-W/2;camY=player.segs[0].y-H/2;}},150);},null);}
 // ══════ РЕЖИМ ЛАБИРИНТ ══════
@@ -2601,6 +2618,7 @@ function startMazeMode(){
     running=true;surviveTimer=0;lastSurviveTick=performance.now();
     _xpFoodCounter=0;_foodCoinCounter=0;
     if(isMobile())showJoystick(true);
+    hideGameButtons();
     offlineTickInterval=setInterval(offlineTick,33);
     trackAch('games',1);
     mazeBreakTimeout=setTimeout(()=>{
@@ -2735,6 +2753,7 @@ ws.onopen = () => {
           _prevScore=MIN_LEN;
           _foodCoinCounter=0;
           if(isMobile())showJoystick(true);
+          hideGameButtons();
           
           // Фикс для горизонтального режима
           setTimeout(()=>{
@@ -3725,10 +3744,13 @@ window.addEventListener('load',()=>{
   // Загружаем сохранённый ник
   const savedName = localStorage.getItem('dvx_name');
   if(savedName) document.getElementById('nameInput').value = savedName;
-  resize();          // ← ВОТ ТУТ ДОБАВЬ! Прямо перед initParticles()
+  resize();
   initParticles();
   if (currentBG==='water') initWaterFish();
   if (currentBG==='space') initSpaceNebula();
+  
+  // ══════ ЕЖЕДНЕВНАЯ НАГРАДА ══════
+  checkDailyReward();  // ← СЮДА ДОБАВЬ!
 });
   
 // Live обновление ника
@@ -5118,6 +5140,87 @@ const FIRST_LOAD_TIPS = [
     bar.style.width = progress + '%';
   }, 350);
 })();
+
+// ══════ ЕЖЕДНЕВНЫЕ НАГРАДЫ ══════
+const DAILY_REWARDS = [
+    { day: 1, coins: 100, crystals: 0, message: '+100 монет' },
+    { day: 2, coins: 200, crystals: 0, message: '+200 монет' },
+    { day: 3, coins: 0, crystals: 5, message: '+5 кристаллов' },
+    { day: 4, coins: 300, crystals: 0, message: '+300 монет' },
+    { day: 5, coins: 0, crystals: 10, message: '+10 кристаллов' },
+    { day: 6, coins: 500, crystals: 0, message: '+500 монет' },
+    { day: 7, coins: 0, crystals: 50, message: '+50 КРИСТАЛЛОВ + СКИН!' }
+];
+
+function checkDailyReward() {
+    const today = new Date().toISOString().slice(0,10);
+    const lastClaim = localStorage.getItem('dvx_last_claim');
+    if (lastClaim === today) return;
+    
+    let streak = parseInt(localStorage.getItem('dvx_streak') || '0');
+    const lastDate = localStorage.getItem('dvx_last_streak_date');
+    if (lastDate && lastDate !== yesterday()) streak = 0;
+    streak = (streak % 7) + 1;
+    
+    const reward = DAILY_REWARDS[streak - 1];
+    if (reward.coins > 0) { essence += reward.coins; syncEss(); }
+    if (reward.crystals > 0) { crystals += reward.crystals; syncCrystals(); }
+    
+    if (streak === 7) {
+        const legendarySkin = SKINS_DATA.find(s => s.rarity === 'legendary' && !s.owned);
+        if (legendarySkin) {
+            legendarySkin.owned = true;
+            saveSkins();
+            showToast(`🎁 ДЕНЬ 7! Скин ${legendarySkin.key}!`, '#f9ca24');
+        } else {
+            crystals += 100;
+            syncCrystals();
+            showToast(`🎁 ДЕНЬ 7! 100 кристаллов!`, '#f9ca24');
+        }
+    } else {
+        showToast(`🎁 ДЕНЬ ${streak}! ${reward.message}`, '#a29bfe');
+    }
+    
+    localStorage.setItem('dvx_last_claim', today);
+    localStorage.setItem('dvx_streak', streak);
+    localStorage.setItem('dvx_last_streak_date', today);
+}
+
+function yesterday() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return d.toISOString().slice(0,10);
+}
+
+function openDailyRewards() {
+    const streak = parseInt(localStorage.getItem('dvx_streak') || '0');
+    const canClaim = localStorage.getItem('dvx_last_claim') !== new Date().toISOString().slice(0,10);
+    let msg = `📅 Твой стрик: ${streak}/7 дней\n\n`;
+    DAILY_REWARDS.forEach(r => {
+        const isClaimed = streak >= r.day;
+        msg += `${isClaimed ? '✅' : '🔸'} День ${r.day}: ${r.coins > 0 ? r.coins+'💰' : ''} ${r.crystals > 0 ? r.crystals+'💎' : ''}\n`;
+    });
+    if (canClaim && streak < 7) msg += `\n🎁 Забери награду ${streak+1}-го дня!`;
+    alert(msg);
+}
+
+document.getElementById('dailyRewardsBtn').onclick = openDailyRewards;
+document.head.appendChild(styleSheet);
+
+  // ══════ УПРАВЛЕНИЕ КНОПКАМИ В ИГРЕ ══════
+function hideGameButtons() {
+    const chatBtn = document.getElementById('globalChatBtn');
+    const dailyBtn = document.getElementById('dailyRewardsBtn');
+    if (chatBtn) chatBtn.style.display = 'none';
+    if (dailyBtn) dailyBtn.style.display = 'none';
+}
+
+function showGameButtons() {
+    const chatBtn = document.getElementById('globalChatBtn');
+    const dailyBtn = document.getElementById('dailyRewardsBtn');
+    if (chatBtn) chatBtn.style.display = 'flex';
+    if (dailyBtn) dailyBtn.style.display = 'flex';
+}
 </script>
 </body>
 </html>
